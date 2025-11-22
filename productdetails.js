@@ -26,6 +26,7 @@ function addToCart(product) {
     else cart.push({ ...product, quantity: 1 });
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
+    updateRightCartPanel();
 }
 
 // SAFE URL PARAMS — Never crashes
@@ -158,6 +159,61 @@ function initCart() {
 
 function init() {
     loadProductData();
+}
+
+// =============================================
+// LIVE CART COUNT FOR RIGHT PANEL (PRODUCT DETAILS PAGE)
+// =============================================
+function updateRightCartPanel() {
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+
+    // Count total items (with quantity)
+    let totalItems = 0;
+    let totalPrice = 0;
+
+    cart.forEach(item => {
+        const qty = item.quantity || 1;
+        totalItems += qty;
+        totalPrice += item.price * qty;
+    });
+
+    // Update the right panel
+    const countDisplay = document.getElementById('cart-items-number');
+    const textDisplay = document.getElementById('cart-items-text');
+    const fullText = document.getElementById('cart-item-count-display');
+
+    if (countDisplay) countDisplay.textContent = totalItems;
+    if (textDisplay) textDisplay.textContent = totalItems === 1 ? '' : 's'; // "1 Item" or "5 Items"
+    if (fullText) {
+        if (totalItems === 0) {
+            fullText.innerHTML = 'Your cart is empty';
+        } else {
+            fullText.innerHTML = `<span id="cart-items-number">${totalItems}</span> Item<span id="cart-items-text">${totalItems === 1 ? '' : 's'}</span> in Cart`;
+        }
+    }
+
+    // Optional: Update total price (if you have these IDs)
+    const totalEl = document.getElementById('cart-total');
+    const savingsEl = document.getElementById('cart-savings');
+    if (totalEl) totalEl.textContent = '₹' + totalPrice;
+    if (savingsEl) savingsEl.textContent = '₹' + Math.round(totalPrice * 0.2); // dummy savings
+}
+
+// Run when page loads
+document.addEventListener('DOMContentLoaded', function () {
+    updateRightCartPanel();
+});
+
+// Run every time someone adds to cart (MOST IMPORTANT!)
+function originalAddToCartFunction() {
+    // Your existing add to cart code (keep it exactly as is)
+    // Example:
+    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    // ... your logic to add item
+    localStorage.setItem('cart', JSON.stringify(cart));
+
+    // THIS IS THE KEY LINE — ADD THIS AT THE END OF YOUR ADD TO CART FUNCTION
+    updateRightCartPanel();
 }
 
 // START IMMEDIATELY

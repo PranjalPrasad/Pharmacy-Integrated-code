@@ -309,7 +309,25 @@ suggestions.addEventListener('click', (e) => {
         const secondaryBanner = "Images/IMG/farmasi banner 8th.jpg";
         // Sample data for 6 categories (can be fetched from backend)
         let categoriesData = [
-        { name: "Allergy and ColdCare", image: "Images/category/allergy and cold care.png", url: "./Medical and HealthCare/OTC/otc.html"},             { name: "Ayurvedic Products", image: "Images/category/Ayurveda.png" },             { name: "Chronic Care", image: "Images/category/CHRONIC 1.png", url: "./MotherCare/mother.html"},             { name: "Digestive Health", image: "Images/category/Digestive Health.png", url: "./BabyCare/baby.html" },             { name: "First Aid", image: "Images/category/FIRST AID & EMERGENCY.png" },             { name: "Fitness Management", image: "Images/category/fitness and weight mangement.png" },             { name: "Immunity Boosters", image: "Images/category/immunity Boosters.png" },             { name: "Men's Health", image: "Images/category/Men's Health.png" },             { name: "Menstrual care", image: "Images/category/Menstrual & intimate care.png" },             { name: "Mobility Aids", image: "Images/category/mobility aids (1).png" },             { name: "Monitoring Devices", image: "Images/category/monitoring devices.png" },             { name: "Oral Care", image: "Images/category/Oral care.png" },             { name: "OTC", image: "Images/category/OTC.png" },             { name: "Pain Relief", image: "Images/category/PAIN RELIEF AND FEVER.png" },             { name: "Prescription Based", image: "Images/category/Prescription based.png" },             { name: "Senior Care", image: "Images/category/Senior Care.png" },             { name: "Skin & Hair", image: "Images/category/skin & hair care.png" },             { name: "Vitamins", image: "Images/category/vitamins.png" },          ]
+        { name: "Allergy and ColdCare", image: "Images/category/allergy and cold care.png", url: "./Medical and HealthCare/Allergy and Coldcare/allergy.html"},
+        { name: "Ayurvedic Products", image: "Images/category/Ayurveda.png", url: "./Wellness/AYURVEDA/ayurved.html" },             
+        { name: "Chronic Care", image: "Images/category/CHRONIC 1.png", url: "./Medical and HealthCare/Chronic/chronic.html"},             
+        { name: "Digestive Health", image: "Images/category/Digestive Health.png", url: "./Medical and HealthCare/Digestive Health/digestive.html" },            
+        { name: "First Aid", image: "Images/category/FIRST AID & EMERGENCY.png", url: "./Medical and HealthCare/FirstAid and Emergency/firstaid.html" },             
+        { name: "Fitness Management", image: "Images/category/fitness and weight mangement.png", url: "./Wellness/FITNESS AND WEIGHT MANAGEMENT/FITNESS.HTML"},             
+        { name: "Immunity Boosters", image: "Images/category/immunity Boosters.png", url: "./Wellness/IMMUNITY BOOSTER/immunity.html"},             
+        { name: "Men's Health", image: "Images/category/Men's Health.png", url: "./Medical and HealthCare/Mens Health/men.html"},             
+        { name: "Menstrual care", image: "Images/category/Menstrual & intimate care.png", url: "./Wellness/MENSTRUAL/menstrualCare.html" },             
+        { name: "Mobility Aids", image: "Images/category/mobility aids (1).png", url: "./DEVICES/MOBILITY AIDS/mobility.html" },             
+        { name: "Monitoring Devices", image: "Images/category/monitoring devices.png", url: "./DEVICES/MONITORING DEVICES/monitor.html" },             
+        { name: "Oral Care", image: "Images/category/Oral care.png", url: "./Wellness/ORAL CARE/oral.html" },             
+        { name: "OTC", image: "Images/category/OTC.png", url: "./Medical and HealthCare/OTC/otc.html" },             
+        { name: "Pain Relief", image: "Images/category/PAIN RELIEF AND FEVER.png", url: "./Medical and HealthCare/PainRelief and Fever/painRelief.html" },             
+        { name: "Prescription Based", image: "Images/category/Prescription based.png", url: "./Medical and HealthCare/Prescription/prescription.html" },             
+        { name: "Senior Care", image: "Images/category/Senior Care.png", url: "./Wellenss/SENIOR CARE/seniorCare.html" },             
+        { name: "Skin & Hair", image: "Images/category/skin & hair care.png", url: "./Wellness/SKIN AND HAIRCARE/skin.html" },             
+        { name: "Vitamins", image: "Images/category/vitamins.png", url: "./Wellness/VITAMINS AND SUPPLEMENTS/vitamins.html" },          
+    ]
         
         // Sample data for Feminine Hygiene Products with IDs starting from 40 (can be fetched from backend)
         let productsData = [
@@ -463,30 +481,59 @@ suggestions.addEventListener('click', (e) => {
         ];
 
         // Card template
- function createCard(p) {
+function createCard(p) {
   return `
-    <div class="card">
+    <div class="card relative group overflow-hidden bg-white rounded-2xl shadow-lg">
+      <!-- Discount Badge -->
       <div class="discount-badge">${p.discount}</div>
+
+      <!-- Wishlist Heart -->
       <div class="wishlist">
         <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
       </div>
-      <img src="${p.image}" alt="${p.name}" class="card-img">
-      <div class="card-content">
-        <div class="product-name">${p.name}</div>
-        <div class="price-row">
-          <span class="current-price">${p.price}</span>
-          <span class="original-price">${p.originalPrice}</span>
-        </div>
-        
-        <div class="button-group">
-          <button class="icon-btn view-btn" title="Quick View" onclick="event.stopPropagation(); openProductDetails(${p.id})">
-            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+
+      <!-- Image Container -->
+      <div class="relative overflow-hidden">
+        <img src="${p.image}" alt="${p.name}" 
+             class="card-img w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
+
+        <!-- Dark Overlay + Centered Quick View (Desktop Only) -->
+        <div class="absolute inset-0 bg-black/50 opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex items-center justify-center">
+          <button onclick="event.stopPropagation(); openProductDetails(${p.id})"
+                  class="pointer-events-auto bg-white text-gray-900 font-bold px-8 py-3 rounded-full shadow-2xl hover:bg-gray-100 transition text-lg">
+            Quick View
           </button>
+        </div>
+      </div>
+
+      <!-- Card Content -->
+      <div class="p-5 flex flex-col">
+        <h3 class="product-name font-medium text-gray-800  mb-3 text-center">${p.name}</h3>
+        
+        <div class="price-row flex items-center justify-center gap-3 mb-3">
+          <span class="current-price text-xl font-bold text-green-600">${p.price}</span>
+          <span class="original-price text-sm text-gray-500 line-through">${p.originalPrice}</span>
+        </div>
+
+        <!-- Button Row - Mobile: Icon + Add to Cart | Desktop: Only Add to Cart -->
+        <div class="flex gap-3">
+          <!-- Quick View Icon - Visible ONLY on Mobile -->
+          <button onclick="event.stopPropagation(); openProductDetails(${p.id})"
+                  class="md:hidden mb-3 flex-shrink-0 w-20 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+
+          <!-- Add to Cart Button - Full width on mobile when icon is shown -->
           <button 
-          onclick='addToCart(${JSON.stringify(p)})' 
-          class="w-full bg-gradient-to-r from-teal-500 to-cyan-600 text-white font-bold py-4 rounded-full hover:from-teal-600 hover:to-cyan-700 transition shadow-lg">
-          Add to Cart
-        </button>
+            onclick="event.stopPropagation(); addToCart(${JSON.stringify(p)})" 
+            class="flex-1 bg-gradient-to-r from-teal-700 to-cyan-800 text-white font-bold py-2 mb-5 rounded-full hover:from-teal-800 hover:to-cyan-900 transition-all shadow-lg text-base">
+            Add to Cart
+          </button>
         </div>
       </div>
     </div>
@@ -526,10 +573,25 @@ function openProductDetails(productId) {
     window.location.href = `productdetails.html?${params.toString()}`;
 }
 
-function renderInfinite(id, data) {
-  const el = document.getElementById(id);
-  const duplicated = [...data, ...data];
-  el.innerHTML = duplicated.map(createCard).join('');
+function renderInfinite(trackId, data) {
+ const track = document.getElementById(trackId);
+ if (!track) return;
+
+ // Duplicate data for infinite scroll effect
+  const duplicated = [...data, ...data, ...data]; // 3x for smooth loop
+
+  track.innerHTML = duplicated.map(createCard).join('');
+
+  // Enable smooth horizontal scrolling
+  track.classList.add('flex', 'gap-6', 'overflow-x-auto', 'scrollbar-hide', 'pb-4', 'px-4', 'snap-x', 'snap-mandatory');
+
+  // Optional: Add inertia/smooth scroll feel (works great on mobile)
+  track.style.scrollBehavior = 'smooth';
+
+  // Make cards snap to center (optional but looks premium)
+  track.querySelectorAll('.card').forEach(card => {
+    card.classList.add('snap-center', 'flex-shrink-0', 'w-80', 'md:w-72', 'lg:w-80');
+  });
 }
 
 // Render both sections

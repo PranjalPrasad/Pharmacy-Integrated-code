@@ -38,7 +38,7 @@
   }
 
   .section-title {
-    font-size: 32px;
+    font-size: 30px;
     text-align: center;
     margin-bottom: 40px;
     color: #222;
@@ -73,7 +73,7 @@
   .card {
     position: relative;
     width: 280px;
-    height: 400px;
+    height: 410px;
     flex-shrink: 0;
     background: #fff;
     border-radius: 20px;
@@ -82,6 +82,13 @@
     transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
   }
+
+  @media (min-width: 768px) {
+  .card { width: 300px; }
+}
+@media (min-width: 1024px) {
+  .card { width: 340px; }
+}
 
   .card:hover {
     transform: translateY(-15px) scale(1.05);
@@ -96,6 +103,13 @@
     object-fit: cover;
     transition: transform 0.6s ease;
   }
+
+  /* Ensure the overlay and quick view button are perfectly centered */
+.card .absolute.inset-0 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
   .card:hover .card-img {
     transform: scale(1.15);
@@ -157,9 +171,9 @@
     color: #333;
     margin-bottom: 10px;
     font-weight: 500;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    
+    
+   
     overflow: hidden;
   }
 
@@ -292,9 +306,7 @@
             scrollbar-width: none;
             -ms-overflow-style: none;
         }
-        .category-scroll::-webkit-scrollbar {
-            display: none;
-        }
+        
        /* Custom animations */
         @keyframes subtle-float {
             0%, 100% { transform: translateY(0); }
@@ -376,9 +388,9 @@
             scrollbar-width: none;
         }
         
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
+       .scrollbar-hide::-webkit-scrollbar {
+         display: none;
+       }
 
        /* Professional typography */
         .product-name {
@@ -390,6 +402,14 @@
             font-weight: 700;
             color: #111827;
         }
+
+        /* Optional: Add subtle grab cursor on desktop */
+#feminine-track, #medicine-track {
+  cursor: grab;
+}
+#feminine-track:active, #medicine-track:active {
+  cursor: grabbing;
+}
 
 
         
@@ -959,20 +979,20 @@
 
 <!-- Feminine Hygiene Section -->
 <!-- Feminine Hygiene Carousel -->
-    <section class="mb-16">
-      <h2 class="text-4xl font-bold text-center mb-10 text-gray-800">Feminine Hygiene</h2>
-      <div class="carousel-container overflow-hidden bg-gradient-to-r from-pink-50 to-purple-50 rounded-3xl p-8">
-        <div id="feminine-track" class="flex gap-8 animate-scroll"></div>
-      </div>
-    </section>
+    <section class="mb-16 overflow-hidden">
+  <h2 class="text-4xl font-bold text-center mb-10 text-gray-800">Feminine Hygiene</h2>
+  <div class="bg-gradient-to-r from-pink-50 to-purple-50 rounded-3xl p-8">
+    <div id="feminine-track"></div>
+  </div>
+</section>
 
     <!-- Medicine Carousel -->
-    <section>
-      <h2 class="text-4xl font-bold text-center mb-10 text-gray-800">Medicines & Healthcare</h2>
-      <div class="carousel-container overflow-hidden bg-gradient-to-r from-blue-50 to-cyan-50 rounded-3xl p-8">
-        <div id="medicine-track" class="flex gap-8 animate-scroll"></div>
-      </div>
-    </section>
+  <section class="overflow-hidden">
+  <h2 class="text-4xl font-bold text-center mb-10 text-gray-800">Medicines & Healthcare</h2>
+  <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-3xl p-8">
+    <div id="medicine-track"></div>
+  </div>
+</section>
     
         <!-- Articles Section -->
         <section class="container mx-auto py-14" id="articlesSection">

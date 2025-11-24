@@ -3,331 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Details - MotherCare</title>
+    <title>Product Details - Good Neev</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="../Header/header.css">
+   <link rel="stylesheet" href="../Footer/footer.css">
+
     <style>
-        /* Image Container */
-        .image-container {
-            position: relative;
-            overflow: hidden;
-            background: #fdf2f8;
-            border-radius: 0.5rem;
-            padding: 0.5rem;
+        .main-image { width: 100%; height: 420px; object-fit: contain; }
+        .thumbnail { 
+            width: 80px; height: 80px; object-fit: cover; cursor: pointer; 
+            border: 2px solid transparent; border-radius: 8px; transition: all 0.2s; 
         }
-        .main-image {
-            width: 100%;
-            max-width: 100%;
-            height: 400px;
-            object-fit: contain;
-        }
-        .thumbnail {
-            width: 6rem;
-            height: 6rem;
-            object-fit: cover;
-            cursor: pointer;
-            border: 2px solid transparent;
-            border-radius: 0.25rem;
-            transition: border-color 0.2s ease, transform 0.2s ease;
-        }
-        .thumbnail:hover {
-            border-color: #ec4899;
-            transform: scale(1.05);
-        }
-        .thumbnail-active {
-            border: 2px solid #ec4899;
-        }
+        .thumbnail:hover, .thumbnail-active { border-color: #ec4899; transform: scale(1.05); }
 
-        /* Magnifier Styles */
-        .magnifier-lens {
-            position: absolute;
-            width: 120px;
-            height: 120px;
-            border: 2px solid #ec4899;
-            background: rgba(255, 255, 255, 0.4);
-            pointer-events: none;
-            display: none;
-            cursor: none;
-            border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-        .magnifier-view {
-            position: absolute;
-            top: 0;
-            left: 100%;
-            width: 320px;
-            height: 320px;
-            border: 2px solid #ec4899;
-            background: #fff;
-            overflow: hidden;
-            display: none;
-            z-index: 10;
-            margin-left: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        .magnifier-view img {
-            position: absolute;
-            object-fit: contain;
-        }
-
-        /* Tab Navigation */
         .tab-button {
-            position: relative;
-            padding-bottom: 0.75rem;
-            font-weight: 500;
-            font-size: 1.1rem;
-            color: #6b7280;
-            transition: color 0.2s ease;
+            position: relative; padding: 12px 24px; font-weight: 600; color: #6b7280;
+            transition: color 0.2s; border-bottom: 3px solid transparent;
         }
-        .tab-button:hover {
-            color: #ec4899;
-        }
-        .tab-button.active {
-            color: #ec4899;
-        }
-        .tab-button.active::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: #ec4899;
-            border-radius: 2px;
-        }
+        .tab-button:hover { color: #ec4899; }
+        .tab-button.active { color: #ec4899; border-bottom-color: #ec4899; }
 
-        /* Reviews Tab */
-        .review-card {
-            background: #f9fafb;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            padding: 2rem;
-        }
-        .rating-bar {
-            background: #e5e7eb;
-            height: 0.75rem;
-            border-radius: 9999px;
-            overflow: hidden;
-        }
-        .rating-bar-fill {
-            background: #fbbf24;
-            height: 100%;
-        }
+        .rating-bar { background: #e5e7eb; height: 10px; border-radius: 999px; overflow: hidden; }
+        .rating-bar-fill { background: #fbbf24; height: 100%; }
 
-        /* Specifications Tab */
-        .spec-row {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 0.5rem;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 0.875rem;
-        }
-        .spec-row:nth-child(odd) {
-            background: #f1f5f9;
-        }
-        .spec-row:last-child {
-            border-bottom: none;
-        }
-
-        /* Shipping & Returns Tab */
         .accordion-header {
-            cursor: pointer;
-            padding: 1.25rem;
-            background: #f1f5f9;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.2s ease;
+            cursor: pointer; padding: 1.25rem; background: #f8f9fa; border-radius: 8px;
+            font-weight: 600; display: flex; justify-content: space-between; align-items: center;
+            transition: background 0.2s;
         }
-        .accordion-header:hover {
-            background: #e5e7eb;
-        }
-        .accordion-content {
-            padding: 1.25rem;
-            display: none;
-        }
-        .accordion-content.active {
-            display: block;
-        }
-
-        .thumbnail-active {
-  border: 2px solid #ec4899 !important;
-}
+        .accordion-header:hover { background: #e9ecef; }
+        .accordion-content { display: none; padding: 1.25rem; background: #f1f5f9; border-radius: 8px; margin-top: 8px; }
+        .accordion-content.active { display: block; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 mt-36">
     <div id="header-placeholder"></div>
 
     <!-- Breadcrumb -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <nav class="flex" aria-label="Breadcrumb">
-            <ol class="flex items-center space-x-2">
-                <li>
-                    <a href="../index.html" class="text-gray-500 hover:text-pink-600">Home</a>
-                </li>
-                <li>
-                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
-                </li>
-                <li>
-                    <span id="breadcrumbCategory" class="text-gray-500">Category</span>
-                </li>
-                <li>
-                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
-                </li>
-                <li>
-                    <span id="breadcrumbProduct" class="text-gray-900 font-medium">Product</span>
-                </li>
-            </ol>
+        <nav class="flex items-center space-x-2 text-sm">
+            <a href="../index.html" class="text-gray-500 hover:text-pink-600">Home</a>
+            <i class="fas fa-chevron-right text-gray-400"></i>
+            <span class="text-gray-500">Mother Care</span>
+            <i class="fas fa-chevron-right text-gray-400"></i>
+            <span class="text-gray-900 font-medium">Himalaya Baby Powder</span>
         </nav>
     </div>
 
-    <!-- Product Details -->
+    <!-- Main Product Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <!-- Product Images -->
+            <!-- Images -->
             <div class="space-y-4">
-                <div class="image-container relative bg-white shadow-lg rounded-lg">
-                    <img id="mainImage" src="/placeholder.svg" alt="" class="main-image">
-                    <div id="magnifierLens" class="magnifier-lens"></div>
-                    <div id="magnifierView" class="magnifier-view">
-                        <img id="magnifiedImage" src="/placeholder.svg" alt="">
-                    </div>
+                <div class="relative bg-white shadow-lg rounded-xl overflow-hidden">
+                    <img id="mainImage" src="https://images.unsplash.com/photo-1584302179602-0377c500f10d?w=800" alt="Himalaya Baby Powder" class="main-image">
                 </div>
-                <div class="flex space-x-2 overflow-x-auto">
-                    <div id="thumbnailContainer" class="flex space-x-2">
-                        <!-- Thumbnails will be dynamically loaded -->
+                <div class="flex space-x-3 overflow-x-auto pb-2">
+                    <div id="thumbnailContainer" class="flex space-x-3">
+                        <img src="https://images.unsplash.com/photo-1584302179602-0377c500f10d?w=400" class="thumbnail thumbnail-active">
+                        <img src="https://images.unsplash.com/photo-1626801674632-9e73e84f9c7f?w=400" class="thumbnail">
+                        <img src="https://images.unsplash.com/photo-1596461404969-9ae8f10bdd73?w=400" class="thumbnail">
                     </div>
                 </div>
             </div>
 
-            <!-- Product Information -->
+            <!-- Product Info -->
             <div class="space-y-6">
                 <div>
-                    <h1 id="productTitle" class="text-3xl font-bold text-gray-900 mb-2"></h1>
-                    <div class="flex items-center space-x-4 mb-4">
+                    <h1 class="text-3xl font-bold text-gray-900">Himalaya Baby Powder (400g)</h1>
+
+                    <!-- Rating & Reviews -->
+                    <div class="flex items-center mt-3 space-x-4">
                         <div class="flex items-center">
-                            <div id="productRating" class="flex text-yellow-400 mr-2"></div>
-                            <span id="productReviewCount" class="text-gray-600"></span>
+                            <div class="flex text-yellow-400 text-lg">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="ml-2 text-gray-600 font-medium">(428 reviews)</span>
                         </div>
-                        <span id="productBrand" class="text-gray-500"></span>
+                        <span class="text-green-600 font-medium">Verified Buyers</span>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span id="productPrice" class="text-4xl font-bold text-pink-600"></span>
-                    <span id="productOriginalPrice" class="text-xl text-gray-500 line-through hidden"></span>
-                    <span id="productDiscount" class="bg-red-500 text-white px-2 py-1 rounded-md text-sm font-bold hidden"></span>
+
+                <!-- Price -->
+                <div class="flex items-baseline space-x-4">
+                    <span class="text-4xl font-bold text-pink-600">₹285</span>
+                    <span class="text-xl text-gray-500 line-through">₹350</span>
+                    <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">18% OFF</span>
                 </div>
+
+                <!-- Description -->
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Description</h3>
-                    <p id="productDescription" class="text-gray-700 leading-relaxed"></p>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Description</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Himalaya Baby Powder keeps your baby fresh and cool all day long. Enriched with natural ingredients like Yashada Bhasma and herbal actives. 
+                        <strong>100% talc-free, dermatologically tested, and safe for daily use.</strong> Prevents irritation and keeps skin soft and smooth.
+                    </p>
                 </div>
-                <div id="sizeSelection" class="hidden">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Size</h3>
-                    <div id="sizeOptions" class="flex flex-wrap gap-2"></div>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Quantity</h3>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center border border-gray-300 rounded-md">
-                            <button id="decreaseQty" class="px-3 py-2 hover:bg-gray-100 transition-colors">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <span id="quantity" class="px-4 py-2 font-semibold">1</span>
-                            <button id="increaseQty" class="px-3 py-2 hover:bg-gray-100 transition-colors">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                        <span id="stockStatus" class="text-green-600 font-medium">In Stock</span>
+
+                <!-- Quantity -->
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center border border-gray-300 rounded-lg">
+                        <button id="decreaseQty" class="px-4 py-3 hover:bg-gray-100 text-xl">-</button>
+                        <span id="quantity" class="px-6 py-3 font-bold text-lg">1</span>
+                        <button id="increaseQty" class="px-4 py-3 hover:bg-gray-100 text-xl">+</button>
                     </div>
+                    <span class="text-green-600 font-semibold">In Stock (127 left)</span>
                 </div>
+
+                <!-- Action Buttons -->
                 <div class="flex space-x-4">
-                    <button id="addToCartBtn" class="flex-1 bg-pink-600 text-white py-3 px-6 rounded-md hover:bg-pink-700 transition-colors font-semibold text-lg shadow-md">
-                        <i class="fas fa-shopping-cart mr-2"></i>Add to Cart
+                    <button id="addToCartBtn" class="flex-1 bg-pink-600 text-white py-4 px-8 rounded-lg hover:bg-pink-700 transition font-bold text-lg shadow-lg flex items-center justify-center">
+                        <i class="fas fa-shopping-cart mr-3"></i> Add to Cart
                     </button>
-                    <button id="addToWishlistBtn" class="px-6 py-3 border-2 border-pink-600 text-pink-600 rounded-md hover:bg-pink-50 transition-colors shadow-md">
-                        <i class="fas fa-heart"></i>
+                    <button id="addToWishlistBtn" class="px-6 py-4 border-2 border-pink-600 text-pink-600 rounded-lg hover:bg-pink-50 transition text-2xl">
+                        <i class="far fa-heart"></i>
                     </button>
                 </div>
+
+                <!-- Key Features -->
                 <div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
-                    <ul id="productFeatures" class="space-y-2"></ul>
+                    <h3 class="text-lg font-semibold mb-3">Key Features</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><i class="fas fa-check text-green-600 mr-2"></i>100% Talc-Free & Safe</li>
+                        <li><i class="fas fa-check text-green-600 mr-2"></i>Dermatologically Tested</li>
+                        <li><i class="fas fa-check text-green-600 mr-2"></i>No Parabens or Synthetic Colors</li>
+                        <li><i class="fas fa-check text-green-600 mr-2"></i>Keeps Baby Cool & Fresh</li>
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <!-- Product Tabs -->
-        <div class="mt-12">
+        <!-- Tabs: Specifications, Reviews, Shipping -->
+        <div class="mt-16 bg-white rounded-xl shadow-lg overflow-hidden">
             <div class="border-b border-gray-200">
-                <nav class="flex space-x-8">
-                    <button id="specificationsTab" class="tab-button active">Specifications</button>
-                    <button id="reviewsTab" class="tab-button">Reviews</button>
-                    <button id="shippingTab" class="tab-button">Shipping & Returns</button>
+                <nav class="flex space-x-8 px-8">
+                    <button id="specificationsTab" class="tab-button active pb-4">Specifications</button>
+                    <button id="reviewsTab" class="tab-button pb-4">Reviews (428)</button>
+                    <button id="shippingTab" class="tab-button pb-4">Shipping & Returns</button>
                 </nav>
             </div>
-            <div id="specificationsContent" class="tab-content">
-                <div class="review-card bg-gray-50">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Product Specifications</h3>
-                    <div id="specificationsList" class="space-y-2"></div>
+
+            <!-- Specifications -->
+            <div id="specificationsContent" class="p-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Product Specifications</h3>
+                <div class="bg-gray-50 rounded-lg p-6 space-y-4 text-gray-700">
+                    <div class="flex justify-between py-3 border-b"><span class="font-medium">Brand</span><span>Himalaya</span></div>
+                    <div class="flex justify-between py-3 border-b"><span class="font-medium">Net Quantity</span><span>400g</span></div>
+                    <div class="flex justify-between py-3 border-b"><span class="font-medium">Item Form</span><span>Powder</span></div>
+                    <div class="flex justify-between py-3 border-b"><span class="font-medium">Skin Type</span><span>All Skin Types</span></div>
+                    <div class="flex justify-between py-3 border-b"><span class="font-medium">Age Range</span><span>0+ Months</span></div>
+                    <div class="flex justify-between py-3 border-b"><span class="font-medium">Key Ingredients</span><span>Natural Zinc, Vetiver, Yashada Bhasma</span></div>
+                    <div class="flex justify-between py-3"><span class="font-medium">Country of Origin</span><span>India</span></div>
                 </div>
             </div>
-            <div id="reviewsContent" class="tab-content hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div class="lg:col-span-1">
-                        <div class="review-card bg-gray-50">
-                            <h3 class="text-xl font-semibold text-gray-900 mb-4">Customer Reviews</h3>
-                            <div class="flex items-center mb-4">
-                                <span id="avgRating" class="text-3xl font-bold text-gray-900 mr-2">4.5</span>
-                                <div>
-                                    <div id="avgRatingStars" class="flex text-yellow-400 mb-1"></div>
-                                    <span id="totalReviews" class="text-sm text-gray-600">Based on 128 reviews</span>
+
+            <!-- Reviews -->
+            <div id="reviewsContent" class="p-8 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-6">Customer Reviews</h3>
+                        <div class="flex items-center mb-6">
+                            <span class="text-5xl font-bold text-gray-900 mr-4">4.8</span>
+                            <div>
+                                <div class="flex text-yellow-400 text-2xl mb-1">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                </div>
+                                <p class="text-gray-600">Based on 428 reviews</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center"><span class="w-12 text-sm">5</span><div class="flex-1 mx-3 rating-bar"><div class="rating-bar-fill w-11/12"></div></div><span class="text-sm text-gray-600">78%</span></div>
+                            <div class="flex items-center"><span class="w-12 text-sm">4</span><div class="flex-1 mx-3 rating-bar"><div class="rating-bar-fill w-1/5"></div></div><span class="text-sm text-gray-600">15%</span></div>
+                            <div class="flex items-center"><span class="w-12 text-sm">3</span><div class="flex-1 mx-3 rating-bar"><div class="rating-bar-fill w-1/12"></div></div><span class="text-sm text-gray-600">5%</span></div>
+                            <div class="flex items-center"><span class="w-12 text-sm">2</span><div class="flex-1 mx-3 rating-bar"><div class="rating-bar-fill w-1/20"></div></div><span class="text-sm text-gray-600">1%</span></div>
+                            <div class="flex items-center"><span class="w-12 text-sm">1</span><div class="flex-1 mx-3 rating-bar"><div class="rating-bar-fill w-0"></div></div><span class="text-sm text-gray-600">1%</span></div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <div class="w-12 h-12 bg-pink-200 rounded-full flex items-center justify-center text-pink-600 font-bold">R</div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold">Riya Sharma</h4>
+                                    <div class="flex text-yellow-400"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
                                 </div>
                             </div>
-                            <div id="ratingBreakdown" class="space-y-3"></div>
+                            <p class="text-gray-700">"Best baby powder I've used! Keeps my baby dry and fresh all day. No rashes at all. Highly recommend!"</p>
+                            <span class="text-sm text-gray-500 mt-2 block">Verified Purchase • 1 month ago</span>
                         </div>
-                    </div>
-                    <div class="lg:col-span-2 space-y-4">
-                        <div id="reviewsList" class="space-y-4"></div>
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <div class="flex items-center mb-3">
+                                <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center text-blue-600 font-bold">A</div>
+                                <div class="ml-4">
+                                    <h4 class="font-semibold">Ananya Patel</h4>
+                                    <div class="flex text-yellow-400"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="far fa-star"></i></div>
+                                </div>
+                            </div>
+                            <p class="text-gray-700">"Good quality and mild fragrance. My baby loves it. Packaging was perfect."</p>
+                            <span class="text-sm text-gray-500 mt-2 block">Verified Purchase • 2 weeks ago</span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div id="shippingContent" class="tab-content hidden">
-                <div class="review-card bg-gray-50">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-4">Shipping & Returns</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <div class="accordion-header">
-                                <span>Shipping Information</span>
-                                <i class="fas fa-chevron-down text-lg"></i>
-                            </div>
-                            <div class="accordion-content">
-                                <ul class="text-gray-700 space-y-2 list-disc pl-5">
-                                    <li id="stockAvailability">Availability: ${currentProduct?.inStock && currentProduct?.stockQuantity > 0 ? `${currentProduct.stockQuantity} items in stock` : 'Out of stock, ships when available'}</li>
-                                    <li>Free shipping on orders over ₹4000</li>
-                                    <li>Standard delivery: 3-5 business days</li>
-                                    <li>Express delivery: 1-2 business days (additional charges apply)</li>
-                                    <li>International shipping available</li>
-                                </ul>
-                            </div>
+
+            <!-- Shipping & Returns -->
+            <div id="shippingContent" class="p-8 hidden">
+                <h3 class="text-2xl font-bold mb-6">Shipping & Returns</h3>
+                <div class="space-y-6">
+                    <div>
+                        <div class="accordion-header">
+                            <span class="text-lg font-semibold">Shipping Information</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
                         </div>
-                        <div>
-                            <div class="accordion-header">
-                                <span>Return Policy</span>
-                                <i class="fas fa-chevron-down text-lg"></i>
-                            </div>
-                            <div class="accordion-content">
-                                <ul class="text-gray-700 space-y-2 list-disc pl-5">
-                                    <li>30-day return policy</li>
-                                    <li>Items must be unused and in original packaging</li>
-                                    <li>Free returns for defective items</li>
-                                    <li>Return shipping costs may apply for non-defective returns</li>
-                                </ul>
-                            </div>
+                        <div class="accordion-content">
+                            <ul class="list-disc pl-6 space-y-3 text-gray-700">
+                                <li><strong>Free Delivery</strong> on orders above ₹4000</li>
+                                <li>Standard Delivery: <strong>3-5 business days</strong></li>
+                                <li>Express Delivery: <strong>1-2 days</strong> (+₹99)</li>
+                                <li>Cash on Delivery (COD) available</li>
+                                <li>Real-time tracking provided</li>
+                                <li>Delivery across 28,000+ pin codes in India</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="accordion-header">
+                            <span class="text-lg font-semibold">Return & Exchange Policy</span>
+                            <i class="fas fa-chevron-down transition-transform"></i>
+                        </div>
+                        <div class="accordion-content">
+                            <ul class="list-disc pl-6 space-y-3 text-gray-700">
+                                <li><strong>30-day easy returns</strong></li>
+                                <li>Free pickup for defective or damaged items</li>
+                                <li>Original packaging and tags required</li>
+                                <li>Refund processed within 7 days of return</li>
+                                <li>Exchange available for size/color issues</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
@@ -335,18 +247,19 @@
         </div>
     </div>
 
-    <div id="footer-placeholder"></div>
+      <!-- Scripts -->
+  <div id="footer-placeholder"></div>
     
 
 
  <script>
     function loadHeader() {
-        fetch('../Header/header.html')
+        fetch('../../Header/header.html')
             .then(r => { if (!r.ok) throw r; return r.text(); })
             .then(html => {
                 document.getElementById('header-placeholder').innerHTML = html;
                 const script = document.createElement('script');
-                script.src = '../Header/header.js';
+                script.src = '../../Header/header.js';
                 script.onload = () => console.log('Header JS loaded');
                 document.body.appendChild(script);
             })
@@ -354,7 +267,7 @@
     }
 
     function loadFooter() {
-        fetch('../Footer/footer.html')
+        fetch('../../Footer/footer.html')
             .then(r => { if (!r.ok) throw r; return r.text(); })
             .then(html => {
                 document.getElementById('footer-placeholder').innerHTML = html;
@@ -369,8 +282,8 @@
     });
 </script>
 
-    
-    <script src="./product-details.js"></script>
-    
+  <script src="./mother-product-details.js"></script>
+   
+   
 </body>
 </html>

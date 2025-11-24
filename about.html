@@ -24,6 +24,7 @@
       href="https://fonts.googleapis.com/css2?family=Alan+Sans:wght@300..900&family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="./Footer/footer.css">
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
@@ -191,9 +192,15 @@
       }
     </style>
   </head>
-  <body class="bg-gray-50 text-gray-800">
+  <body class="bg-gray-50 text-gray-800 mt-32">
+    <div id="header-placeholder"></div>
     <!-- Loading Bar -->
     <div class="loading-bar" id="loadingBar"></div>
+
+    <!-- Back Arrow -->
+    <a href="index.html" class="fixed top-20 left-10 z-50 w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-pink-50 transition-all duration-300 hover:scale-110 group">
+      <i class="fas fa-arrow-left text-pink-500 text-xl group-hover:text-pink-600"></i>
+    </a>
 
     <!-- Hero Section -->
    <section
@@ -717,6 +724,40 @@
         </div>
       </div>
     </section>
+
+      <!-- Placeholder for Footer -->
+  <div id="footer-placeholder"></div>
+    
+
+    <script>
+    function loadHeader() {
+        fetch('../Header/header.html')
+            .then(r => { if (!r.ok) throw r; return r.text(); })
+            .then(html => {
+                document.getElementById('header-placeholder').innerHTML = html;
+                const script = document.createElement('script');
+                script.src = '../Header/header.js';
+                script.onload = () => console.log('Header JS loaded');
+                document.body.appendChild(script);
+            })
+            .catch(err => console.error('Header load failed:', err));
+    }
+
+    function loadFooter() {
+        fetch('../Footer/footer.html')
+            .then(r => { if (!r.ok) throw r; return r.text(); })
+            .then(html => {
+                document.getElementById('footer-placeholder').innerHTML = html;
+            })
+            .catch(err => console.error('Footer load failed:', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadHeader();
+        loadFooter();
+        // ... rest of your code
+    });
+</script>
 
     <script>
       // Initialize AOS (Animate On Scroll)

@@ -344,7 +344,7 @@ function createProductCard(product) {
         <button id="wishlist-${product.id}" class="absolute top-2 right-2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
           <i class="${getWishlistIcon(isInWishlist)}"></i>
         </button>
-        <div class="relative h-64 overflow-hidden">
+        <div class="relative h-64 overflow-hidden" >
           ${getCarouselImages(product.images || [], product.title, product.id, product.mainImageUrl)}
         </div>
       </div>
@@ -1019,6 +1019,12 @@ function renderPagination() {
 }
 
 function viewProductDetails(productId) {
+  // Save the selected product ID
   localStorage.setItem("selectedProductId", productId);
+  
+  // Also save ALL products so the details page can find the correct one
+  localStorage.setItem("allProducts", JSON.stringify(products));
+  
+  // Navigate to details page
   window.location.href = "mother-product-details.html";
 }

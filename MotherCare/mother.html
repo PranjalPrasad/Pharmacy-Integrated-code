@@ -13,7 +13,7 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./mother.css" />
       <link rel="stylesheet" href="../Header/header.css">
       <link rel="stylesheet" href="../Footer/footer.css">
       
@@ -76,6 +76,7 @@
         border-radius: 16px; /* smooth rounded edges */
         overflow: hidden;
         margin: 0;
+        cursor: pointer;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
       }
 
@@ -222,7 +223,7 @@
     
     
   </head>
- <body class="bg-white">
+ <body class="bg-pink-100">
     
 
     <div id="header-placeholder"></div>
@@ -230,7 +231,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- ✅ Auto Scrolling Banner with Dots -->
       <section
-        class="relative w-full h-[300px] sm:h-[350px] mb-6 overflow-hidden rounded-xl shadow-lg"
+        class="mt-36 relative w-full h-[300px] sm:h-[350px] mb-6 overflow-hidden rounded-xl shadow-lg"
       >
         <!-- Slides wrapper -->
         <div id="bannerWrapper" class="w-full h-full relative">
@@ -321,7 +322,7 @@
         <!-- Sidebar Filters -->
         <aside
           id="filterSidebar"
-          class="filter-sidebar lg:w-64 bg-white rounded-lg shadow-md p-6 h-fit lg:sticky lg:top-24"
+          class="sticky filter-sidebar lg:w-64 bg-white rounded-lg shadow-md p-6 h-fit lg:sticky lg:top-24"
         >
           <div class="flex justify-between items-center mb-6 lg:hidden">
             <h2 class="text-lg font-semibold text-gray-900">Filters</h2>
@@ -346,7 +347,7 @@
                   type="radio"
                   name="category"
                   value="all"
-                  class="category-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer category-filter text-pink-600 focus:ring-pink-500"
                   checked
                 />
                 <span class="ml-2 text-sm text-gray-700">All Products</span>
@@ -356,7 +357,7 @@
                   type="radio"
                   name="category"
                   value="maternity-wear"
-                  class="category-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer category-filter text-pink-600 focus:ring-pink-500"
                 />
                 <span class="ml-2 text-sm text-gray-700">Maternity Wear</span>
               </label>
@@ -365,7 +366,7 @@
                   type="radio"
                   name="category"
                   value="nutrition"
-                  class="category-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer category-filter text-pink-600 focus:ring-pink-500"
                 />
                 <span class="ml-2 text-sm text-gray-700"
                   >Pregnancy Nutrition</span
@@ -376,7 +377,7 @@
                   type="radio"
                   name="category"
                   value="skincare"
-                  class="category-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer category-filter text-pink-600 focus:ring-pink-500"
                 />
                 <span class="ml-2 text-sm text-gray-700"
                   >Skincare for Moms</span
@@ -387,7 +388,7 @@
                   type="radio"
                   name="category"
                   value="trimester-kits"
-                  class="category-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer category-filter text-pink-600 focus:ring-pink-500"
                 />
                 <span class="ml-2 text-sm text-gray-700">Trimester Kits</span>
               </label>
@@ -396,7 +397,7 @@
                   type="radio"
                   name="category"
                   value="postpartum"
-                  class="category-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer category-filter text-pink-600 focus:ring-pink-500"
                 />
                 <span class="ml-2 text-sm text-gray-700"
                   >Postpartum Recovery</span
@@ -407,10 +408,32 @@
                   type="radio"
                   name="category"
                   value="breastfeeding"
-                  class="category-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer category-filter text-pink-600 focus:ring-pink-500"
                 />
                 <span class="ml-2 text-sm text-gray-700"
                   >Breastfeeding Essentials</span
+                >
+              </label>
+              <label class="flex items-center">
+                <input
+                  type="radio"
+                  name="category"
+                  value="womens health"
+                  class="cursor-pointer category-filter text-pink-600 focus:ring-pink-500"
+                />
+                <span class="ml-2 text-sm text-gray-700"
+                  >Women's Health</span
+                >
+              </label>
+              <label class="flex items-center">
+                <input
+                  type="radio"
+                  name="category"
+                  value="gift hamper"
+                  class="cursor-pointer text-pink-600 focus:ring-pink-500"
+                />
+                <span class="ml-2 text-sm text-gray-700"
+                  >Gift hamper</span
                 >
               </label>
             </div>
@@ -431,7 +454,7 @@
                   data-min="0"
                   data-max="2075"
                 />
-                <span class="ml-2 text-sm text-gray-700">Under ₹4000</span>
+                <span class="cursor-pointer ml-2 text-sm text-gray-700">Under ₹4000</span>
               </label>
               <label class="flex items-center">
                 <input
@@ -440,7 +463,7 @@
                   data-min="2075"
                   data-max="4150"
                 />
-                <span class="ml-2 text-sm text-gray-700">₹2075 - ₹4150</span>
+                <span class="cursor-pointer ml-2 text-sm text-gray-700">₹2075 - ₹4150</span>
               </label>
               <label class="flex items-center">
                 <input
@@ -449,7 +472,7 @@
                   data-min="4150"
                   data-max="8300"
                 />
-                <span class="ml-2 text-sm text-gray-700">₹4150 - ₹8300</span>
+                <span class="cursor-pointer ml-2 text-sm text-gray-700">₹4150 - ₹8300</span>
               </label>
               <label class="flex items-center">
                 <input
@@ -458,7 +481,7 @@
                   data-min="8300"
                   data-max="82917"
                 />
-                <span class="ml-2 text-sm text-gray-700">Over ₹8300</span>
+                <span class="cursor-pointer ml-2 text-sm text-gray-700">Over ₹8300</span>
               </label>
             </div>
           </div>
@@ -474,22 +497,22 @@
               <label class="flex items-center">
                 <input
                   type="checkbox"
-                  class="rating-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer rating-filter text-pink-600 focus:ring-pink-500"
                   data-rating="4"
                 />
                 <span class="ml-2 text-sm text-gray-700 flex items-center">
-                  <span class="text-yellow-400">★★★★</span>
+                  <span class="cursor-pointer text-yellow-400">★★★★</span>
                   <span class="ml-1">& Up</span>
                 </span>
               </label>
               <label class="flex items-center">
                 <input
                   type="checkbox"
-                  class="rating-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer rating-filter text-pink-600 focus:ring-pink-500"
                   data-rating="3"
                 />
                 <span class="ml-2 text-sm text-gray-700 flex items-center">
-                  <span class="text-yellow-400">★★★</span>
+                  <span class="cursor-pointer text-yellow-400">★★★</span>
                   <span class="ml-1">& Up</span>
                 </span>
               </label>
@@ -507,7 +530,7 @@
               <label class="flex items-center">
                 <input
                   type="checkbox"
-                  class="discount-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer discount-filter text-pink-600 focus:ring-pink-500"
                   data-discount="10"
                 />
                 <span class="ml-2 text-sm text-gray-700">10% Off or More</span>
@@ -515,7 +538,7 @@
               <label class="flex items-center">
                 <input
                   type="checkbox"
-                  class="discount-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer discount-filter text-pink-600 focus:ring-pink-500"
                   data-discount="20"
                 />
                 <span class="ml-2 text-sm text-gray-700">20% Off or More</span>
@@ -523,10 +546,10 @@
               <label class="flex items-center">
                 <input
                   type="checkbox"
-                  class="discount-filter text-pink-600 focus:ring-pink-500"
+                  class="cursor-pointer discount-filter text-pink-600 focus:ring-pink-500"
                   data-discount="50"
                 />
-                <span class="ml-2 text-sm text-gray-700">50% Off or More</span>
+                <span class="cursor-pointer ml-2 text-sm text-gray-700">50% Off or More</span>
               </label>
             </div>
           </div>
@@ -534,7 +557,7 @@
           <!-- Clear Filters -->
           <button
             id="clearFilters"
-            class="w-full bg-pink-400 text-white-800 py-2 px-4 rounded-lg hover:bg-pink-600 hover:text-white  transition-colors"
+            class="cursor-pointer w-full bg-pink-400 text-white-800 py-2 px-4 rounded-lg hover:bg-pink-600 hover:text-white  transition-colors"
           >
             Clear All Filters
           </button>

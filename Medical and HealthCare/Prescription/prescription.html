@@ -48,57 +48,59 @@
     }
   </style>
 </head>
-<body class="bg-white" onload="initializePage()">
+<body class="bg-[#DDF6D2]" onload="initializePage()">
   <div id="header-placeholder"></div>
 
   <!-- Hero Banner -->
-  <section class="w-full h-96 relative bg-center bg-cover"
-         style="background-image: url('https://i.pinimg.com/1200x/52/40/cf/5240cff0fb3479c7adc3351a22acc765.jpg');">
+  <section class="mt-40 w-full h-96 relative bg-center bg-cover"
+         style="background-image: url('../../Images/IMG/PRESCRIPTION\ \(1\).png');">
     <div class="absolute inset-0 bg-black/30"></div>
-    <div class="relative z-10 flex items-center justify-center h-full px-4">
-      <h1 class="text-white text-3xl sm:text-4xl md:text-5xl font-bold text-center leading-tight">
-        Prescription Medicines
-      </h1>
+    <div class="relative flex items-center justify-center h-full px-4">
+  
     </div>
 </section>
 
   <div class="container mx-auto px-1 py-6">
     <div class="flex flex-col md:flex-row gap-6">
-      <!-- Sidebar -->
-      <div class="w-full md:w-1/5 md:h-[calc(90vh-4rem)] md:sticky md:top-16 overflow-y-auto bg-white p-3 rounded-lg shadow nav-sidebar">
-        <div class="mb-4">
-          <!-- Sorting -->
-          <div class="flex justify-start mb-6">
-            <select class="w-52 border border-gray-300 p-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary" id="sortSelect">
-              <option>Sort By: Relevance</option>
-              <option>Price: Low to High</option>
-              <option>Price: High to Low</option>
-            </select>
-          </div>
+     <!-- Sidebar - VISIBLE ONLY ON DESKTOP (md and up) -->
+<div class="hidden md:block sticky top-16 w-full md:w-1/5 md:h-[calc(90vh-4rem)] overflow-y-auto bg-white p-3 rounded-lg shadow nav-sidebar">
+  <div class="mb-4">
+    <!-- Sorting -->
+    <div class="flex justify-start mb-6">
+      <select class="w-52 border border-gray-300 p-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary" id="sortSelect">
+        <option>Sort By: Relevance</option>
+        <option>Price: Low to High</option>
+        <option>Price: High to Low</option>
+      </select>
+    </div>
 
-          <h2 class="text-lg font-bold mb-2">Categories</h2>
-          <ul id="categoryList" class="space-y-2">
-            <li>
-              <a href="#" class="category-link font-medium">Anti-Allergy / Antihistamines</a>
-              <span class="expand-toggle cursor-pointer ml-2 text-lg font-bold text-primary">+</span>
-            </li>
-            <li>
-              <a href="#" class="category-link font-medium">Cold & Cough Relief</a>
-            </li>
-          </ul>
-        </div>
+    <h2 class="text-lg font-bold mb-2">Categories</h2>
+    <ul id="categoryList" class="space-y-2">
+      <li class="flex items-center justify-between">
+        <a href="#" class="category-link font-medium hover:text-primary">Anti-Allergy / Antihistamines</a>
+        <span class="expand-toggle cursor-pointer ml-2 text-lg font-bold text-primary">+</span>
+      </li>
+      <li>
+        <a href="#" class="category-link font-medium hover:text-primary">Cold & Cough Relief</a>
+      </li>
+      <!-- Add more categories as needed -->
+    </ul>
+  </div>
 
-        <!-- Brands -->
-        <div>
-          <h2 class="text-lg font-bold mb-2">
-            Brands <span class="expand-toggle cursor-pointer">+</span>
-          </h2>
-          <ul id="brandList" class="hidden space-y-2">
-            <li><label><input type="checkbox" class="brand-filter" value="BrandX"> BrandX</label></li>
-            <li><label><input type="checkbox" class="brand-filter" value="BrandZ"> BrandZ</label></li>
-          </ul>
-        </div>
-      </div>
+  <!-- Brands -->
+  <div>
+    <h2 class="text-lg font-bold mb-2 flex items-center justify-between">
+      Brands 
+      <span class="expand-toggle cursor-pointer text-xl">+</span>
+    </h2>
+    <ul id="brandList" class="space-y-2 mt-3">
+      <li><label class="flex items-center gap-2"><input type="checkbox" class="brand-filter" value="BrandX"> BrandX</label></li>
+      <li><label class="flex items-center gap-2"><input type="checkbox" class="brand-filter" value="BrandZ"> BrandZ</label></li>
+      <li><label class="flex items-center gap-2"><input type="checkbox" class="brand-filter" value="Cipla"> Cipla</label></li>
+      <!-- Add more brands -->
+    </ul>
+  </div>
+</div>
 
       <!-- Product Grid -->
       <section class="w-full md:w-5/6">
@@ -106,6 +108,106 @@
       </section>
     </div>
   </div>
+
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 flex md:hidden z-50 shadow-lg">
+    <button id="openSortBtn" class="flex-1 py-4 text-center font-semibold text-gray-800 border-r border-gray-300">
+      Sort
+    </button>
+    <button id="openFilterBtn" class="flex-1 py-4 text-center font-semibold text-blue-600">
+      Filters
+    </button>
+  </div>
+
+  <!-- ====================== MOBILE SORT PANEL (slides up) ====================== -->
+  <div id="mobileSortPanel" class="fixed inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-2xl z-50 transform translate-y-full slide-up md:hidden">
+    <div class="flex justify-center pt-4">
+      <div class="w-16 h-1 bg-gray-400 rounded-full"></div>
+    </div>
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-xl font-bold">Sort By</h3>
+        <button id="closeSortBtn" class="text-3xl">&times;</button>
+      </div>
+      <select id="sortSelectMobile" class="w-full border border-gray-300 p-4 rounded-lg text-base focus:ring-2 focus:ring-blue-500">
+        <option>Sort By: Relevance</option>
+        <option>Price: Low to High</option>
+        <option>Price: High to Low</option>
+      </select>
+      <button class="mt-6 w-full bg-blue-600 text-white py-4 rounded-lg font-semibold">Apply</button>
+    </div>
+  </div>
+
+  <!-- ====================== MOBILE FILTER DRAWER (all options visible) ====================== -->
+  <div id="mobileFilterDrawer" class="fixed inset-x-0 bottom-0 max-h-[90vh] bg-white rounded-t-2xl shadow-2xl overflow-y-auto z-50 transform translate-y-full slide-up md:hidden">
+    <div class="flex justify-center pt-4 pb-2">
+      <div class="w-16 h-1 bg-gray-400 rounded-full"></div>
+    </div>
+
+    <div class="px-6 pt-4 pb-24"> <!-- pb-24 to avoid overlap with bottom bar -->
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-bold">Filters</h3>
+        <button id="closeFilterBtn" class="text-3xl">&times;</button>
+      </div>
+
+      <!-- Sorting (also available in filter drawer for convenience) -->
+      <div class="mb-8">
+        <select class="w-full border border-gray-300 p-4 rounded-lg focus:ring-2 focus:ring-blue-500">
+          <option>Sort By: Relevance</option>
+          <option>Price: Low to High</option>
+          <option>Price: High to Low</option>
+        </select>
+      </div>
+
+      <!-- Categories - Exactly like your original -->
+      <div class="mb-8">
+        <h2 class="text-lg font-bold mb-4">Categories</h2>
+        <ul class="space-y-4">
+          <li class="flex items-center justify-between">
+            <a href="#" class="category-link font-medium text-gray-800 hover:text-blue-600">
+              Anti-Allergy / Antihistamines
+            </a>
+            <span class="expand-toggle cursor-pointer ml-2 text-lg font-bold text-blue-600">+</span>
+          </li>
+          <li>
+            <a href="#" class="category-link font-medium text-gray-800 hover:text-blue-600">
+              Cold & Cough Relief
+            </a>
+          </li>
+          <li>
+            <a href="#" class="category-link font-medium text-gray-800 hover:text-blue-600">
+              Pain Relief
+            </a>
+          </li>
+          <!-- Add as many as you want -->
+        </ul>
+      </div>
+
+      <!-- Brands - Exactly like your original, fully visible -->
+      <div class="mb-8">
+        <h2 class="text-lg font-bold mb-4 flex items-center justify-between">
+          Brands
+          <span class="expand-toggle cursor-pointer text-xl">+</span>
+        </h2>
+        <ul id="brandListMobile" class="mt-4 space-y-4">
+          <li><label class="flex items-center"><input type="checkbox" class="mr-3 h-5 w-5 text-blue-600 rounded"> BrandX</label></li>
+          <li><label class="flex items-center"><input type="checkbox" class="mr-3 h-5 w-5 text-blue-600 rounded"> BrandZ</label></li>
+          <li><label class="flex items-center"><input type="checkbox" class="mr-3 h-5 w-5 text-blue-600 rounded"> BrandY</label></li>
+          <li><label class="flex items-center"><input type="checkbox" class="mr-3 h-5 w-5 text-blue-600 rounded"> Cipla</label></li>
+          <li><label class="flex items-center"><input type="checkbox" class="mr-3 h-5 w-5 text-blue-600 rounded"> Sun Pharma</label></li>
+          <!-- Add unlimited brands -->
+        </ul>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-4 mt-10">
+        <button id="clearAll" class="flex-1 border border-gray-400 py-4 rounded-lg font-semibold">Clear All</button>
+        <button id="applyFilters" class="flex-1 bg-blue-600 text-white py-4 rounded-lg font-semibold">Apply Filters</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backdrop for filter drawer -->
+  <div id="filterBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
 
   <!-- Upload Prescription Modal -->
   <div id="uploadModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -1467,6 +1569,49 @@
     });
   </script>
 
- 
+  <script>
+    // Elements
+    const openSortBtn = document.getElementById('openSortBtn');
+    const closeSortBtn = document.getElementById('closeSortBtn');
+    const mobileSortPanel = document.getElementById('mobileSortPanel');
+
+    const openFilterBtn = document.getElementById('openFilterBtn');
+    const closeFilterBtn = document.getElementById('closeFilterBtn');
+    const mobileFilterDrawer = document.getElementById('mobileFilterDrawer');
+    const filterBackdrop = document.getElementById('filterBackdrop');
+
+    // Open Sort
+    openSortBtn.onclick = () => {
+      mobileSortPanel.classList.remove('translate-y-full');
+    };
+
+    // Close Sort
+    closeSortBtn.onclick = () => {
+      mobileSortPanel.classList.add('translate-y-full');
+    };
+
+    // Open Filter Drawer
+    openFilterBtn.onclick = () => {
+      filterBackdrop.classList.remove('hidden');
+      mobileFilterDrawer.classList.remove('translate-y-full');
+    };
+
+    // Close Filter Drawer
+    const closeFilter = () => {
+      mobileFilterDrawer.classList.add('translate-y-full');
+      setTimeout(() => filterBackdrop.classList.add('hidden'), 350);
+    };
+    closeFilterBtn.onclick = closeFilter;
+    filterBackdrop.onclick = closeFilter;
+
+    // Optional: Close panels when clicking outside (sort panel)
+    mobileSortPanel.addEventListener('click', (e) => {
+      if (e.target === mobileSortPanel) {
+        mobileSortPanel.classList.add('translate-y-full');
+      }
+    });
+  </script>
+
+ <script src="../../cart-wishlist-system.js" defer></script>
 </body>
 </html>

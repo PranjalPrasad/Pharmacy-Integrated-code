@@ -703,20 +703,14 @@ function updateResultsCount() {
 
 // Cart and wishlist functions
 function updateCartCount() {
-  const cartCount = document.getElementById("cartCount");
-  if (cartCount) {
-    const count = cart.reduce((total, item) => total + item.quantity, 0);
-    cartCount.textContent = count;
-    cartCount.classList.toggle("hidden", count === 0);
+  if (typeof window.updateCartAndWishlistCounts === 'function') {
+    window.updateCartAndWishlistCounts();
   }
 }
 
 function updateWishlistCount() {
-  const wishlistCount = document.getElementById("wishlistCount");
-  if (wishlistCount) {
-    const count = wishlist.length;
-    wishlistCount.textContent = count;
-    wishlistCount.classList.toggle("hidden", count === 0);
+  if (typeof window.updateCartAndWishlistCounts === 'function') {
+    window.updateCartAndWishlistCounts();
   }
 }
 

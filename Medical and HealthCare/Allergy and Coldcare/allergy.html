@@ -60,7 +60,7 @@
  <div id="header-placeholder"></div>
 
 <section
-  class="w-full h-48 relative bg-center bg-cover"
+  class="w-full h-96 relative bg-center bg-cover mt-32"
   style="background-image: url('https://i.pinimg.com/1200x/52/40/cf/5240cff0fb3479c7adc3351a22acc765.jpg');"
 >
   <!-- Overlay for better contrast -->
@@ -275,12 +275,12 @@
 
  <script>
     function loadHeader() {
-        fetch('../Header/header.html')
+        fetch('../../Header/header.html')
             .then(r => { if (!r.ok) throw r; return r.text(); })
             .then(html => {
                 document.getElementById('header-placeholder').innerHTML = html;
                 const script = document.createElement('script');
-                script.src = '../Header/header.js';
+                script.src = '../../Header/header.js';
                 script.onload = () => console.log('Header JS loaded');
                 document.body.appendChild(script);
             })
@@ -288,7 +288,7 @@
     }
 
     function loadFooter() {
-        fetch('../Footer/footer.html')
+        fetch('../../Footer/footer.html')
             .then(r => { if (!r.ok) throw r; return r.text(); })
             .then(html => {
                 document.getElementById('footer-placeholder').innerHTML = html;
@@ -303,7 +303,7 @@
     });
 </script>
 
-  
+  <script src="../../cart-wishlist-system.js" defer></script>
   <script src="./allergy.js"></script>
 
 

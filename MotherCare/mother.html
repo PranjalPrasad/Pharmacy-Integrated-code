@@ -223,7 +223,7 @@
     
     
   </head>
- <body class="bg-pink-100">
+ <body class="bg-[#FFF2EF]">
     
 
     <div id="header-placeholder"></div>
@@ -716,7 +716,11 @@
 
    
 
- <script>
+<script>
+    // Global cart & wishlist (shared across pages)
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+
     function loadHeader() {
         fetch('../Header/header.html')
             .then(r => { if (!r.ok) throw r; return r.text(); })
@@ -724,7 +728,11 @@
                 document.getElementById('header-placeholder').innerHTML = html;
                 const script = document.createElement('script');
                 script.src = '../Header/header.js';
-                script.onload = () => console.log('Header JS loaded');
+                script.onload = () => {
+                    console.log('Header JS loaded');
+                    // CRITICAL FIX: Update counts after header loads
+                    updateCartAndWishlistCounts();
+                };
                 document.body.appendChild(script);
             })
             .catch(err => console.error('Header load failed:', err));
@@ -733,16 +741,34 @@
     function loadFooter() {
         fetch('../Footer/footer.html')
             .then(r => { if (!r.ok) throw r; return r.text(); })
-            .then(html => {
-                document.getElementById('footer-placeholder').innerHTML = html;
-            })
+            .then(html => document.getElementById('footer-placeholder').innerHTML = html)
             .catch(err => console.error('Footer load failed:', err));
     }
+
+    // This function updates the cart & wishlist badges
+    function updateCartAndWishlistCounts() {
+        setTimeout(() => {
+            const cartCount = document.getElementById("cartCount");
+            const wishlistCount = document.getElementById("wishlistCount");
+
+            if (cartCount) {
+                const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+                cartCount.textContent = total;
+                cartCount.classList.toggle("hidden", total === 0);
+            }
+            if (wishlistCount) {
+                wishlistCount.textContent = wishlist.length;
+                wishlistCount.classList.toggle("hidden", wishlist.length === 0);
+            }
+        }, 100);
+    }
+
+    // Make it globally available so mother.js can call it
+    window.updateCartAndWishlistCounts = updateCartAndWishlistCounts;
 
     document.addEventListener('DOMContentLoaded', () => {
         loadHeader();
         loadFooter();
-        // ... rest of your code
     });
 </script>
 
@@ -766,7 +792,7 @@
       document.getElementById('year').textContent = new Date().getFullYear();
     </script>  
     
-   
+   <script src="../cart-wishlist-system.js" defer></script>
     <script src="./mother.js"></script>
    
   </body>

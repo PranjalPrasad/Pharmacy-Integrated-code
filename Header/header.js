@@ -365,3 +365,59 @@ document.getElementById('mobile-menu-btn')?.addEventListener('click', (e) => {
     document.getElementById('mobile-menu').classList.toggle('hidden');
   });
 
+
+// ACTIVE NAV LINK HIGHLIGHT - 100% WORKING
+function highlightActiveNav() {
+  const currentPage = window.location.pathname;  // e.g., /MotherCare/mother.html
+
+  // Remove all active classes first
+  document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+    link.classList.remove('active');
+  });
+
+  // Check each nav link
+  document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+    const href = link.getAttribute('href');
+    
+    if (!href || href === '#' || href === 'javascript:void(0)') return;
+
+    // Match exact page or folder
+    if (currentPage.includes(href.replace(/^\/+/, ''))) {
+      link.classList.add('active');
+    }
+  });
+
+  // Special case: if on home page
+  if (currentPage === '/' || currentPage.endsWith('/index.html') || currentPage.endsWith('/')) {
+    document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
+  }
+}
+
+// Run when page loads
+document.addEventListener('DOMContentLoaded', highlightActiveNav);
+// Also run immediately in case DOM already loaded
+highlightActiveNav();
+
+// FINAL ACTIVE NAV HIGHLIGHT - 100% WORKING
+function highlightActiveNav() {
+  const path = window.location.pathname;
+
+  document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+    link.classList.remove('active');
+    const href = link.getAttribute('href');
+    if (!href || href === '#' || href === 'javascript:void(0)') return;
+
+    const cleanHref = href.split('?')[0].replace(/^\//, '');
+    const cleanPath = path.split('?')[0].replace(/^\//, '');
+
+    if (cleanPath === cleanHref || cleanPath.includes(cleanHref)) {
+      link.classList.add('active');
+    }
+  });
+}
+
+// Run on load
+document.addEventListener('DOMContentLoaded', highlightActiveNav);
+highlightActiveNav(); // Run immediately too

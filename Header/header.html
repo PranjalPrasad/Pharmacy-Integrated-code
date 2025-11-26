@@ -7,9 +7,42 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    body { padding-top: 0 !important; }
-    .fixed-header { position: fixed; top: 0; left: 0; right: 0; z-index: 50; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-  </style>
+  body { padding-top: 0 !important; }
+  .fixed-header { 
+    position: fixed; top: 0; left: 0; right: 0; 
+    z-index: 50; background: white; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+  }
+
+  /* ACTIVE STATE STYLES */
+  .nav-link.active {
+    background-color: #ec4899 !important;
+    color: white !important;
+    font-weight: bold !important;
+    border-radius: 0.5rem;
+  }
+
+  /* Special active colors */
+  .nav-link[href*="mother.html"].active,
+  .nav-link[href*="MotherCare"].active {
+    background-color: #fdb8d9 !important;
+    color: #be185d !important;
+    border: 2px solid #f472b6 !important;
+  }
+
+  .nav-link[href*="baby.html"].active,
+  .nav-link[href*="BabyCare"].active {
+    background-color: #bfdbfe !important;
+    color: #1e40af !important;
+    border: 2px solid #93c5fd !important;
+  }
+
+  .mobile-nav-link.active {
+    background-color: #ec4899 !important;
+    color: white !important;
+    font-weight: bold;
+  }
+</style>
 </head>
 <body>
 
@@ -109,69 +142,95 @@
     </div>
   </header>
 
-  <!-- NAVIGATION BAR -->
-  <nav class="bg-white border-t">
-    <div class="max-w-7xl mx-auto px-4">
-      <!-- Desktop Nav -->
-      <div class="hidden lg:flex justify-center py-3">
-        <ul class="flex space-x-8 text-lg font-bold">
-          <li><a href="/MotherCare/mother.html" class="px-5 py-2 rounded-lg border-2 border-pink-100 text-pink-700 hover:bg-pink-50" data-i18n="motherCare">Mother Care</a></li>
-          <li><a href="/BabyCare/baby.html" class="px-5 py-2 rounded-lg border-2 border-blue-100 text-blue-700 hover:bg-blue-50" data-i18n="babyCare">Baby Care</a></li>
+<!-- NAVIGATION BAR -->
+<nav class="bg-white border-t">
+  <div class="max-w-7xl mx-auto px-4">
+    <!-- Desktop Nav -->
+    <div class="hidden lg:flex justify-center py-3">
+      <ul class="flex space-x-8 text-lg font-bold">
+        <li>
+          <a href="/MotherCare/mother.html" 
+             class="nav-link px-5 py-2 rounded-lg border-2 border-pink-100 text-pink-700 hover:bg-pink-50 transition" 
+             data-i18n="motherCare">Mother Care</a>
+        </li>
+        <li>
+          <a href="/BabyCare/baby.html" 
+             class="nav-link px-5 py-2 rounded-lg border-2 border-blue-100 text-blue-700 hover:bg-blue-50 transition" 
+             data-i18n="babyCare">Baby Care</a>
+        </li>
 
-          <li class="relative group">
-            <a href="#" class="px-5 py-2 hover:bg-gray-100 rounded flex items-center" data-i18n="medicineHealthcare">
-              Medicine & HealthCare <i class="ml-1 fas fa-chevron-down text-xs" data-i18n="chevron"></i>
-            </a>
-            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white shadow-xl rounded-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-              <a href="/Medical and HealthCare/Prescription/prescription.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="prescriptionMedicines">Prescription Medicines</a>
-              <a href="/Medical and HealthCare/OTC/otc.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="otc">OTC</a>
-              <a href="/Medical and HealthCare/Chronic/chronic.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="chronic">Chronic Care</a>
-              <a href="/Medical and HealthCare/FirstAid and Emergency/firstaid.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="firstAid">First Aid</a>
-              <a href="/Medical and HealthCare/PainRelief and Fever/painRelief.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="pain">Pain Relief</a>
-              <a href="/Medical and HealthCare/Allergy and Coldcare/allergy.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="allergy">Allergy & Cold</a>
-              <a href="/Medical and HealthCare/Digestive Health/digestive.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="digestive">Digestive Health</a>
-              <a href="/Medical and HealthCare/Mens Health/men.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="men">Men's Health</a>
-            </div>
-          </li>
+        <!-- Medicine & HealthCare Dropdown -->
+        <li class="relative group">
+          <a href="javascript:void(0)" 
+             class="nav-link px-5 py-2 hover:bg-gray-100 rounded flex items-center transition" 
+             data-i18n="medicineHealthcare">
+            Medicine & HealthCare <i class="ml-1 fas fa-chevron-down text-xs"></i>
+          </a>
+          <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white shadow-xl rounded-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+            <a href="/Medical and HealthCare/Prescription/prescription.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="prescriptionMedicines">Prescription Medicines</a>
+            <a href="/Medical and HealthCare/OTC/otc.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="otc">OTC</a>
+            <a href="/Medical and HealthCare/Chronic/chronic.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="chronic">Chronic Care</a>
+            <a href="/Medical and HealthCare/FirstAid and Emergency/firstaid.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="firstAid">First Aid</a>
+            <a href="/Medical and HealthCare/PainRelief and Fever/painRelief.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="pain">Pain Relief</a>
+            <a href="/Medical and HealthCare/Allergy and Coldcare/allergy.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="allergy">Allergy & Cold</a>
+            <a href="/Medical and HealthCare/Digestive Health/digestive.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="digestive">Digestive Health</a>
+            <a href="/Medical and HealthCare/Mens Health/men.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="men">Men's Health</a>
+          </div>
+        </li>
 
-          <li class="relative group">
-            <a href="#" class="px-5 py-2 hover:bg-gray-100 rounded flex items-center" data-i18n="wellness">Wellness <i class="ml-1 fas fa-chevron-down text-xs"></i></a>
-            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white shadow-xl rounded-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-              <a href="/Wellness/VITAMINS AND SUPPLEMENTS/vitamins.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="vitamins">Vitamins & Supplements</a>
-              <a href="/Wellness/SKIN AND HAIRCARE/skin.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="skin">Skin & Hair Care</a>
-              <a href="/Wellness/ORAL CARE/oral.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="oral">Oral Care</a>
-              <a href="/Wellness/MENSTRUAL/menstrualCare.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="menstrual">Menstrual Care</a>
-              <a href="/Wellness/FITNESS AND WEIGHT MANAGEMENT/fitness.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="fitness">Fitness & Weight</a>
-              <a href="/Wellness/SENIOR CARE/seniorCare.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="senior">Senior Care</a>
-              <a href="/Wellness/IMMUNITY BOOSTER/immunity.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="immunity">Immunity Booster</a>
-              <a href="/Wellness/AYURVEDA/ayurved.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="ayurveda">Ayurveda</a>
-            </div>
-          </li>
+        <!-- Wellness Dropdown -->
+        <li class="relative group">
+          <a href="javascript:void(0)" 
+             class="nav-link px-5 py-2 hover:bg-gray-100 rounded flex items-center transition" 
+             data-i18n="wellness">Wellness <i class="ml-1 fas fa-chevron-down text-xs"></i></a>
+          <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white shadow-xl rounded-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+            <a href="/Wellness/VITAMINS AND SUPPLEMENTS/vitamins.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="vitamins">Vitamins & Supplements</a>
+            <a href="/Wellness/SKIN AND HAIRCARE/skin.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="skin">Skin & Hair Care</a>
+            <a href="/Wellness/ORAL CARE/oral.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="oral">Oral Care</a>
+            <a href="/Wellness/MENSTRUAL/menstrualCare.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="menstrual">Menstrual Care</a>
+            <a href="/Wellness/FITNESS AND WEIGHT MANAGEMENT/fitness.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="fitness">Fitness & Weight</a>
+            <a href="/Wellness/SENIOR CARE/seniorCare.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="senior">Senior Care</a>
+            <a href="/Wellness/IMMUNITY BOOSTER/immunity.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="immunity">Immunity Booster</a>
+            <a href="/Wellness/AYURVEDA/ayurved.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="ayurveda">Ayurveda</a>
+          </div>
+        </li>
 
-          <li class="relative group">
-            <a href="#" class="px-5 py-2 hover:bg-gray-100 rounded flex items-center" data-i18n="devices">Devices <i class="ml-1 fas fa-chevron-down text-xs"></i></a>
-            <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white shadow-xl rounded-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-              <a href="/DEVICES/MONITORING DEVICES/monitor.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="bp">Monitoring Devices</a>
-              <a href="/DEVICES/MOBILITY AIDS/mobility.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="mobility">Mobility Aids</a>
-              <a href="/DEVICES/RESPIRATORY CARE/respiratory.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="respiratory">Respiratory Care</a>
-            </div>
-          </li>
+        <!-- Devices Dropdown -->
+        <li class="relative group">
+          <a href="javascript:void(0)" 
+             class="nav-link px-5 py-2 hover:bg-gray-100 rounded flex items-center transition" 
+             data-i18n="devices">Devices <i class="ml-1 fas fa-chevron-down text-xs"></i></a>
+          <div class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-56 bg-white shadow-xl rounded-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+            <a href="/DEVICES/MONITORING DEVICES/monitor.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="bp">Monitoring Devices</a>
+            <a href="/DEVICES/MOBILITY AIDS/mobility.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="mobility">Mobility Aids</a>
+            <a href="/DEVICES/RESPIRATORY CARE/respiratory.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="respiratory">Respiratory Care</a>
+          </div>
+        </li>
 
-          <li><a href="#" class="px-5 py-2 hover:bg-gray-100 rounded" data-i18n="surgical">Surgical Items <i class="ml-1 fas fa-chevron-down text-xs"></i></a></li>
-          <li><a href="/about.html" class="px-5 py-2 hover:bg-gray-100 rounded" data-i18n="about">About Us</a></li>
-        </ul>
-      </div>
+        <li>
+          <a href="/surgical.html" 
+             class="nav-link px-5 py-2 hover:bg-gray-100 rounded transition" 
+             data-i18n="surgical">Surgical Items</a>
+        </li>
+        <li>
+          <a href="/about.html" 
+             class="nav-link px-5 py-2 hover:bg-gray-100 rounded transition" 
+             data-i18n="about">About Us</a>
+        </li>
+      </ul>
+    </div>
 
-      <!-- Mobile Menu (Hidden by default) -->
-      <div id="mobile-menu" class="lg:hidden hidden bg-white shadow-lg max-h-screen overflow-y-auto">
-        <div class="py-4">
-          <a href="/MotherCare/mother.html" class="block px-6 py-4 font-medium text-pink-700">Mother Care</a>
-          <a href="/BabyCare/baby.html" class="block px-6 py-4 font-medium text-blue-700">Baby Care</a>
-          <!-- Add other mobile menu items as needed -->
-        </div>
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="lg:hidden hidden bg-white shadow-lg max-h-screen overflow-y-auto">
+      <div class="py-4">
+        <a href="/MotherCare/mother.html" class="mobile-nav-link block px-6 py-4 font-medium text-pink-700 hover:bg-pink-50">Mother Care</a>
+        <a href="/BabyCare/baby.html" class="mobile-nav-link block px-6 py-4 font-medium text-blue-700 hover:bg-blue-50">Baby Care</a>
+        <a href="/surgical.html" class="mobile-nav-link block px-6 py-4 font-medium hover:bg-gray-100">Surgical Items</a>
+        <a href="/about.html" class="mobile-nav-link block px-6 py-4 font-medium hover:bg-gray-100">About Us</a>
       </div>
     </div>
-  </nav>
+  </div>
+</nav>
 </div>
 
 <!-- Mobile Profile Menu -->
@@ -185,5 +244,7 @@
 </div>
 
 <script src="header.js"></script>
+
+
 </body>
 </html>

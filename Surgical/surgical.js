@@ -1,664 +1,189 @@
-// baby.js - COMPLETE VERSION WITH WORKING IMAGES
-// baby.js - PREVENT DOUBLE EXECUTION
-(() => {
-    // Prevent running twice
-    if (window.babyShopInitialized) {
-        console.log("baby.js already initialized, skipping...");
-        return;
-    }
-    window.babyShopInitialized = true;
+// surgical-kits.js → FULL WORKING VERSION (Copy-Paste Ready)
 
-let products = [];
-let filteredProducts = [];
-let currentPage = 1;
-const productsPerPage = 12;
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+const SUBCATEGORIES = {
+  "dressings-and-bandages": {
+    title: "Dressings and Bandages",
+    products: [
+      { id: 101, title: "Sterile Gauze Pad 10x10cm (Pack of 100)", price: 449, image: "https://placehold.co/400x400/10B981/white?text=Sterile+Gauze" },
+      { id: 102, title: "Adhesive Bandage Strips (100 pcs)", price: 179, image: "https://placehold.co/400x400/3B82F6/white?text=Band+Aid" },
+      { id: 103, title: "Non-Woven Adhesive Tape 2.5cm x 9m", price: 89, image: "https://placehold.co/400x400/6366F1/white?text=Adhesive+Tape" },
+      { id: 104, title: "Absorbent Cotton Roll 500g", price: 320, image: "https://placehold.co/400x400/EC4899/white?text=Cotton+Roll" },
+      { id: 105, title: "Crepe Bandage 15cm x 4m", price: 145, image: "https://placehold.co/400x400/F59E0B/white?text=Crepe+Bandage" },
+      { id: 106, title: "Triangular Bandage (Calico)", price: 95, image: "https://placehold.co/400x400/8B5CF6/white?text=Triangular" }
+    ]
+  },
+  "surgical-consumables": {
+    title: "Surgical Consumables",
+    products: [
+      { id: 201, title: "Latex Surgical Gloves Powder-Free (Box of 50)", price: 649, image: "https://placehold.co/400x400/14B8A6/white?text=Surgical+Gloves" },
+      { id: 202, title: "Nitrile Examination Gloves (100 pcs)", price: 499, image: "https://placehold.co/400x400/06B6D4/white?text=Nitrile+Gloves" },
+      { id: 203, title: "3-Ply Face Mask with Nose Pin (50 pcs)", price: 149, image: "https://placehold.co/400x400/8B5CF6/white?text=Face+Mask" },
+      { id: 204, title: "Disposable Surgeon Cap (100 pcs)", price: 299, image: "https://placehold.co/400x400/10B981/white?text=Surgeon+Cap" },
+      { id: 205, title: "Shoe Cover Non-Woven (100 pcs)", price: 399, image: "https://placehold.co/400x400/F472B6/white?text=Shoe+Cover" },
+      { id: 206, title: "Alcohol Swabs (Box of 100)", price: 189, image: "https://placehold.co/400x400/3B82F6/white?text=Alcohol+Swab" }
+    ]
+  },
+  "iv-and-infusion-items": {
+    title: "IV and Infusion Items",
+    products: [
+      { id: 301, title: "IV Cannula 20G (Pink)", price: 68, image: "https://placehold.co/400x400/F59E0B/white?text=IV+Cannula+20G" },
+      { id: 302, title: "IV Cannula 22G (Blue)", price: 65, image: "https://placehold.co/400x400/3B82F6/white?text=IV+Cannula+22G" },
+      { id: 303, title: "IV Infusion Set with Airvent", price: 42, image: "https://placehold.co/400x400/10B981/white?text=Infusion+Set" },
+      { id: 304, title: "Scalp Vein Set 23G (Butterfly)", price: 28, image: "https://placehold.co/400x400/EC4899/white?text=Butterfly+Needle" },
+      { id: 305, title: "Three-Way Stopcock", price: 55, image: "https://placehold.co/400x400/8B5CF6/white?text=3-Way+Stopcock" },
+      { id: 306, title: "Extension Line 100cm", price: 85, image: "https://placehold.co/400x400/FBBF24/white?text=Extension+Line" }
+    ]
+  },
+  "catheters-and-tubes": {
+    title: "Catheters and Tubes",
+    products: [
+      { id: 401, title: "Foley Catheter 2-Way 16Fr (Silicone)", price: 385, image: "https://placehold.co/400x400/06B6D4/white?text=Foley+Catheter" },
+      { id: 402, title: "Nelaton Catheter 14Fr", price: 48, image: "https://placehold.co/400x400/10B981/white?text=Nelaton" },
+      { id: 403, title: "Ryles Tube 16Fr (PVC)", price: 65, image: "https://placehold.co/400x400/F59E0B/white?text=Ryles+Tube" },
+      { id: 404, title: "Suction Catheter 12Fr", price: 38, image: "https://placehold.co/400x400/8B5CF6/white?text=Suction+Catheter" },
+      { id: 405, title: "Yankauer Suction Handle", price: 125, image: "https://placehold.co/400x400/EC4899/white?text=Yankauer" }
+    ]
+  },
+  "wound-care": {
+    title: "Wound Care",
+    products: [
+      { id: 501, title: "Hydrocolloid Dressing 10x10cm", price: 285, image: "https://placehold.co/400x400/14B8A6/white?text=Hydrocolloid" },
+      { id: 502, title: "Silver Alginate Dressing", price: 680, image: "https://placehold.co/400x400/3B82F6/white?text=Silver+Alginate" },
+      { id: 503, title: "Povidone Iodine Ointment 20g", price: 89, image: "https://placehold.co/400x400/F59E0B/white?text=Betadine" },
+      { id: 504, title: "Collagen Dressing Sheet", price: 980, image: "https://placehold.co/400x400/10B981/white?text=Collagen" },
+      { id: 505, title: "Transparent Film Dressing", price: 68, image: "https://placehold.co/400x400/8B5CF6/white?text=Film+Dressing" }
+    ]
+  },
+  "orthopedic-support": {
+    title: "Orthopedic Support",
+    products: [
+      { id: 601, title: "Knee Brace with Hinges (Large)", price: 1249, image: "https://placehold.co/400x400/EC4899/white?text=Knee+Brace" },
+      { id: 602, title: "Lumbar Sacral Belt (L.S. Belt)", price: 899, image: "https://placehold.co/400x400/06B6D4/white?text=LS+Belt" },
+      { id: 603, title: "Cervical Collar Soft", price: 349, image: "https://placehold.co/400x400/3B82F6/white?text=Cervical+Collar" },
+      { id: 604, title: "Ankle Support Neoprene", price: 499, image: "https://placehold.co/400x400/F59E0B/white?text=Ankle+Brace" }
+    ]
+  },
+  "iv-fluids-and-injectables": {
+    title: "IV Fluids and Injectables",
+    products: [
+      { id: 701, title: "Normal Saline 0.9% 500ml", price: 38, image: "https://placehold.co/400x400/10B981/white?text=NS+500ml" },
+      { id: 702, title: "Dextrose 5% 500ml", price: 42, image: "https://placehold.co/400x400/3B82F6/white?text=D5+500ml" },
+      { id: 703, title: "Ringer Lactate 500ml", price: 48, image: "https://placehold.co/400x400/FBBF24/white?text=RL+500ml" },
+      { id: 704, title: "Metronidazole IV 100ml", price: 78, image: "https://placehold.co/400x400/8B5CF6/white?text=Metronidazole" },
+      { id: 705, title: "Paracetamol IV 100ml", price: 125, image: "https://placehold.co/400x400/EC4899/white?text=Paracetamol+IV" }
+    ]
+  },
+  "surgical-kits": {
+    title: "Surgical Kits",
+    products: [
+      { id: 801, title: "Minor OT Dressing Kit", price: 680, image: "https://placehold.co/400x400/F59E0B/white?text=Minor+OT+Kit" },
+      { id: 802, title: "Suture Removal Kit", price: 380, image: "https://placehold.co/400x400/10B981/white?text=Suture+Removal" },
+      { id: 803, title: "IV Start Kit", price: 450, image: "https://placehold.co/400x400/3B82F6/white?text=IV+Start+Kit" },
+      { id: 804, title: "Catheterization Kit (Foley)", price: 890, image: "https://placehold.co/400x400/EC4899/white?text=Foley+Kit" }
+    ]
+  }
+};
 
-// Banner Carousel Variables
-let currentBannerSlide = 0;
-let bannerInterval;
+document.addEventListener("DOMContentLoaded", function () {
+  const productsGrid = document.getElementById("productsGrid");
+  const categoryTitle = document.getElementById("categoryTitle");
+  const resultsCount = document.getElementById("resultsCount");
 
-// ==================== UTILITY FUNCTIONS ====================
-function getPlaceholderImage(text = 'Product') {
-    return `https://placehold.co/400x400/3B82F6/FFFFFF/png?text=${encodeURIComponent(text)}`;
-}
+  function renderSubcategory(key) {
+    if (!SUBCATEGORIES[key]) key = "dressings-and-bandages";
+    const data = SUBCATEGORIES[key];
 
-function generateStarRating(rating) {
-    const full = Math.floor(rating);
-    const half = rating % 1 >= 0.5 ? 1 : 0;
-    const empty = 5 - full - half;
-    
-    let stars = '';
-    for (let i = 0; i < full; i++) stars += '<i class="fas fa-star"></i>';
-    if (half) stars += '<i class="fas fa-star-half-alt"></i>';
-    for (let i = 0; i < empty; i++) stars += '<i class="far fa-star"></i>';
-    
-    return stars;
-}
+    categoryTitle.textContent = data.title;
+    resultsCount.textContent = `Showing ${data.products.length} products`;
+    history.pushState({ sub: key }, "", `?sub=${key}`);
 
-function showNotification(msg, type = "info") {
-    document.querySelectorAll('.custom-notification').forEach(n => n.remove());
-    
-    const notification = document.createElement("div");
-    notification.className = `custom-notification fixed top-20 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium transition-all duration-300 ${
-        type === "success" ? "bg-green-500" : 
-        type === "error" ? "bg-red-500" : 
-        "bg-blue-500"
-    }`;
-    notification.textContent = msg;
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.opacity = "0";
-        notification.style.transform = "translateX(100%)";
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// ==================== PRODUCT RENDERING FUNCTIONS ====================
-function createProductCard(product) {
-    const mainImage = product.mainImageUrl || (product.images && product.images[0]) || 
-                     product.image || 
-                     getPlaceholderImage(product.title);
-    const images = product.images && product.images.length > 0
-                   ? product.images
-                   : [mainImage];
-
-    const hasMultipleImages = images.length > 1;
-    const isInWishlist = wishlist.some(p => p.id === product.id);
-
-    return `
-        <div class="product-card group">
-            <div class="relative">
-                ${product.discount > 0 ? `
-                    <div class="absolute top-2 left-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md z-10">
-                        ${product.discount}% OFF
-                    </div>
-                ` : ''}
-                
-                <button id="wishlist-${product.id}" class="absolute top-2 right-2 z-10 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-all duration-200">
-                    <i class="${isInWishlist ? 'fas fa-heart text-pink-500' : 'far fa-heart text-gray-400'}"></i>
-                </button>
-                
-                <div class="relative h-64 overflow-hidden rounded-t-lg">
-                    <div id="carousel-${product.id}" class="flex product-carousel h-full" style="width: ${images.length * 100}%">
-                        ${images.map((img, index) => `
-                            <div class="w-full h-full flex-shrink-0" style="width: ${100 / images.length}%">
-                                <img src="${img}" alt="${product.title}" 
-                                     class="w-full h-full object-cover image-zoom"
-                                     onerror="this.onerror=null; this.src='${getPlaceholderImage(product.title)}';">
-                            </div>
-                        `).join("")}
-                    </div>
-                    
-                    ${hasMultipleImages ? `
-                        <button id="prev-${product.id}" class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <i class="fas fa-chevron-left text-gray-600 text-sm"></i>
-                        </button>
-                        <button id="next-${product.id}" class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                            <i class="fas fa-chevron-right text-gray-600 text-sm"></i>
-                        </button>
-                        <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex space-x-1">
-                            ${images.map((_, i) => `
-                                <button class="carousel-dot w-2 h-2 rounded-full transition-all duration-300 ${i === 0 ? 'bg-white active' : 'bg-white/60'}" 
-                                        data-index="${i}" data-carousel="${product.id}"></button>
-                            `).join("")}
-                        </div>
-                    ` : ''}
-                </div>
-            </div>
-            
-            <div class="content p-4">
-                <h3 class="text-lg font-semibold text-gray-900 line-clamp-2 mb-2">${product.title}</h3>
-                <p class="text-sm text-gray-600 line-clamp-2 mb-3">${product.description || 'No description available'}</p>
-                
-                <div class="flex items-center mb-2">
-                    <div class="flex text-yellow-400 text-sm">${generateStarRating(product.rating)}</div>
-                    <span class="ml-2 text-sm text-gray-600">(${product.reviewCount || 0})</span>
-                </div>
-                
-                <div class="flex items-center mb-3">
-                    <span class="text-xl font-bold text-pink-600">₹${(product.price || 0).toFixed(2)}</span>
-                    ${product.originalPrice > product.price ? `
-                        <span class="ml-2 text-sm text-gray-500 line-through">₹${(product.originalPrice || 0).toFixed(2)}</span>
-                    ` : ''}
-                </div>
-                
-                <div class="mt-3">
-                    <button id="view-details-${product.id}" class="view-details">
-                        View Details
-                    </button>
-                </div>
-            </div>
+    productsGrid.innerHTML = data.products.map(p => `
+      <div class="product-card group">
+        <div class="relative overflow-hidden rounded-t-lg">
+          <img src="${p.image}" alt="${p.title}" class="w-full h-64 object-cover image-zoom">
         </div>
-    `;
-}
+        <div class="content p-4">
+          <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">${p.title}</h3>
+          <div class="mt-3">
+            <span class="text-xl font-bold text-pink-600">₹${p.price}</span>
+          </div>
+          <div class="mt-3">
+            <button class="view-details w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition"
+                    onclick="goToProduct('${encodeURIComponent(p.title)}', ${p.price}, '${p.image}')">
+              View Details
+            </button>
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
 
-function setupProductCarousel(productId, totalImages) {
-    let currentIndex = 0;
-    const carousel = document.getElementById(`carousel-${productId}`);
-    const prevBtn = document.getElementById(`prev-${productId}`);
-    const nextBtn = document.getElementById(`next-${productId}`);
-    const dots = document.querySelectorAll(`[data-carousel="${productId}"]`);
+  // Yeh function sabse important hai
+  window.goToProduct = function(encodedTitle, price, image) {
+    const title = decodeURIComponent(encodedTitle);
+    const url = `../productdetails.html?name=${encodeURIComponent(title)}&price=${price}&image=${encodeURIComponent(image)}`;
+    window.location.href = url;
+  };
 
-    if (!carousel) return;
+  // Load from URL
+  let currentKey = new URLSearchParams(window.location.search).get("sub") || "dressings-and-bandages";
+  renderSubcategory(currentKey);
+  document.querySelector(`input[value="${currentKey}"]`)?.setAttribute("checked", true);
 
-    function updateCarousel() {
-        const translateX = -currentIndex * (100 / totalImages);
-        carousel.style.transform = `translateX(${translateX}%)`;
-        
-        dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === currentIndex);
-        });
-    }
-
-    if (prevBtn) {
-        prevBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            currentIndex = (currentIndex - 1 + totalImages) % totalImages;
-            updateCarousel();
-        });
-    }
-
-    if (nextBtn) {
-        nextBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            currentIndex = (currentIndex + 1) % totalImages;
-            updateCarousel();
-        });
-    }
-
-    dots.forEach(dot => {
-        dot.addEventListener('click', (e) => {
-            e.stopPropagation();
-            currentIndex = parseInt(dot.dataset.index);
-            updateCarousel();
-        });
+  // Radio change
+  document.querySelectorAll('input[name="surgical_subcat"]').forEach(radio => {
+    radio.addEventListener("change", function () {
+      if (this.checked) renderSubcategory(this.value);
     });
+  });
 
-    if (totalImages > 1) {
-        let autoSlide = setInterval(() => {
-            currentIndex = (currentIndex + 1) % totalImages;
-            updateCarousel();
-        }, 4000);
-
-        const productCard = carousel.closest('.product-card');
-        if (productCard) {
-            productCard.addEventListener('mouseenter', () => clearInterval(autoSlide));
-            productCard.addEventListener('mouseleave', () => {
-                autoSlide = setInterval(() => {
-                    currentIndex = (currentIndex + 1) % totalImages;
-                    updateCarousel();
-                }, 4000);
-            });
-        }
+  // Back/forward support
+  window.addEventListener("popstate", e => {
+    if (e.state?.sub && SUBCATEGORIES[e.state.sub]) {
+      renderSubcategory(e.state.sub);
+      document.querySelector(`input[value="${e.state.sub}"]`).checked = true;
     }
+  });
+
+  // Price sliders (unchanged)
+  function initSlider(minId, maxId, fillId, minDispId, maxDispId) {
+    const minThumb = document.getElementById(minId);
+    const maxThumb = document.getElementById(maxId);
+    const fill = document.getElementById(fillId);
+    const minDisp = document.getElementById(minDispId);
+    const maxDisp = document.getElementById(maxDispId);
+
+    const update = () => {
+      let minVal = parseInt(minThumb.value);
+      let maxVal = parseInt(maxThumb.value);
+      if (minVal > maxVal) [minVal, maxVal] = [maxVal, minVal];
+      const pMin = (minVal / 10000) * 100;
+      const pMax = (maxVal / 10000) * 100;
+      fill.style.left = pMin + '%';
+      fill.style.width = (pMax - pMin) + '%';
+      minDisp.textContent = '₹' + minVal.toLocaleString('en-IN');
+      maxDisp.textContent = '₹' + maxVal.toLocaleString('en-IN');
+    };
+    minThumb.addEventListener('input', update);
+    maxThumb.addEventListener('input', update);
+    update();
+  }
+  initSlider('minThumb', 'maxThumb', 'desktopFill', 'minValue', 'maxValue');
+  initSlider('mobileMinThumb', 'mobileMaxThumb', 'mobileFill', 'mobileMinValue', 'mobileMaxValue');
+
+  // Mobile sheets (unchanged)
+  const backdrop = document.getElementById('mobileSheetBackdrop');
+  document.getElementById('openSortSheet')?.addEventListener('click', () => { backdrop.classList.remove('hidden'); document.getElementById('sortSheet').classList.remove('translate-y-full'); });
+  document.getElementById('openFilterSheet')?.addEventListener('click', () => { backdrop.classList.remove('hidden'); document.getElementById('filterSheet').classList.remove('translate-y-full'); });
+  backdrop.onclick = () => { backdrop.classList.add('hidden'); document.getElementById('sortSheet').classList.add('translate-y-full'); document.getElementById('filterSheet').classList.add('translate-y-full'); };
+
+  // Header/Footer
+  fetch('../Header/header.html').then(r => r.text()).then(html => document.getElementById('header-placeholder').innerHTML = html);
+  fetch('../Footer/footer.html').then(r => r.text()).then(html => document.getElementById('footer-placeholder').innerHTML = html);
+});
+
+// Collapse toggle
+function toggleCollapse(el) {
+  el.nextElementSibling.classList.toggle('hidden');
+  el.querySelector('i').classList.toggle('rotate-180');
 }
-
-function showLoading() {
-    const grid = document.getElementById("productsGrid");
-    if (grid) {
-        grid.innerHTML = `
-            <div class="col-span-full text-center py-12">
-                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p class="mt-2 text-gray-600">Loading products...</p>
-            </div>
-        `;
-    }
-}
-
-function renderProducts() {
-    const grid = document.getElementById("productsGrid");
-    if (!grid) {
-        console.error('❌ Products grid element not found');
-        return;
-    }
-
-    const start = (currentPage - 1) * productsPerPage;
-    const end = start + productsPerPage;
-    const pageItems = filteredProducts.slice(start, end);
-
-    if (pageItems.length === 0) {
-        grid.innerHTML = `
-            <div class="col-span-full text-center py-12">
-                <i class="fas fa-search text-6xl text-gray-300 mb-4"></i>
-                <h3 class="text-xl font-semibold text-gray-600 mb-2">No products found</h3>
-                <p class="text-gray-500">Try adjusting your filters or search terms</p>
-            </div>
-        `;
-    } else {
-        grid.innerHTML = pageItems.map(product => createProductCard(product)).join("");
-        
-        pageItems.forEach(product => {
-            const wishlistBtn = document.getElementById(`wishlist-${product.id}`);
-            if (wishlistBtn) {
-                wishlistBtn.addEventListener("click", () => toggleWishlist(product.id));
-            }
-            
-            const viewDetailsBtn = document.getElementById(`view-details-${product.id}`);
-            if (viewDetailsBtn) {
-                viewDetailsBtn.addEventListener("click", () => viewProductDetails(product.id));
-            }
-            
-            if (product.images && product.images.length > 1) {
-                setupProductCarousel(product.id, product.images.length);
-            }
-        });
-    }
-
-    renderPagination();
-    updateResultsCount();
-}
-
-function updateResultsCount() {
-    const el = document.getElementById("resultsCount");
-    if (el) {
-        const total = filteredProducts.length;
-        const start = (currentPage - 1) * productsPerPage + 1;
-        const end = Math.min(currentPage * productsPerPage, total);
-        el.textContent = total === 0 ? "No products found" : `Showing ${start}-${end} of ${total} products`;
-    }
-}
-
-function renderPagination() {
-    const pagination = document.getElementById("pagination");
-    if (!pagination) return;
-
-    const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
-    
-    if (totalPages <= 1) { 
-        pagination.innerHTML = ""; 
-        return; 
-    }
-
-    let html = "";
-    
-    if (currentPage > 1) {
-        html += `<button class="pagination-btn px-3 py-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all" data-page="${currentPage-1}">
-            <i class="fas fa-chevron-left"></i>
-        </button>`;
-    }
-    
-    for (let i = 1; i <= totalPages; i++) {
-        if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-            html += `<button class="pagination-btn px-3 py-2 rounded-md border transition-all ${
-                i === currentPage ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 text-gray-600 hover:bg-gray-50'
-            }" data-page="${i}">${i}</button>`;
-        } else if (i === currentPage - 2 || i === currentPage + 2) {
-            html += `<span class="px-2 text-gray-400">...</span>`;
-        }
-    }
-
-    if (currentPage < totalPages) {
-        html += `<button class="pagination-btn px-3 py-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 transition-all" data-page="${currentPage+1}">
-            <i class="fas fa-chevron-right"></i>
-        </button>`;
-    }
-    
-    pagination.innerHTML = html;
-    
-    document.querySelectorAll(".pagination-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            currentPage = parseInt(btn.dataset.page);
-            renderProducts();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-    });
-}
-
-// ==================== PRODUCT DATA FUNCTIONS ====================
-function loadSampleProducts() {
-    console.log('📦 Loading sample products...');
-    
-    products = [
-        {
-            id: 1,
-            title: "Premium Baby Diapers",
-            description: "Soft and absorbent diapers for your baby's comfort",
-            category: "diapers-wipes",
-            price: 899,
-            originalPrice: 1199,
-            discount: 25,
-            rating: 4.5,
-            reviewCount: 128,
-            brand: "BabyComfort",
-            inStock: true,
-            stockQuantity: 50,
-            images: [
-                "https://placehold.co/400x400/3B82F6/FFFFFF/png?text=Baby+Diapers",
-                "https://placehold.co/400x400/60A5FA/FFFFFF/png?text=Diapers+Pack"
-            ],
-            sizes: ["Newborn", "Small", "Medium", "Large"]
-        },
-        {
-            id: 2,
-            title: "Organic Baby Shampoo",
-            description: "Gentle shampoo made with natural ingredients for sensitive skin",
-            category: "skin-hair-care",
-            price: 349,
-            originalPrice: 499,
-            discount: 30,
-            rating: 4.8,
-            reviewCount: 89,
-            brand: "NatureBaby",
-            inStock: true,
-            stockQuantity: 30,
-            images: [
-                "https://placehold.co/400x400/10B981/FFFFFF/png?text=Baby+Shampoo",
-                "https://placehold.co/400x400/34D399/FFFFFF/png?text=Natural+Care"
-            ]
-        },
-        {
-            id: 3,
-            title: "Baby Feeding Bottle Set",
-            description: "BPA-free feeding bottles with anti-colic technology",
-            category: "feeding-nursing",
-            price: 1299,
-            originalPrice: 1599,
-            discount: 19,
-            rating: 4.3,
-            reviewCount: 204,
-            brand: "FeedWell",
-            inStock: true,
-            stockQuantity: 25,
-            images: [
-                "https://placehold.co/400x400/F59E0B/FFFFFF/png?text=Feeding+Bottle",
-                "https://placehold.co/400x400/FBBF24/FFFFFF/png?text=Bottle+Set"
-            ]
-        },
-        {
-            id: 4,
-            title: "Baby Wet Wipes Pack",
-            description: "Gentle wet wipes for sensitive baby skin",
-            category: "diapers-wipes",
-            price: 299,
-            originalPrice: 399,
-            discount: 25,
-            rating: 4.6,
-            reviewCount: 156,
-            brand: "BabyComfort",
-            inStock: true,
-            stockQuantity: 80,
-            images: [
-                "https://placehold.co/400x400/8B5CF6/FFFFFF/png?text=Baby+Wipes",
-                "https://placehold.co/400x400/A78BFA/FFFFFF/png?text=Wet+Wipes"
-            ]
-        },
-        {
-            id: 5,
-            title: "Baby Lotion",
-            description: "Moisturizing lotion for soft baby skin",
-            category: "skin-hair-care",
-            price: 449,
-            originalPrice: 599,
-            discount: 25,
-            rating: 4.7,
-            reviewCount: 112,
-            brand: "NatureBaby",
-            inStock: true,
-            stockQuantity: 45,
-            images: [
-                "https://placehold.co/400x400/EC4899/FFFFFF/png?text=Baby+Lotion",
-                "https://placehold.co/400x400/F472B6/FFFFFF/png?text=Skin+Care"
-            ]
-        },
-        {
-            id: 6,
-            title: "Baby Pacifier Set",
-            description: "BPA-free pacifiers for newborns and infants",
-            category: "feeding-nursing",
-            price: 399,
-            originalPrice: 499,
-            discount: 20,
-            rating: 4.4,
-            reviewCount: 78,
-            brand: "FeedWell",
-            inStock: true,
-            stockQuantity: 60,
-            images: [
-                "https://placehold.co/400x400/14B8A6/FFFFFF/png?text=Baby+Pacifier",
-                "https://placehold.co/400x400/2DD4BF/FFFFFF/png?text=Pacifier+Set"
-            ]
-        }
-    ];
-    
-    filteredProducts = [...products];
-    renderProducts();
-    console.log(`✅ ${products.length} sample products loaded`);
-}
-
-// ==================== BANNER CAROUSEL ====================
-function initializeBannerCarousel() {
-    console.log("🖼️ Initializing banner carousel...");
-    
-    const slides = document.querySelectorAll('.banner-slide');
-    const dots = document.querySelectorAll('.banner-dot');
-    
-    console.log(`Found ${slides.length} slides and ${dots.length} dots`);
-    
-    if (slides.length === 0) {
-        console.log('❌ No banner slides found');
-        return;
-    }
-    
-    showBannerSlide(0);
-    startBannerAutoSlide();
-    
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => {
-            console.log(`📍 Dot ${index} clicked`);
-            currentBannerSlide = index;
-            showBannerSlide(currentBannerSlide);
-            resetBannerAutoSlide();
-        });
-    });
-    
-    const bannerWrapper = document.getElementById('bannerWrapper');
-    if (bannerWrapper) {
-        bannerWrapper.addEventListener('mouseenter', pauseBannerAutoSlide);
-        bannerWrapper.addEventListener('mouseleave', startBannerAutoSlide);
-    }
-    
-    console.log("✅ Banner carousel initialized successfully");
-}
-
-function showBannerSlide(index) {
-    const slides = document.querySelectorAll('.banner-slide');
-    const dots = document.querySelectorAll('.banner-dot');
-    
-    slides.forEach(slide => {
-        slide.classList.remove('active');
-    });
-    
-    if (slides[index]) {
-        slides[index].classList.add('active');
-    }
-    
-    dots.forEach((dot, i) => {
-        if (i === index) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
-    
-    currentBannerSlide = index;
-}
-
-function nextBannerSlide() {
-    const slides = document.querySelectorAll('.banner-slide');
-    currentBannerSlide = (currentBannerSlide + 1) % slides.length;
-    showBannerSlide(currentBannerSlide);
-}
-
-function startBannerAutoSlide() {
-    if (bannerInterval) {
-        clearInterval(bannerInterval);
-    }
-    
-    bannerInterval = setInterval(nextBannerSlide, 5000);
-}
-
-function pauseBannerAutoSlide() {
-    if (bannerInterval) {
-        clearInterval(bannerInterval);
-    }
-}
-
-function resetBannerAutoSlide() {
-    pauseBannerAutoSlide();
-    startBannerAutoSlide();
-}
-
-// ==================== EVENT HANDLERS ====================
-function toggleWishlist(productId) {
-    const product = products.find(p => p.id === productId);
-    if (!product) return;
-
-    const existingIndex = wishlist.findIndex(p => p.id === productId);
-    
-    if (existingIndex > -1) {
-        wishlist.splice(existingIndex, 1);
-        showNotification("Removed from wishlist", "info");
-    } else {
-        wishlist.push(product);
-        showNotification("Added to wishlist!", "success");
-    }
-    
-    localStorage.setItem("wishlist", JSON.stringify(wishlist));
-    updateWishlistCount();
-    renderProducts();
-}
-
-function viewProductDetails(productId) {
-    console.log('🔍 Navigating to product details for ID:', productId);
-    localStorage.setItem("selectedProductId", productId);
-    window.location.href = "./baby-product-details.html";
-}
-
-function updateCartCount() {
-    const el = document.getElementById("cartCount");
-    if (!el) return;
-    
-    const count = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-    el.textContent = count;
-    el.classList.toggle("hidden", count === 0);
-}
-
-function updateWishlistCount() {
-    const el = document.getElementById("wishlistCount");
-    if (!el) return;
-    
-    const count = wishlist.length;
-    el.textContent = count;
-    el.classList.toggle("hidden", count === 0);
-}
-
-// ==================== FILTERS & SORTING ====================
-function setupEventListeners() {
-    console.log("🔧 Setting up event listeners...");
-    
-    const filterToggleBtn = document.getElementById("filterToggleBtn");
-    const closeSidebarBtn = document.getElementById("closeSidebarBtn");
-    const filterOverlay = document.getElementById("filterOverlay");
-
-    if (filterToggleBtn) {
-        filterToggleBtn.addEventListener("click", toggleFilterSidebar);
-    }
-    if (closeSidebarBtn) {
-        closeSidebarBtn.addEventListener("click", toggleFilterSidebar);
-    }
-    if (filterOverlay) {
-        filterOverlay.addEventListener("click", toggleFilterSidebar);
-    }
-
-    const clearFiltersBtn = document.getElementById("clearFilters");
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener("click", clearFilters);
-    }
-
-    const sortSelect = document.getElementById("sortSelect");
-    if (sortSelect) {
-        sortSelect.addEventListener("change", applySorting);
-    }
-
-    console.log("✅ Event listeners setup complete");
-}
-
-function toggleFilterSidebar() {
-    const sidebar = document.getElementById("filterSidebar");
-    const overlay = document.getElementById("filterOverlay");
-    
-    if (sidebar && overlay) {
-        sidebar.classList.toggle("hidden-mobile");
-        overlay.classList.toggle("hidden");
-        document.body.classList.toggle("overflow-hidden");
-    }
-}
-
-function clearFilters() {
-    const allCategory = document.querySelector('input[name="category"][value="all"]');
-    if (allCategory) allCategory.checked = true;
-    
-    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    
-    const sortSelect = document.getElementById("sortSelect");
-    if (sortSelect) sortSelect.value = "default";
-    
-    filteredProducts = [...products];
-    currentPage = 1;
-    renderProducts();
-}
-
-function applySorting() {
-    const sortSelect = document.getElementById("sortSelect");
-    if (!sortSelect) return;
-
-    const sortValue = sortSelect.value;
-    
-    filteredProducts.sort((a, b) => {
-        switch (sortValue) {
-            case "price-low":
-                return a.price - b.price;
-            case "price-high":
-                return b.price - a.price;
-            case "rating":
-                return b.rating - a.rating;
-            case "newest":
-                return b.id - a.id;
-            default:
-                return 0;
-        }
-    });
-
-    currentPage = 1;
-    renderProducts();
-}
-
-// ==================== INITIALIZATION ====================
-document.addEventListener("DOMContentLoaded", function() {
-        console.log("Initializing Baby Care page...");
-        updateCartCount();
-        updateWishlistCount();
-        initializeBannerCarousel();
-        loadSampleProducts();
-        setupEventListeners();
-
-        const yearElement = document.getElementById('year');
-        if (yearElement) {
-            yearElement.textContent = new Date().getFullYear();
-        }
-    });
-
-    window.addEventListener('beforeunload', () => {
-        if (window.bannerInterval) {
-            clearInterval(window.bannerInterval);
-        }
-    });
-
-    console.log("baby.js loaded successfully");
-})();

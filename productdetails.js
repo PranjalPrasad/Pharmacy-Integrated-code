@@ -1,16 +1,21 @@
+// ==================== productdetails.js – FULL WORKING VERSION ====================
+
 function removeSkeleton() {
     document.querySelectorAll('.skeleton').forEach(el => {
         el.classList.remove('skeleton');
         el.style.background = '';
         el.style.backgroundImage = '';
+        el.style.animation = '';
     });
 }
 
-const API_BASE_URL = 'http://localhost:8083/api/products';
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
+// Global variables
+let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+let currentProduct = null;
 
+// Update cart count in header (both desktop & mobile)
 function updateCartCount() {
-    const total = cart.reduce((s, i) => s + (i.quantity || 1), 0);
+    const total = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     ['desktop-cart-count', 'mobile-cart-count'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
@@ -20,201 +25,238 @@ function updateCartCount() {
     });
 }
 
+// Add to cart – 100% safe, name kabhi undefined nahi hoga
 function addToCart(product) {
-    const existing = cart.find(i => i.id == product.id);
-    if (existing) existing.quantity += 1;
-    else cart.push({ ...product, quantity: 1 });
+    const cartItem = {
+        id: product.id || Date.now(),
+        name: product.name || 'Unknown Product',
+        price: Number(product.price) || 0,
+        image: product.image || 'https://via.placeholder.com/150',
+        quantity: 1
+    };
+
+    const existing = cart.find(item => item.id == cartItem.id);
+    if (existing) {
+        existing.quantity += 1;
+    } else {
+        cart.push(cartItem);
+    }
+
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartCount();
     updateRightCartPanel();
 }
 
-// SAFE URL PARAMS — Never crashes
+// Right side live cart panel update (Product Details Page)
+function updateRightCartPanel() {
+    const items = cart.reduce((sum, i) => sum + (i.quantity || 1), 0);
+    const totalPrice = cart.reduce((sum, i) => sum + i.price * (i.quantity || 1), 0);
+
+    const countEl = document.getElementById('cart-items-number');
+    const textEl = document.getElementById('cart-items-text');
+    const fullText = document.getElementById('cart-item-count-display');
+
+    if (countEl) countEl.textContent = items;
+    if (textEl) textEl.textContent = items === 1 ? '' : 's';
+
+    if (fullText) {
+        fullText.innerHTML = items === 0
+            ? 'Your cart is empty'
+            : `<span id="cart-items-number">${items}</span> Item<span id="cart-items-text">${items === 1 ? '' : 's'}</span> in Cart`;
+    }
+}
+
+// Safe URL parameter reading
 function getUrlParams() {
     const params = {};
-    try {
-        new URLSearchParams(location.search).forEach((value, key) => {
-            try {
-                params[key] = decodeURIComponent(value.replace(/\+/g, ' '));
-            } catch {
-                params[key] = value.replace(/\+/g, ' ');
-            }
-        });
-    } catch (e) {
-        console.warn('Failed to parse URL params', e);
+    const searchParams = new URLSearchParams(location.search);
+    for (const [key, value] of searchParams) {
+        try {
+            params[key] = decodeURIComponent(value);
+        } catch {
+            params[key] = value;
+        }
     }
     return params;
 }
 
+// Render thumbnails
 function renderThumbnails(src) {
     const container = document.getElementById('thumbnail-container');
     if (!container || !src) return;
     container.innerHTML = '';
-    [src, src, src].forEach((s, i) => {
+    [src, src, src].forEach(s => {
         const img = document.createElement('img');
         img.src = s;
-        img.className = 'w-20 h-20 object-contain border-2 rounded-lg cursor-pointer transition hover:border-pharmeasy-green';
-        if (i === 0) img.classList.add('border-pharmeasy-green');
+        img.className = 'w-20 h-20 object-contain border-2 rounded-lg cursor-pointer hover:border-pharmeasy-green transition';
         img.onclick = () => {
-            const main = document.getElementById('main-product-image');
-            if (main) main.src = s;
+            document.getElementById('main-product-image').src = s;
             container.querySelectorAll('img').forEach(t => t.classList.remove('border-pharmeasy-green'));
             img.classList.add('border-pharmeasy-green');
         };
         container.appendChild(img);
     });
+    container.children[0].classList.add('border-pharmeasy-green');
 }
 
-// SAFE LOAD FROM URL PARAMS
+// Load Frequently Bought Together from sessionStorage (OTC page products)
+function loadFrequentlyBoughtItems(category, currentId) {
+    try {
+        const allProducts = JSON.parse(sessionStorage.getItem('currentPageProducts') || '[]');
+        let related = allProducts.filter(p => p.category === category && p.id != currentId);
+
+        if (related.length < 4) {
+            related = allProducts.filter(p => p.id != currentId);
+        }
+
+        related = related.sort(() => Math.random() - 0.5).slice(0, 4);
+        renderFrequentlyBought(related);
+    } catch (e) {
+        console.log('No related products found');
+    }
+}
+
+function renderFrequentlyBought(products) {
+    const container = document.getElementById('frequently-bought-container');
+    if (!container) return;
+
+    container.innerHTML = products.length === 0
+        ? '<p class="col-span-full text-center text-gray-500 py-8">No related products</p>'
+        : '';
+
+    products.forEach(p => {
+        const discount = p.originalPrice
+            ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
+            : 0;
+
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition cursor-pointer';
+        card.innerHTML = `
+            <img src="${p.image}" class="w-full h-40 object-cover rounded-lg mb-3">
+            <h4 class="font-medium text-sm line-clamp-2 mb-1">${p.name}</h4>
+            <p class="text-xs text-gray-500">${p.brand || 'Generic'}</p>
+            <div class="mt-2 flex items-center gap-2">
+                <span class="text-lg font-bold text-green-600">₹${p.price}</span>
+                ${p.originalPrice ? `
+                    <span class="text-sm text-gray-400 line-through">₹${p.originalPrice}</span>
+                    <span class="text-xs text-green-600 font-bold">${discount}% off</span>
+                ` : ''}
+            </div>
+            <button onclick="navigateToProductDetails(${p.id})"
+                class="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium">
+                View Details
+            </button>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// Navigate to another product (used in Frequently Bought)
+window.navigateToProductDetails = function(id) {
+    const product = JSON.parse(sessionStorage.getItem('currentPageProducts') || '[]').find(p => p.id == id);
+    if (!product) return;
+
+    const params = new URLSearchParams({
+        id: product.id,
+        name: encodeURIComponent(product.name),
+        brand: encodeURIComponent(product.brand || 'Generic'),
+        price: product.price,
+        originalPrice: product.originalPrice || '',
+        discount: product.discount || 0,
+        image: encodeURIComponent(product.image),
+        description: encodeURIComponent(product.description || ''),
+        category: product.category || 'all'
+    });
+
+    window.location.href = `productdetails.html?${params.toString()}`;
+};
+
+// Load product from URL parameters
 function loadFromUrlParams() {
     const p = getUrlParams();
+
     if (!p.name || !p.price) return false;
 
-    const nameEl = document.getElementById('product-name');
-    const priceEl = document.getElementById('selling-price');
-    const imgEl = document.getElementById('main-product-image');
+    currentProduct = {
+        id: p.id || Date.now(),
+        name: p.name,
+        brand: p.brand || 'Generic',
+        price: parseFloat(p.price),
+        originalPrice: p.originalPrice ? parseFloat(p.originalPrice) : null,
+        discount: p.discount ? parseInt(p.discount) : 0,
+        image: p.image || 'https://via.placeholder.com/600',
+        description: p.description || 'No description available.',
+        category: p.category || 'all'
+    };
 
-    if (nameEl) nameEl.textContent = p.name;
-    if (priceEl) priceEl.textContent = p.price;
-    if (imgEl && p.image) {
-        imgEl.src = p.image;
-        renderThumbnails(p.image);
+    // Update all UI elements
+    document.getElementById('product-name').textContent = currentProduct.name;
+    document.getElementById('selling-price').textContent = '₹' + currentProduct.price.toFixed(0);
+
+    if (currentProduct.originalPrice) {
+        document.getElementById('mrp-price').textContent = '₹' + currentProduct.originalPrice;
+        document.getElementById('discount-badge').textContent = currentProduct.discount + '% OFF';
+        document.getElementById('discount-badge').classList.remove('hidden');
+        document.querySelector('.line-through')?.classList.remove('hidden');
+    } else {
+        document.getElementById('discount-badge').classList.add('hidden');
+        document.querySelector('.line-through')?.classList.add('hidden');
+    }
+
+    const mainImg = document.getElementById('main-product-image');
+    if (mainImg && currentProduct.image) {
+        mainImg.src = currentProduct.image;
+        renderThumbnails(currentProduct.image);
     }
 
     removeSkeleton();
-    initCart();
+    updateCartCount();
+    loadFrequentlyBoughtItems(currentProduct.category, currentProduct.id);
     return true;
 }
 
 function showNotFound() {
-    const nameEl = document.getElementById('product-name');
-    const imgEl = document.getElementById('main-product-image');
-    if (nameEl) nameEl.textContent = 'Product Not Found';
-    if (imgEl) imgEl.src = 'https://via.placeholder.com/500x500?text=Not+Found';
+    document.getElementById('product-name').textContent = 'Product Not Found';
+    document.getElementById('main-product-image').src = 'https://via.placeholder.com/600?text=Not+Found';
     removeSkeleton();
 }
 
-async function loadProductData() {
-    if (loadFromUrlParams()) return;
-
-    const id = getUrlParams().id;
-    if (!id) {
-        showNotFound();
-        return;
-    }
-
-    try {
-        const res = await fetch(`${API_BASE_URL}/get-product/${id}`);
-        if (!res.ok) throw new Error();
-        const product = await res.json();
-
-        const nameEl = document.getElementById('product-name');
-        const priceEl = document.getElementById('selling-price');
-        const imgEl = document.getElementById('main-product-image');
-
-        if (nameEl) nameEl.textContent = product.productName || 'Unknown Product';
-        if (priceEl) priceEl.textContent = `₹${product.productPrice || 0}`;
-
-        const imgUrl = product.productMainImage 
-            ? `${API_BASE_URL}/${id}/image`
-            : 'https://via.placeholder.com/500x500?text=No+Image';
-
-        if (imgEl) {
-            imgEl.src = imgUrl;
-            renderThumbnails(imgUrl);
-        }
-
-        removeSkeleton();
-        initCart();
-
-    } catch (e) {
-        showNotFound();
-    }
-}
-
-function initCart() {
-    updateCartCount();
-
+// Initialize Add to Cart & Buy Now buttons
+function initCartButtons() {
     const addBtn = document.querySelector('button.bg-pharmeasy-green');
     const buyBtn = document.querySelector('button.bg-orange-500');
 
-    if (addBtn) {
+    if (addBtn && currentProduct) {
         addBtn.onclick = () => {
-            const name = document.getElementById('product-name')?.textContent || 'Product';
-            const price = parseFloat(document.getElementById('selling-price')?.textContent?.replace('₹', '') || '0');
-            const image = document.getElementById('main-product-image')?.src || '';
+            addToCart(currentProduct);
 
-            addToCart({ id: getUrlParams().id || Date.now(), name, price, image, quantity: 1 });
-            alert(name + ' added to cart!');
+            // Change button to "Go to Bag" after adding
+            addBtn.textContent = 'Go to Bag';
+            addBtn.classList.remove('bg-pharmeasy-green', 'hover:bg-green-700');
+            addBtn.classList.add('bg-orange-500', 'hover:bg-orange-600');
+            addBtn.onclick = () => window.location.href = '/cart.html';
         };
     }
 
-    if (buyBtn) {
+    if (buyBtn && currentProduct) {
         buyBtn.onclick = () => {
-            addBtn?.click();
-            setTimeout(() => location.href = 'checkout.html', 300);
+            addToCart(currentProduct);
+            setTimeout(() => window.location.href = '/cart.html', 300);
         };
     }
 }
 
+// Main init
 function init() {
-    loadProductData();
-}
-
-// =============================================
-// LIVE CART COUNT FOR RIGHT PANEL (PRODUCT DETAILS PAGE)
-// =============================================
-function updateRightCartPanel() {
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-
-    // Count total items (with quantity)
-    let totalItems = 0;
-    let totalPrice = 0;
-
-    cart.forEach(item => {
-        const qty = item.quantity || 1;
-        totalItems += qty;
-        totalPrice += item.price * qty;
-    });
-
-    // Update the right panel
-    const countDisplay = document.getElementById('cart-items-number');
-    const textDisplay = document.getElementById('cart-items-text');
-    const fullText = document.getElementById('cart-item-count-display');
-
-    if (countDisplay) countDisplay.textContent = totalItems;
-    if (textDisplay) textDisplay.textContent = totalItems === 1 ? '' : 's'; // "1 Item" or "5 Items"
-    if (fullText) {
-        if (totalItems === 0) {
-            fullText.innerHTML = 'Your cart is empty';
-        } else {
-            fullText.innerHTML = `<span id="cart-items-number">${totalItems}</span> Item<span id="cart-items-text">${totalItems === 1 ? '' : 's'}</span> in Cart`;
-        }
+    if (!loadFromUrlParams()) {
+        showNotFound();
     }
-
-    // Optional: Update total price (if you have these IDs)
-    const totalEl = document.getElementById('cart-total');
-    const savingsEl = document.getElementById('cart-savings');
-    if (totalEl) totalEl.textContent = '₹' + totalPrice;
-    if (savingsEl) savingsEl.textContent = '₹' + Math.round(totalPrice * 0.2); // dummy savings
+    initCartButtons();
+    updateRightCartPanel(); // right side cart count
 }
 
-// Run when page loads
-document.addEventListener('DOMContentLoaded', function () {
-    updateRightCartPanel();
+// Start everything when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    init();
+    updateCartCount(); // header cart count
 });
-
-// Run every time someone adds to cart (MOST IMPORTANT!)
-function originalAddToCartFunction() {
-    // Your existing add to cart code (keep it exactly as is)
-    // Example:
-    let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    // ... your logic to add item
-    localStorage.setItem('cart', JSON.stringify(cart));
-
-    // THIS IS THE KEY LINE — ADD THIS AT THE END OF YOUR ADD TO CART FUNCTION
-    updateRightCartPanel();
-}
-
-// START IMMEDIATELY
-init();

@@ -1,1072 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Baby Care - Premium Products for Your Baby</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-    <link rel="stylesheet" href="./baby.css" />
-    <link rel="stylesheet" href="../Header/header.css">
-    <link rel="stylesheet" href="../Footer/footer.css">
-    
-    <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#36C2CE',
-            secondary: '#0ea5e9',
-            accent: '#10b981',
-            dark: '#1e293b',
-          }
-        }
-      }
-    }
-    </script>
-
-    <style>
-  /* Hide footer only on mobile & tablet (≤1024px) */
-  @media (max-width: 1024px) {
-    #footer-placeholder {
-      display: none !important;
-    }
-  }
-</style>
-    <style>
-      /* General Hover Effects */
-      .product-card:hover {
-        transform: translateY(-6px);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-      }
-
-      .image-zoom:hover {
-        transform: scale(1.05);
-        transition: transform 0.3s ease;
-      }
-
-      /* Rotate chevron when sub-menu is open */
-    .sub-level-1:not(.hidden) ~ .flex > i,
-    .sub-level-2:not(.hidden) ~ .flex > i,
-    [sub-level-1]:not(.hidden) ~ .flex > i,
-    [sub-level-2]:not(.hidden) ~ .flex > i {
-      transform: rotate(180deg) !important;
-    }
-    @media (min-width: 1024px) {
-      .sub-level-1 { display: block !important; }
-    }
-    @media (max-width: 1023px) {
-      body { padding-bottom: 90px !important; }
-    }
-
-    /* Dual Thumb Price Slider Styling */
-    .price-slider-container h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #831843;
-    margin-bottom: 16px;
-  }
-
-  .slider-wrapper {
-    position: relative;
-    height: 6px;
-    background: #fce7f3;
-    border-radius: 4px;
-    margin: 40px 10px 30px;
-  }
-
-  .slider-fill {
-    position: absolute;
-    height: 100%;
-    background: linear-gradient(90deg, #f9a8d4, #ec4899);
-    border-radius: 4px;
-    top: 0;
-  }
-
-  input[type="range"] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    background: transparent;
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    margin: 0;
-    pointer-events: none;
-  }
-
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    height: 24px;
-    width: 24px;
-    border-radius: 50%;
-    background: #ec4899;
-    border: 4px solid white;
-    cursor: pointer;
-    pointer-events: all;
-    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
-  }
-
-  input[type="range"]::-moz-range-thumb {
-    height: 24px;
-    width: 24px;
-    border-radius: 50%;
-    background: #ec4899;
-    border: 4px solid white;
-    cursor: pointer;
-    pointer-events: all;
-    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
-    border: none;
-  }
-
-  .price-values {
-    display: flex;
-    justify-content: space-between;
-    font-weight: 600;
-    color: #9f1239;
-    font-size: 14px;
-    padding: 0 10px;
-  }
-
-      /* Product Card */
-      .product-card {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        width: 100%;
-        min-height: 420px;
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        overflow: hidden;
-    
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-      }
-
-      .product-card img,
-      .product-image {
-        width: 100%;
-        height: 250px;
-        object-fit: cover;
-        background: #f9fafb;
-      }
-
-      .product-card .content {
-        padding: 1rem;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-      }
-
-      .text-content {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-
-      .text-content h3,
-      .text-content p,
-      .text-content .flex {
-        text-align: left;
-        margin-bottom: 0;
-      }
-
-      .button-container {
-        display: flex;
-        justify-content: center;
-        margin-top: auto;
-        padding: 0.75rem;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-      }
-
-      .view-details {
-        padding: 0.6rem 1.5rem;
-        font-size: 0.95rem;
-        font-weight: 400;
-        border-radius: 8px;
-        background: #3B82F6;
-        color: white;
-        border: 1px solid #3B82F6;
-        transition: all 0.3s ease;
-        flex: none;
-        width: 100%;
-        text-align: center;
-      }
-
-      .view-details:hover {
-        background: #2563eb;
-        color: white;
-      }
-
-      /* Animation */
-      @keyframes fade-in-up {
-        0% {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        100% {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .animate-fade-in-up {
-        animation: fade-in-up 1s ease forwards;
-      }
-
-      .delay-200 {
-        animation-delay: 0.2s;
-      }
-
-      /* Banner Carousel */
-      .banner-slide {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        opacity: 0;
-        transition: opacity 1s ease-in-out;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-      }
-
-      .banner-slide.active {
-        opacity: 1;
-      }
-
-      .banner-dot.active {
-        background-color: white !important;
-        opacity: 1 !important;
-      }
-
-      /* Responsive Cards & Buttons */
-      @media (max-width: 640px) {
-        .button-container {
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .view-details {
-          width: 100%;
-          max-width: 250px;
-        }
-
-        .product-card {
-          width: 100%;
-          min-height: auto;
-        }
-      }
-
-      /* Sidebar background gradient */
-      .filter-sidebar {
-        background: linear-gradient(135deg, #DBEAFE, #93C5FD);
-      }
-
-      .filter-sidebar label {
-        background-color: rgba(255, 255, 255, 0.856);
-        padding: 0.35rem 0.8rem;
-        border-radius: 10px;
-        display: block;
-      }
-
-      /* Product Image Carousel */
-      .product-carousel {
-        transition: transform 0.5s ease-in-out;
-      }
-
-      .carousel-dot.active {
-        background-color: white !important;
-      }
-
-      .line-clamp-2 {
-        display: -webkit-box;
-        
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-      }
-    </style>
-  </head>
-  <body class="bg-[#ECF4E8]"> 
-    <div id="header-placeholder"></div>
-
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Banner Carousel -->
-      <section class="relative w-full h-[300px] sm:h-[350px] mb-6 overflow-hidden rounded-xl shadow-lg mt-32">
-        <!-- Slides wrapper -->
-        <div id="bannerWrapper" class="w-full h-full relative">
-          <!-- Slide 1 -->
-          <div class="banner-slide active" style="background-image: url('../Images/IMG/babyCareBanner1.jpg')">
-            <div class="absolute inset-0 bg-black/10"></div>
-          </div>
-
-          <!-- Slide 2 -->
-          <div class="banner-slide" style="background-image: url('../Images/IMG/babyCareBanner2.jpg')">
-            <div class="absolute inset-0 bg-black/10"></div>
-          </div>
-
-          <!-- Slide 3 -->
-          <div class="banner-slide" style="background-image: url('../Images/IMG/babyCareBanner3.jpg')">
-            <div class="absolute inset-0 bg-black/10"></div>
-          </div>
-        </div>
-
-        <!-- Navigation Dots -->
-        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
-          <button class="banner-dot w-3 h-3 rounded-full bg-white opacity-70 active transition-all duration-300" data-slide="0"></button>
-          <button class="banner-dot w-3 h-3 rounded-full bg-white/50 hover:opacity-80 transition-all duration-300" data-slide="1"></button>
-          <button class="banner-dot w-3 h-3 rounded-full bg-white/50 hover:opacity-80 transition-all duration-300" data-slide="2"></button>
-        </div>
-      </section>
-
-
-      <!-- desktop sidebar -->
-
-       <div class="flex flex-col lg:flex-row gap-8 mt-8">
-    <aside id="filterSidebar"
-  class="hidden lg:block lg:w-80 bg-blue-200 rounded-lg shadow-lg p-6 h-fit lg:sticky lg:top-24">
-
-  <div class="flex justify-between items-center mb-6 lg:hidden">
-    <h2 class="text-lg font-semibold text-gray-900">Filters</h2>
-    <button id="closeSidebarBtn" class="text-gray-500 hover:text-gray-700">
-      <i class="fas fa-times"></i>
-    </button>
-  </div>
-
-  <form id="filterForm" class="space-y-8">
-
-  <!-- ====================== CATEGORIES ====================== -->
-  <!-- Surgical Subcategories in Sidebar -->
-<div class="border-b border-gray-200 pb-7">
-  <div class="flex items-center justify-between cursor-pointer select-none"
-       onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
-    <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Surgical Subcategories</h3>
-    <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
-  </div>
-
-  <div class="mt-5 space-y-3 hidden" id="surgicalSubcategories">
-    <label class="flex items-center text-sm cursor-pointer">
-      <input type="radio" name="surgical_subcat" value="dressings-and-bandages" class="w-4 h-4 text-primary">
-      <span class="ml-3 text-gray-700">Dressings and Bandages</span>
-    </label>
-    <label class="flex items-center text-sm cursor-pointer">
-      <input type="radio" name="surgical_subcat" value="surgical-consumables" class="w-4 h-4 text-primary">
-      <span class="ml-3 text-gray-700">Surgical Consumables</span>
-    </label>
-    <label class="flex items-center text-sm cursor-pointer">
-      <input type="radio" name="surgical_subcat" value="iv-and-infusion-items" class="w-4 h-4 text-primary">
-      <span class="ml-3 text-gray-700">IV and Infusion Items</span>
-    </label>
-    <label class="flex items-center text-sm cursor-pointer">
-      <input type="radio" name="surgical_subcat" value="catheters-and-tubes" class="w-4 h-4 text-primary">
-      <span class="ml-3 text-gray-700">Catheters and Tubes</span>
-    </label>
-    <label class="flex items-center text-sm cursor-pointer">
-      <input type="radio" name="surgical_subcat" value="wound-care" class="w-4 h-4 text-primary">
-      <span class="ml-3 text-gray-700">Wound Care</span>
-    </label>
-    <label class="flex items-center text-sm cursor-pointer">
-      <input type="radio" name="surgical_subcat" value="orthopedic-support" class="w-4 h-4 text-primary">
-      <span class="ml-3 text-gray-700">Orthopedic Support</span>
-    </label>
-    <label class="flex items-center text-sm cursor-pointer">
-      <input type="radio" name="surgical_subcat" value="iv-fluids-and-injectables" class="w-4 h-4 text-primary">
-      <span class="ml-3 text-gray-700">IV Fluids and Injectables</span>
-    </label>
-    <label class="flex items-center text-sm cursor-pointer">
-      <input type="radio" name="surgical_subcat" value="surgical-kits" class="w-4 h-4 text-primary">
-      <span class="ml-3 text-gray-700">Surgical Kits</span>
-    </label>
-  </div>
-</div>
-
-
-  <!-- Price Range Slider (0 - 10,000) -->
-          <div class="price-slider-container">
-  <h4>Price Range</h4>
-  <div class="slider-wrapper">
-    <div class="slider-fill" id="desktopFill"></div>
-    <input type="range" min="0" max="10000" value="0"    id="minThumb">
-    <input type="range" min="0" max="10000" value="10000" id="maxThumb">
-  </div>
-  <div class="price-values">
-    <span id="minValue">₹0</span>
-    <span id="maxValue">₹10,000</span>
-  </div>
-</div>
-
- 
-
-    <!-- ====================== BRANDS ====================== -->
-  <div class="border-b border-gray-200 pb-7">
-    <div class="flex items-center justify-between cursor-pointer select-none"
-         onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
-      <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Brands</h3>
-      <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
-    </div>
-    <div class="mt-5 space-y-3 hidden">
-      <label class="flex items-center text-sm">
-        <input type="radio" name="brand" class="w-4 h-4 text-primary rounded" checked>
-        <span class="ml-3 text-gray-700">All Brands</span>
-      </label>
-      <label class="flex items-center text-sm">
-        <input type="radio" name="brand" class="w-4 h-4 text-primary rounded">
-        <span class="ml-3 text-gray-700">Heritage Auctions</span>
-      </label>
-      <label class="flex items-center text-sm">
-        <input type="radio" name="brand" class="w-4 h-4 text-primary rounded">
-        <span class="ml-3 text-gray-700">NumisBids</span>
-      </label>
-    </div>
-  </div>
-
-    <!-- ====================== DISCOUNT ====================== -->
-  <div class="border-b border-gray-200 pb-7">
-    <div class="flex items-center justify-between cursor-pointer select-none"
-         onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
-      <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Discount</h3>
-      <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
-    </div>
-    <div class="mt-5 space-y-3 hidden">
-      <label class="flex items-center text-sm">
-        <input type="radio" name="discount" class="w-4 h-4 text-primary rounded" checked>
-        <span class="ml-3 text-gray-700">All Products</span>
-      </label>
-      <label class="flex items-center text-sm">
-        <input type="radio" name="discount" class="w-4 h-4 text-primary rounded">
-        <span class="ml-3 text-gray-700">10% or more</span>
-      </label>
-      <label class="flex items-center text-sm">
-        <input type="radio" name="discount" class="w-4 h-4 text-primary rounded">
-        <span class="ml-3 text-gray-700">25% or more</span>
-      </label>
-      <label class="flex items-center text-sm">
-        <input type="radio" name="discount" class="w-4 h-4 text-primary rounded">
-        <span class="ml-3 text-gray-700">50% or more</span>
-      </label>
-    </div>
-  </div>
-
-    <!-- ====================== SHOW RESULTS BUTTON ====================== -->
-  <button type="submit" class="w-full bg-[#8FABD4] hover:bg-[#4A70A9] text-white font-semibold py-3.5 rounded-md transition-all duration-200 shadow-sm">
-    Show results
-  </button>
-
-  </form>
-</aside>
-        <main class="flex-1">
-          <!-- Title + Sort -->
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-            <div>
-              <h2 id="categoryTitle" class="text-2xl font-bold text-gray-900">All Products</h2>
-              <p id="resultsCount" class="text-gray-600 mt-1">Showing all products</p>
-            </div>
-
-            <!-- Sort Dropdown - Visible on tablet & desktop -->
-            <select id="sortSelect" class="hidden sm:block border border-gray-300 rounded-lg px-5 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer">
-              <option value="default">Sort by: Featured</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="rating">Customer Rating</option>
-              <option value="newest">Newest First</option>
-            </select>
-          </div>
-
-          <!-- Products Grid -->
-          <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Products will be loaded here by mother.js -->
-          </div>
-
-          <!-- Pagination -->
-          <div id="pagination" class="flex justify-center items-center mt-12 space-x-2">
-            <!-- Pagination buttons -->
-          </div>
-        </main>
-      </div>
-
-  <!-- ===================== MOBILE BOTTOM BAR (Sort + Filters) ===================== -->
-  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 z-50 lg:hidden shadow-2xl">
-    <button id="openSortSheet" class="flex-1 bg-blue-500 text-white font-bold py-3.5 rounded-lg flex items-center justify-center gap-2 hover:bg-green-700 transition">
-      Sort
-    </button>
-    <button id="openFilterSheet" class="flex-1 bg-blue-500 text-white font-bold py-3.5 rounded-lg flex items-center justify-center gap-2 hover:bg-red-700 transition">
-      Filters
-    </button>
-  </div>
-
-  <div id="filterSheet" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 transform translate-y-full transition-transform duration-300">
-      <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h3 class="text-lg font-bold">Filters</h3>
-        <button id="closeFilterSheet" class="text-2xl">X</button>
-      </div>
-      <div class="p-6 space-y-8">
-
-                     <!-- mobile price slider -->
-    <div class="price-slider-container">
-  <h4 class="font-semibold mb-4">Price Range</h4>
-  <div class="slider-wrapper">
-    <div class="slider-fill" id="mobileFill"></div>
-    <input type="range" min="0" max="10000" value="0"    id="mobileMinThumb">
-    <input type="range" min="0" max="10000" value="10000" id="mobileMaxThumb">
-  </div>
-  <div class="price-values">
-    <span id="mobileMinValue">₹0</span>
-    <span id="mobileMaxValue">₹10,000</span>
-  </div>
-</div>
-   <div class="flex gap-3 pt-6 border-t">
-          <button id="clearMobileFilters" class="flex-1 border border-pink-600 text-pink-600 py-3 rounded-lg font-bold">Clear All</button>
-          <button id="applyMobileFilters" class="flex-1 bg-pink-600 text-white py-3 rounded-lg font-bold">Apply Filters</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===================== BACKDROP ===================== -->
-  <div id="mobileSheetBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden lg:hidden"></div>
-
-  <!-- ===================== SORT SHEET ===================== -->
-   <div id="sortSheet" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 transform translate-y-full transition-transform duration-300">
-      <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h3 class="text-lg font-bold">Sort By</h3>
-        <button id="closeSortSheet" class="text-2xl">&times;</button>
-      </div>
-      <div class="p-6 space-y-4">
-        <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-          <input type="radio" name="mobileSort" value="default" checked class="w-5 h-5 text-pink-600">
-          <span class="ml-4 font-medium">Featured</span>
-        </label>
-        <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-          <input type="radio" name="mobileSort" value="price-low" class="w-5 h-5 text-pink-600">
-          <span class="ml-4 font-medium">Price: Low to High</span>
-        </label>
-        <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-          <input type="radio" name="mobileSort" value="price-high" class="w-5 h-5 text-pink-600">
-          <span class="ml-4 font-medium">Price: High to Low</span>
-        </label>
-        <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-          <input type="radio" name="mobileSort" value="rating" class="w-5 h-5 text-pink-600">
-          <span class="ml-4 font-medium">Customer Rating</span>
-        </label>
-        <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-          <input type="radio" name="mobileSort" value="newest" class="w-5 h-5 text-pink-600">
-          <span class="ml-4 font-medium">Newest First</span>
-        </label>
-      </div>
-      <div class="p-4 border-t bg-white sticky bottom-0">
-        <button id="applySortBtn" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3.5 rounded-lg">
-          Apply Sort
-        </button>
-      </div>
-    </div>
-
-
-
-        
-      </div>
-
-       <!-- Mobile Filter Overlay -->
-    <div
-      id="filterOverlay"
-      class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"
-    ></div>
-
-  <!-- ===================== FILTER SHEET (FULL COPY OF DESKTOP) ===================== -->
-  <div id="filterSheet" class="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 transform translate-y-full transition-transform duration-300 lg:hidden">
-    <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center z-10">
-      <h3 class="text-lg font-bold">Filters</h3>
-      <button id="closeFilterSheet">X</button>
-    </div>
-
-    <div class="p-6 pb-32">
-      <form id="mobileFilterForm" class="space-y-8">
-
-        <!-- FULL CATEGORIES (exact copy from desktop) -->
-        <div class="border-b border-gray-200 rounded-lg p-4">
-          <div class="flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
-            <h3 class="font-semibold text-gray-800">Categories</h3>
-            <i class="fas fa-chevron-down transition-transform"></i>
-          </div>
-          <div class="mt-4 space-y-3 hidden">
-            <label class="flex items-center"><input type="radio" name="mobileCat" value="all" checked class="w-4 h-4 text-blue-600"><span class="ml-3">All categories</span></label>
-
-            <!-- Antenatal -->
-            <div class="ml-4">
-              <div class="flex justify-between items-center py-2 cursor-pointer" onclick="event.stopPropagation(); this.nextElementSibling.classList.toggle('hidden')">
-                <span class="font-medium">Antenatal or Pregnancy Care</span><i class="fas fa-chevron-down text-xs"></i>
-              </div>
-              <div class="ml-6 space-y-2 hidden">
-                <label class="flex items-center text-sm"><input type="radio" name="mobileCat" class="w-4 h-4 text-blue-600"><span class="ml-3 text-gray-600">Test Kits</span></label>
-                <label class="flex items-center text-sm"><input type="radio" name="mobileCat" class="w-4 h-4 text-blue-600"><span class="ml-3 text-gray-600">Skin Care</span></label>
-                <!-- ... add all others same way ... -->
-              </div>
-            </div>
-            <!-- Repeat for other main categories -->
-          </div>
-        </div>
-
-        <!-- PRICE SLIDER (WORKING) -->
-        <div class="price-filter mt-6">
-          <h4 class="font-semibold mb-4">Price Range</h4>
-          <div class="price-inputs">
-            <input type="text" id="mobileMinPrice" value="₹0" class="w-24 px-3 py-2 border border-blue-300 rounded">
-            <span>-</span>
-            <input type="text" id="mobileMaxPrice" value="₹500" class="w-24 px-3 py-2 border border-blue-300 rounded">
-          </div>
-          <div class="slider-container mt-6">
-            <div class="slider-range" id="mobileRange"></div>
-            <input type="range" min="0" max="1000" value="0" id="mobileMinThumb" class="absolute w-full">
-            <input type="range" min="0" max="1000" value="500" id="mobileMaxThumb" class="absolute w-full">
-          </div>
-          <div class="price-values mt-2 text-sm text-gray-600">
-            <span>₹0</span><span>₹1,000</span>
-          </div>
-        </div>
-
-        <!-- BRANDS & DISCOUNT (copy from desktop) -->
-        <!-- ... paste your Brands and Discount sections exactly like desktop ... -->
-
-        <!-- APPLY / CLEAR BUTTONS -->
-        <div class="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex gap-3">
-          <button type="button" id="clearMobileFilters" class="flex-1 border border-blue-600 text-blue-700 py-3 rounded-lg font-bold">
-            Clear All
-          </button>
-          <button type="button" id="applyMobileFilters" class="flex-1 bg-blue-500 text-white py-3 rounded-lg font-bold">
-            Apply Filters
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-    </div>
-
-    <!-- Mobile Filter Overlay -->
-    <div id="filterOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
-
-    <!-- Placeholder for Footer -->
-  <div id="footer-placeholder"></div>
-    
-
-    <script>
-      // Global cart & wishlist (shared across pages)
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    let wishlist = JSON.parse(localStorage.getItem("wishlist"))
-
-    function loadHeader() {
-        fetch('../Header/header.html')
-            .then(r => { if (!r.ok) throw r; return r.text(); })
-            .then(html => {
-                document.getElementById('header-placeholder').innerHTML = html;
-                const script = document.createElement('script');
-                script.src = '../Header/header.js';
-                script.onload = () => console.log('Header JS loaded');
-                document.body.appendChild(script);
-            })
-            .catch(err => console.error('Header load failed:', err));
-    }
-
-    function loadFooter() {
-        fetch('../Footer/footer.html')
-            .then(r => { if (!r.ok) throw r; return r.text(); })
-            .then(html => {
-                document.getElementById('footer-placeholder').innerHTML = html;
-            })
-            .catch(err => console.error('Footer load failed:', err));
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        loadHeader();
-        loadFooter();
-        // ... rest of your code
-    });
-
-     function initSlider(minThumbId, maxThumbId, fillId, minDisplayId, maxDisplayId) {
-   const minThumb = document.getElementById(minThumbId);
-   const maxThumb = document.getElementById(maxThumbId);
-   const fill = document.getElementById(fillId);
-   const minDisplay = document.getElementById(minDisplayId);
-   const maxDisplay = document.getElementById(maxDisplayId);
-
-   function update() {
-     let minVal = parseInt(minThumb.value);
-     let maxVal = parseInt(maxThumb.value);
-
-     if (minVal > maxVal) {
-       [minVal, maxVal] = [maxVal, minVal];
-       minThumb.value = minVal;
-       maxThumb.value = maxVal;
-     }
-
-     const percentMin = (minVal / 10000) * 100;
-     const percentMax = (maxVal / 10000) * 100;
-
-     fill.style.left = percentMin + '%';
-     fill.style.width = (percentMax - percentMin) + '%';
-
-     minDisplay.textContent = '₹' + minVal.toLocaleString('en-IN');
-     maxDisplay.textContent = '₹' + maxVal.toLocaleString('en-IN');
-   }
-
-   minThumb.addEventListener('input', update);
-   maxThumb.addEventListener('input', update);
-   update(); // initial
- }
-
- // Initialize both sliders
- initSlider('minThumb', 'maxThumb', 'desktopFill', 'minValue', 'maxValue');
- initSlider('mobileMinThumb', 'mobileMaxThumb', 'mobileFill', 'mobileMinValue', 'mobileMaxValue');
-
- // ... rest of your existing JS stays the same
-
-
-   
-        // Mobile sheets
-        const backdrop = document.getElementById('mobileSheetBackdrop');
-        const sortSheet = document.getElementById('sortSheet');
-        const filterSheet = document.getElementById('filterSheet');
-
-        document.getElementById('openSortSheet').onclick = () => { sortSheet.classList.remove('translate-y-full'); backdrop.classList.remove('hidden'); };
-        document.getElementById('openFilterSheet').onclick = () => { filterSheet.classList.remove('translate-y-full'); backdrop.classList.remove('hidden'); };
-        document.getElementById('closeSortSheet').onclick = document.getElementById('closeFilterSheet').onclick = backdrop.onclick = () => {
-          sortSheet.classList.add('translate-y-full');
-          filterSheet.classList.add('translate-y-full');
-          backdrop.classList.add('hidden');
-        };
-
-         document.getElementById('openFilterSheet')?.addEventListener('click', () => {
-          document.getElementById('filterSheet').classList.remove('translate-y-full');
-          document.getElementById('mobileSheetBackdrop').classList.remove('hidden');
-        });
-        document.getElementById('closeFilterSheet')?.addEventListener('click', () => {
-          document.getElementById('filterSheet').classList.add('translate-y-full');
-          document.getElementById('mobileSheetBackdrop').classList.add('hidden');
-        });
-        document.getElementById('mobileSheetBackdrop')?.addEventListener('click', () => {
-          document.getElementById('filterSheet').classList.add('translate-y-full');
-          document.getElementById('mobileSheetBackdrop').classList.add('hidden');
-        });
-
-        // Upload modal logic (simplified)
-       window.openUploadModalForProduct = function(product) {
-          document.getElementById('modalProductName').textContent = 'Upload Prescription for: ' + product.name;
-          document.getElementById('modalProductImage').src = product.image;
-          document.getElementById('modalProductImage').classList.remove('hidden');
-          document.getElementById('uploadModal').classList.remove('hidden');
-        };
-
-        document.body.addEventListener('click', e => {
-          if (e.target.closest('.upload-pres-btn')) {
-            const data = e.target.closest('.upload-pres-btn').dataset.product;
-            const product = JSON.parse(data.replace(/&apos;/g, "'"));
-            openUploadModalForProduct(product);
-          }
-        });
-    
-
-      // ================
-      // Filters & Sorting
-      // ================
-      categoryList?.addEventListener('click', (e) => {
-        if (e.target.classList.contains('expand-toggle')) {
-          const sub = e.target.parentElement.querySelector('.subcategory');
-          if (sub) sub.classList.toggle('hidden');
-          e.target.textContent = e.target.textContent === '+' ? '-' : '+';
-          return;
-        }
-        if (e.target.classList.contains('category-link')) {
-          e.preventDefault();
-          const cat = e.target.textContent.trim();
-          activeCategory = cat;
-          applyFilters(products.filter(p => p.category === cat));
-        }
-      });
-
-      if (brandToggle) {
-        brandToggle.addEventListener('click', () => {
-          brandList.classList.toggle('hidden');
-          brandToggle.textContent = brandToggle.textContent === '+' ? '-' : '+';
-        });
-      }
-
-      brandFilters.forEach(f => f.addEventListener('change', () => applyFilters(products)));
-      sortSelect?.addEventListener('change', () => { activeSort = sortSelect.value; applyFilters(products); });
-
-      function applyFilters(startList) {
-        let list = [...(startList || products)];
-        const brands = Array.from(brandFilters).filter(f => f.checked).map(f => f.value);
-        if (brands.length) list = list.filter(p => brands.includes(p.brand));
-        if (activeSort === 'Price: Low to High') list.sort((a,b) => a.price - b.price);
-        else if (activeSort === 'Price: High to Low') list.sort((a,b) => b.price - a.price);
-        displayProducts(list);
-      }
-    
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Surgical Kits</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="../Footer/footer.css">
+  <link rel="stylesheet" href="surgical-kits.css">
   
-
-</script>
-
-
- 
-
- <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const backdrop = document.getElementById('mobileSheetBackdrop');
-      const sortSheet = document.getElementById('sortSheet');
-      const filterSheet = document.getElementById('filterSheet');
-
-      // Open
-      document.getElementById('openSortSheet')?.addEventListener('click', () => {
-        backdrop.classList.remove('hidden');
-        sortSheet.classList.remove('translate-y-full');
-      });
-      document.getElementById('openFilterSheet')?.addEventListener('click', () => {
-        backdrop.classList.remove('hidden');
-        filterSheet.classList.remove('translate-y-full');
-      });
-
-      // Close
-      function closeSheets() {
-        backdrop.classList.add('hidden');
-        sortSheet.classList.add('translate-y-full');
-        filterSheet.classList.add('translate-y-full');
-      }
-      backdrop.onclick = closeSheets;
-      document.getElementById('closeSortSheet').onclick = closeSheets;
-      document.getElementById('closeFilterSheet').onclick = closeSheets;
-
-      // Apply Sort → sync with desktop select
-      document.getElementById('applySortBtn').onclick = () => {
-        const val = document.querySelector('input[name="mobileSort"]:checked')?.value || 'default';
-        document.getElementById('sortSelect').value = val;
-        document.getElementById('sortSelect').dispatchEvent(new Event('change'));
-        closeSheets();
-      };
-
-      // Mobile Price Slider Logic (same as desktop)
-      const mMin = document.getElementById('mobileMinThumb');
-      const mMax = document.getElementById('mobileMaxThumb');
-      const mRange = document.getElementById('mobileRange');
-      const mMinInput = document.getElementById('mobileMinPrice');
-      const mMaxInput = document.getElementById('mobileMaxPrice');
-
-      function updateMobileRange() {
-        const minP = ((mMin.value / 1000) * 100);
-        const maxP = ((mMax.value / 1000) * 100);
-        mRange.style.left = minP + '%';
-        mRange.style.width = (maxP - minP) + '%';
-        mMinInput.value = '₹' + mMin.value;
-        mMaxInput.value = '₹' + mMax.value;
-      }
-      mMin.oninput = mMax.oninput = updateMobileRange;
-      mMinInput.onchange = () => { mMin.value = mMinInput.value.replace('₹',''); updateMobileRange(); };
-      mMaxInput.onchange = () => { mMax.value = mMaxInput.value.replace('₹',''); updateMobileRange(); };
-      updateMobileRange();
-
-      // Apply Filters button (you can expand this later)
-      document.getElementById('applyMobileFilters').onclick = closeSheets;
-      document.getElementById('clearMobileFilters').onclick = () => {
-        document.querySelectorAll('input[name="mobileCat"]').forEach(r => r.checked = r.value === 'all');
-        mMin.value = 0; mMax.value = 1000;
-        updateMobileRange();
-      };
-    });
-  </script>
-
   <script>
-      // Initialize mother page after DOM is loaded
-      document.addEventListener('DOMContentLoaded', function() {
-        if (typeof initializeMotherPage === 'function') {
-          initializeMotherPage();
-        } else {
-          console.error('initializeMotherPage function not found');
-        }
-      });
-    </script>
+    tailwind.config = {
+      theme: { extend: { colors: { primary: '#36C2CE', secondary: '#0ea5e9', accent: '#10b981', dark: '#1e293b' } } }
+    }
+  </script>
+  <style>
+    @media (max-width: 1024px) { #footer-placeholder { display: none !important; } }
+    /* All your original styles – copy-paste yahin se */
+.product-card:hover { transform: translateY(-6px); transition: transform .3s ease, box-shadow .3s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+.image-zoom:hover { transform: scale(1.05); transition: transform .3s ease; }
+.price-slider-container h4 { font-size: 16px; font-weight: 600; color: #831843; margin-bottom: 16px; }
+.slider-wrapper { position: relative; height: 6px; background: #fce7f3; border-radius: 4px; margin: 40px 10px 30px; }
+.slider-fill { position: absolute; height: 100%; background: linear-gradient(90deg, #f9a8d4, #ec4899); border-radius: 4px; top: 0; }
+input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; position: absolute; pointer-events: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #ec4899; border: 4px solid white; cursor: pointer; pointer-events: all; box-shadow: 0 4px 12px rgba(236,72,153,0.4); }
+/* Baaki sab styles bhi yahin daal do – jo aapke original mein the */
+  </style>
+</head>
+<body class="bg-[#ECF4E8]">
 
-   
- <script src="../cart-wishlist-system.js" defer></script>
-    <!-- <script src="surgical.js"></script> -->
+  <div id="header-placeholder"></div>
 
-    <script>
-        const SUBCATEGORIES = {
-  "dressings-and-bandages": {
-    title: "Dressings and Bandages",
-    products: [
-      { id: 101, title: "Sterile Gauze Pad 10x10cm (Pack of 100)", price: 449, image: "https://placehold.co/400x400/10B981/white?text=Sterile+Gauze" },
-      { id: 102, title: "Adhesive Bandage Strips (100 pcs)", price: 179, image: "https://placehold.co/400x400/3B82F6/white?text=Band+Aid" },
-      { id: 103, title: "Non-Woven Adhesive Tape 2.5cm x 9m", price: 89, image: "https://placehold.co/400x400/6366F1/white?text=Adhesive+Tape" },
-      { id: 104, title: "Absorbent Cotton Roll 500g", price: 320, image: "https://placehold.co/400x400/EC4899/white?text=Cotton+Roll" },
-      { id: 105, title: "Crepe Bandage 15cm x 4m", price: 145, image: "https://placehold.co/400x400/F59E0B/white?text=Crepe+Bandage" },
-      { id: 106, title: "Triangular Bandage (Calico)", price: 95, image: "https://placehold.co/400x400/8B5CF6/white?text=Triangular" }
-    ]
-  },
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-  "surgical-consumables": {
-    title: "Surgical Consumables",
-    products: [
-      { id: 201, title: "Latex Surgical Gloves Powder-Free (Box of 50)", price: 649, image: "https://placehold.co/400x400/14B8A6/white?text=Surgical+Gloves" },
-      { id: 202, title: "Nitrile Examination Gloves (100 pcs)", price: 499, image: "https://placehold.co/400x400/06B6D4/white?text=Nitrile+Gloves" },
-      { id: 203, title: "3-Ply Face Mask with Nose Pin (50 pcs)", price: 149, image: "https://placehold.co/400x400/8B5CF6/white?text=Face+Mask" },
-      { id: 204, title: "Disposable Surgeon Cap (100 pcs)", price: 299, image: "https://placehold.co/400x400/10B981/white?text=Surgeon+Cap" },
-      { id: 205, title: "Shoe Cover Non-Woven (100 pcs)", price: 399, image: "https://placehold.co/400x400/F472B6/white?text=Shoe+Cover" },
-      { id: 206, title: "Alcohol Swabs (Box of 100)", price: 189, image: "https://placehold.co/400x400/3B82F6/white?text=Alcohol+Swab" }
-    ]
-  },
+    <!-- Banner Carousel -->
+    <section class="relative w-full h-[300px] sm:h-[350px] mb-6 overflow-hidden rounded-xl shadow-lg mt-32">
+      <div id="bannerWrapper" class="w-full h-full relative">
+        <div class="banner-slide active" style="background-image: url('../Images/IMG/babyCareBanner1.jpg')"><div class="absolute inset-0 bg-black/10"></div></div>
+        <div class="banner-slide" style="background-image: url('../Images/IMG/babyCareBanner2.jpg')"><div class="absolute inset-0 bg-black/10"></div></div>
+        <div class="banner-slide" style="background-image: url('../Images/IMG/babyCareBanner3.jpg')"><div class="absolute inset-0 bg-black/10"></div></div>
+      </div>
+      <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+        <button class="banner-dot w-3 h-3 rounded-full bg-white opacity-70 active" data-slide="0"></button>
+        <button class="banner-dot w-3 h-3 rounded-full bg-white/50 hover:opacity-80" data-slide="1"></button>
+        <button class="banner-dot w-3 h-3 rounded-full bg-white/50 hover:opacity-80" data-slide="2"></button>
+      </div>
+    </section>
 
-  "iv-and-infusion-items": {
-    title: "IV and Infusion Items",
-    products: [
-      { id: 301, title: "IV Cannula 20G (Pink)", price: 68, image: "https://placehold.co/400x400/F59E0B/white?text=IV+Cannula+20G" },
-      { id: 302, title: "IV Cannula 22G (Blue)", price: 65, image: "https://placehold.co/400x400/3B82F6/white?text=IV+Cannula+22G" },
-      { id: 303, title: "IV Infusion Set with Airvent", price: 42, image: "https://placehold.co/400x400/10B981/white?text=Infusion+Set" },
-      { id: 304, title: "Scalp Vein Set 23G (Butterfly)", price: 28, image: "https://placehold.co/400x400/EC4899/white?text=Butterfly+Needle" },
-      { id: 305, title: "Three-Way Stopcock", price: 55, image: "https://placehold.co/400x400/8B5CF6/white?text=3-Way+Stopcock" },
-      { id: 306, title: "Extension Line 100cm", price: 85, image: "https://placehold.co/400x400/FBBF24/white?text=Extension+Line" }
-    ]
-  },
+    <div class="flex flex-col lg:flex-row gap-8 mt-8">
 
-  "catheters-and-tubes": {
-    title: "Catheters and Tubes",
-    products: [
-      { id: 401, title: "Foley Catheter 2-Way 16Fr (Silicone)", price: 385, image: "https://placehold.co/400x400/06B6D4/white?text=Foley+Catheter" },
-      { id: 402, title: "Nelaton Catheter 14Fr", price: 48, image: "https://placehold.co/400x400/10B981/white?text=Nelaton" },
-      { id: 403, title: "Ryles Tube 16Fr (PVC)", price: 65, image: "https://placehold.co/400x400/F59E0B/white?text=Ryles+Tube" },
-      { id: 404, title: "Suction Catheter 12Fr", price: 38, image: "https://placehold.co/400x400/8B5CF6/white?text=Suction+Catheter" },
-      { id: 405, title: "Yankauer Suction Handle", price: 125, image: "https://placehold.co/400x400/EC4899/white?text=Yankauer" }
-    ]
-  },
+      <!-- Desktop Sidebar -->
+      <aside id="filterSidebar" class="hidden lg:block lg:w-80 bg-blue-200 rounded-lg shadow-lg p-6 h-fit lg:sticky lg:top-24">
+        <form id="filterForm" class="space-y-8">
 
-  "wound-care": {
-    title: "Wound Care",
-    products: [
-      { id: 501, title: "Hydrocolloid Dressing 10x10cm", price: 285, image: "https://placehold.co/400x400/14B8A6/white?text=Hydrocolloid" },
-      { id: 502, title: "Silver Alginate Dressing", price: 680, image: "https://placehold.co/400x400/3B82F6/white?text=Silver+Alginate" },
-      { id: 503, title: "Povidone Iodine Ointment 20g", price: 89, image: "https://placehold.co/400x400/F59E0B/white?text=Betadine" },
-      { id: 504, title: "Collagen Dressing Sheet", price: 980, image: "https://placehold.co/400x400/10B981/white?text=Collagen" },
-      { id: 505, title: "Transparent Film Dressing", price: 68, image: "https://placehold.co/400x400/8B5CF6/white?text=Film+Dressing" }
-    ]
-  },
-
-  "orthopedic-support": {
-    title: "Orthopedic Support",
-    products: [
-      { id: 601, title: "Knee Brace with Hinges (Large)", price: 1249, image: "https://placehold.co/400x400/EC4899/white?text=Knee+Brace" },
-      { id: 602, title: "Lumbar Sacral Belt (L.S. Belt)", price: 899, image: "https://placehold.co/400x400/06B6D4/white?text=LS+Belt" },
-      { id: 603, title: "Cervical Collar Soft", price: 349, image: "https://placehold.co/400x400/3B82F6/white?text=Cervical+Collar" },
-      { id: 604, title: "Ankle Support Neoprene", price: 499, image: "https://placehold.co/400x400/F59E0B/white?text=Ankle+Brace" }
-    ]
-  },
-
-  "iv-fluids-and-injectables": {
-    title: "IV Fluids and Injectables",
-    products: [
-      { id: 701, title: "Normal Saline 0.9% 500ml", price: 38, image: "https://placehold.co/400x400/10B981/white?text=NS+500ml" },
-      { id: 702, title: "Dextrose 5% 500ml", price: 42, image: "https://placehold.co/400x400/3B82F6/white?text=D5+500ml" },
-      { id: 703, title: "Ringer Lactate 500ml", price: 48, image: "https://placehold.co/400x400/FBBF24/white?text=RL+500ml" },
-      { id: 704, title: "Metronidazole IV 100ml", price: 78, image: "https://placehold.co/400x400/8B5CF6/white?text=Metronidazole" },
-      { id: 705, title: "Paracetamol IV 100ml", price: 125, image: "https://placehold.co/400x400/EC4899/white?text=Paracetamol+IV" }
-    ]
-  },
-
-  "surgical-kits": {
-    title: "Surgical Kits",
-    products: [
-      { id: 801, title: "Minor OT Dressing Kit", price: 680, image: "https://placehold.co/400x400/F59E0B/white?text=Minor+OT+Kit" },
-      { id: 802, title: "Suture Removal Kit", price: 380, image: "https://placehold.co/400x400/10B981/white?text=Suture+Removal" },
-      { id: 803, title: "IV Start Kit", price: 450, image: "https://placehold.co/400x400/3B82F6/white?text=IV+Start+Kit" },
-      { id: 804, title: "Catheterization Kit (Foley)", price: 890, image: "https://placehold.co/400x400/EC4899/white?text=Foley+Kit" }
-    ]
-  }
-};
-
-
-    </script>
-
-    <script>
-// ===== SURGICAL SINGLE PAGE LOGIC (No Reload) =====
-document.addEventListener("DOMContentLoaded", function () {
-  const productsGrid = document.getElementById("productsGrid");
-  const categoryTitle = document.getElementById("categoryTitle");
-  const resultsCount = document.getElementById("resultsCount");
-
-  // Default subcategory
-  let currentSubcatKey = "dressings-and-bandages";
-
-  // Read from URL on load
-  const urlParams = new URLSearchParams(window.location.search);
-  const subFromUrl = urlParams.get("sub");
-  if (subFromUrl && SUBCATEGORIES[subFromUrl]) {
-    currentSubcatKey = subFromUrl;
-  }
-
-  // Render products function
-  function renderSubcategory(key) {
-    if (!SUBCATEGORIES[key]) key = "dressings-and-bandages";
-
-    const data = SUBCATEGORIES[key];
-    currentSubcatKey = key;
-
-    // Update title
-    categoryTitle.textContent = data.title;
-    resultsCount.textContent = `Showing ${data.products.length} products`;
-
-    // Update URL without reload
-    history.pushState({ sub: key }, "", `?sub=${key}`);
-
-    // Render products
-    productsGrid.innerHTML = data.products.map(p => `
-      <div class="product-card group">
-        <div class="relative overflow-hidden rounded-t-lg">
-          <img src="${p.image}" alt="${p.title}" class="w-full h-64 object-cover image-zoom">
-        </div>
-        <div class="content p-4">
-          <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">${p.title}</h3>
-          <div class="mt-3">
-            <span class="text-xl font-bold text-pink-600">₹${p.price}</span>
+          <!-- Surgical Subcategories -->
+          <div class="border-b border-gray-200 pb-7">
+            <div class="flex items-center justify-between cursor-pointer select-none" onclick="toggleCollapse(this)">
+              <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Surgical Subcategories</h3>
+              <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+            </div>
+            <div class="mt-5 space-y-3 hidden" id="surgicalSubcategories">
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="surgical_subcat" value="dressings-and-bandages" class="w-4 h-4 text-primary"><span class="ml-3 text-gray-700">Dressings and Bandages</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="surgical_subcat" value="surgical-consumables" class="w-4 h-4 text-primary"><span class="ml-3 text-gray-700">Surgical Consumables</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="surgical_subcat" value="iv-and-infusion-items" class="w-4 h-4 text-primary"><span class="ml-3 text-gray-700">IV and Infusion Items</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="surgical_subcat" value="catheters-and-tubes" class="w-4 h-4 text-primary"><span class="ml-3 text-gray-700">Catheters and Tubes</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="surgical_subcat" value="wound-care" class="w-4 h-4 text-primary"><span class="ml-3 text-gray-700">Wound Care</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="surgical_subcat" value="orthopedic-support" class="w-4 h-4 text-primary"><span class="ml-3 text-gray-700">Orthopedic Support</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="surgical_subcat" value="iv-fluids-and-injectables" class="w-4 h-4 text-primary"><span class="ml-3 text-gray-700">IV Fluids and Injectables</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="surgical_subcat" value="surgical-kits" class="w-4 h-4 text-primary"><span class="ml-3 text-gray-700">Surgical Kits</span></label>
+            </div>
           </div>
-          <div class="mt-3">
-            <button class="view-details w-full">View Details</button>
+
+          <!-- Price Slider -->
+          <div class="price-slider-container">
+            <h4>Price Range</h4>
+            <div class="slider-wrapper">
+              <div class="slider-fill" id="desktopFill"></div>
+              <input type="range" min="0" max="10000" value="0" id="minThumb">
+              <input type="range" min="0" max="10000" value="10000" id="maxThumb">
+            </div>
+            <div class="price-values">
+              <span id="minValue">₹0</span>
+              <span id="maxValue">₹10,000</span>
+            </div>
+          </div>
+
+          <!-- Brands & Discount (collapsed) -->
+          <div class="border-b border-gray-200 pb-7">
+            <div class="flex items-center justify-between cursor-pointer select-none" onclick="toggleCollapse(this)">
+              <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Brands</h3>
+              <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+            </div>
+            <div class="mt-5 space-y-3 hidden">
+              <label class="flex items-center text-sm"><input type="radio" name="brand" class="w-4 h-4 text-primary rounded" checked><span class="ml-3 text-gray-700">All Brands</span></label>
+              <label class="flex items-center text-sm"><input type="radio" name="brand" class="w-4 h-4 text-primary rounded"><span class="ml-3 text-gray-700">Heritage Auctions</span></label>
+              <label class="flex items-center text-sm"><input type="radio" name="brand" class="w-4 h-4 text-primary rounded"><span class="ml-3 text-gray-700">NumisBids</span></label>
+            </div>
+          </div>
+
+          <div class="border-b border-gray-200 pb-7">
+            <div class="flex items-center justify-between cursor-pointer select-none" onclick="toggleCollapse(this)">
+              <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Discount</h3>
+              <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+            </div>
+            <div class="mt-5 space-y-3 hidden">
+              <label class="flex items-center text-sm"><input type="radio" name="discount" class="w-4 h-4 text-primary rounded" checked><span class="ml-3 text-gray-700">All Products</span></label>
+              <label class="flex items-center text-sm"><input type="radio" name="discount" class="w-4 h-4 text-primary rounded"><span class="ml-3 text-gray-700">10% or more</span></label>
+              <label class="flex items-center text-sm"><input type="radio" name="discount" class="w-4 h-4 text-primary rounded"><span class="ml-3 text-gray-700">25% or more</span></label>
+              <label class="flex items-center text-sm"><input type="radio" name="discount" class="w-4 h-4 text-primary rounded"><span class="ml-3 text-gray-700">50% or more</span></label>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full bg-[#8FABD4] hover:bg-[#4A70A9] text-white font-semibold py-3.5 rounded-md transition-all duration-200 shadow-sm">
+            Show results
+          </button>
+        </form>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="flex-1">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+          <div>
+            <h2 id="categoryTitle" class="text-2xl font-bold text-gray-900">All Products</h2>
+            <p id="resultsCount" class="text-gray-600 mt-1">Showing all products</p>
+          </div>
+          <select id="sortSelect" class="hidden sm:block border border-gray-300 rounded-lg px-5 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer">
+            <option value="default">Sort by: Featured</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+            <option value="rating">Customer Rating</option>
+            <option value="newest">Newest First</option>
+          </select>
+        </div>
+
+        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Products yahan load honge -->
+        </div>
+      </main>
+    </div>
+
+    <!-- Mobile Bottom Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 z-50 lg:hidden shadow-2xl">
+      <button id="openSortSheet" class="flex-1 bg-blue-500 text-white font-bold py-3.5 rounded-lg">Sort</button>
+      <button id="openFilterSheet" class="flex-1 bg-blue-500 text-white font-bold py-3.5 rounded-lg">Filters</button>
+    </div>
+
+    <!-- Mobile Sheets (abhi empty, functionality JS mein hai) -->
+    <div id="sortSheet" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 transform translate-y-full transition-transform duration-300"></div>
+    <div id="filterSheet" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 transform translate-y-full transition-transform duration-300">
+      <div class="p-6">
+        <div class="price-slider-container">
+          <h4 class="font-semibold mb-4">Price Range</h4>
+          <div class="slider-wrapper">
+            <div class="slider-fill" id="mobileFill"></div>
+            <input type="range" min="0" max="10000" value="0" id="mobileMinThumb">
+            <input type="range" min="0" max="10000" value="10000" id="mobileMaxThumb">
+          </div>
+          <div class="price-values">
+            <span id="mobileMinValue">₹0</span>
+            <span id="mobileMaxValue">₹10,000</span>
           </div>
         </div>
       </div>
-    `).join("");
-  }
+    </div>
+    <div id="mobileSheetBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden"></div>
+  </div>
 
-  // Listen to radio button changes
-  document.querySelectorAll('input[name="surgical_subcat"]').forEach(radio => {
-    radio.addEventListener("change", function () {
-      if (this.checked) {
-        renderSubcategory(this.value);
-      }
-    });
-  });
+  <div id="footer-placeholder"></div>
 
-  // Back/Forward button support
-  window.addEventListener("popstate", function (e) {
-    const state = e.state;
-    if (state && state.sub && SUBCATEGORIES[state.sub]) {
-      renderSubcategory(state.sub);
-      // Also check the radio button
-      const radio = document.querySelector(`input[value="${state.sub}"]`);
-      if (radio) radio.checked = true;
-    }
-  });
-
-  // Initial load
-  renderSubcategory(currentSubcatKey);
-
-  // Check the correct radio button on load
-  const activeRadio = document.querySelector(`input[value="${currentSubcatKey}"]`);
-  if (activeRadio) activeRadio.checked = true;
-});
-</script>
-   
-  </body>
+  <!-- Scripts -->
+  <script src="../cart-wishlist-system.js" defer></script>
+  <script src="./surgical.js" defer></script>
+</body>
 </html>

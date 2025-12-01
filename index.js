@@ -342,23 +342,54 @@ setTimeout(forceUpdateWishlistCount, 1000);
             { term: 'herbal', matches: 'Ayurveda & Herbal Products', icon: '🌿' },
             { term: 'immunity', matches: 'Immunity Boosters', icon: '🛡️' }
         ];
-
-
 function openProductDetails(productId) {
-  const product = allProducts.find(p => p.id === productId);
-  if (!product) return alert("Product not found!");
-  const params = new URLSearchParams({
-    id: product.id,
-    name: encodeURIComponent(product.name),
-    price: product.price,
-    originalPrice: product.originalPrice || '',
-    discount: product.discount || '',
-    image: product.image,
-    description: product.description || 'Premium quality product.',
-    category: productsData.some(p => p.id === productId) ? 'feminine' : 'medicine'
-  });
-  window.location.href = `productdetails.html?${params.toString()}`;
+    const allProducts = [...productsData, ...medicinesData];
+    const product = allProducts.find(p => p.id === productId);
+
+    if (!product) {
+        alert("Product not found!");
+        return;
+    }
+
+    // Determine which section this product belongs to
+    let sectionProducts = [];
+    let sectionCategory = '';
+
+    if (productsData.some(p => p.id === productId)) {
+        // This is a feminine hygiene product
+        sectionProducts = productsData;
+        sectionCategory = 'feminine';
+    } else if (medicinesData.some(p => p.id === productId)) {
+        // This is a medicine/device product
+        sectionProducts = medicinesData;
+        sectionCategory = 'medicine';
+    }
+
+    // Store the products from THIS section in sessionStorage
+    sessionStorage.setItem('currentPageProducts', JSON.stringify(sectionProducts));
+    sessionStorage.setItem('currentPageCategory', sectionCategory);
+
+    // Create URL parameters
+    const params = new URLSearchParams({
+        id: product.id,
+        name: product.name,
+        price: product.price.replace('₹', '').trim(),
+        originalPrice: product.originalPrice ? product.originalPrice.replace('₹', '').trim() : '',
+        discount: product.discount || '',
+        image: product.image,
+        description: product.description || 'Premium quality product.',
+        category: sectionCategory
+    });
+
+    window.location.href = `/productdetails.html?${params.toString()}`;
 }
+
+// Make it globally accessible
+window.openProductDetails = openProductDetails;
+
+
+// Make it globally accessible
+window.openProductDetails = openProductDetails;
 
 
         const searchInput = document.getElementById('searchInput');
@@ -714,8 +745,8 @@ function createCard(p) {
 
       <div class="relative overflow-hidden">
         <img src="${p.image}" alt="${p.name}" class="card-img w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
-        <div onclick="event.stopPropagation(); openProductDetails(${p.id})" class="absolute inset-0 bg-black/50 opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <button onclick="event.stopPropagation(); openProductDetails(${p.id})" class="pointer-events-auto bg-gray-300 text-gray-900 font-bold px-8 py-2 rounded-full shadow-2xl hover:bg-gray-400 transition text-lg">
+        <div class="absolute inset-0 bg-black/50 opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <button onclick="event.stopPropagation(); window.openProductDetails(${p.id})" class="pointer-events-auto bg-gray-300 text-gray-900 font-bold px-8 py-2 rounded-full shadow-2xl hover:bg-gray-400 transition text-lg">
             Quick View
           </button>
         </div>
@@ -728,7 +759,7 @@ function createCard(p) {
           ${p.originalPrice ? `<span class="original-price text-sm text-gray-500 line-through">₹${cleanOriginalPrice}</span>` : ''}
         </div>
         <div class="flex gap-3 items-center">
-          <button onclick="event.stopPropagation(); openProductDetails(${p.id})" class="md:hidden flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition">
+          <button onclick="event.stopPropagation(); window.openProductDetails(${p.id})" class="md:hidden flex-shrink-0 w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-blue-700 transition">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
           </button>
           <div class="flex-1 relative">

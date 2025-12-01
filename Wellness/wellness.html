@@ -6,8 +6,9 @@
   <title>Wellness - Premium Health & Beauty Products</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="../Header/header.css">
+ 
   <link rel="stylesheet" href="../Footer/footer.css">
+  
 
   <script>
     tailwind.config = {
@@ -25,32 +26,29 @@
   </script>
 
   <style>
-  /* Hide footer only on mobile & tablet (≤1024px) */
-  @media (max-width: 1024px) {
-    #footer-placeholder {
-      display: none !important;
+    @media (max-width: 1024px) {
+      #footer-placeholder { display: none !important; }
     }
-  }
-</style>
-
-  <style>
     .product-card:hover { transform: translateY(-6px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); transition: all 0.3s ease; }
     .image-zoom:hover img { transform: scale(1.05); transition: transform 0.3s ease; }
 
-    .banner-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; background-size: cover; background-position: center; }
+    .banner-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease-in-out; background-size: cover; background-position: center; }
     .banner-slide.active { opacity: 1; }
     .banner-dot.active { background-color: white !important; opacity: 1 !important; }
 
     .price-slider-container h4 { font-size: 16px; font-weight: 600; color: #831843; margin-bottom: 16px; }
     .slider-wrapper { position: relative; height: 6px; background: #fce7f3; border-radius: 4px; margin: 40px 10px 30px; }
-    .slider-fill { position: absolute; height: 100%; background: linear-gradient(90deg, #f9a8d4, #ec4899); border-radius: 4px; top: 0; }
-    input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; position: absolute; top: 0; left: 0; height: 100%; margin: 0; pointer-events: none; }
-    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #ec4899; border: 4px solid white; cursor: pointer; pointer-events: all; box-shadow: 0 4px 12px rgba(236,72,153,0.4); }
+    .slider-fill { position: absolute; height: 100%; background: linear-gradient(90deg, #f9a8d4, #ec4899); border-radius: 4px; }
+    input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; position: absolute; inset: 0; pointer-events: none; }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #ec4899;
+      border: 4px solid white; cursor: pointer; pointer-events: all; box-shadow: 0 4px 12px rgba(236,72,153,0.4);
+    }
     .price-values { display: flex; justify-content: space-between; font-weight: 600; color: #9f1239; font-size: 14px; padding: 0 10px; }
 
-    .product-card { display: flex; flex-direction: column; justify-content: space-between; width: 100%; min-height: 420px; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
+    .product-card { display: flex; flex-direction: column; justify-content: space-between; background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; transition: all 0.3s ease; }
     .product-card img { width: 100%; height: 250px; object-fit: cover; }
-    .view-details { padding: 0.6rem 1.5rem; font-size: 0.95rem; font-weight: 400; border-radius: 8px; background: #3B82F6; color: white; border: 1px solid #3B82F6; transition: all 0.3s ease; width: 100%; text-align: center; }
+    .view-details { padding: 0.75rem; font-weight: 500; border-radius: 8px; background: #3B82F6; color: white; transition: all 0.3s ease; }
     .view-details:hover { background: #2563eb; }
   </style>
 </head>
@@ -64,42 +62,34 @@
       <div class="banner-slide" style="background-image: url('../Images/IMG/wellnessBanner2.jpg')"></div>
       <div class="banner-slide" style="background-image: url('../Images/IMG/wellnessBanner3.jpg')"></div>
     </div>
-    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20">
       <button class="banner-dot w-3 h-3 rounded-full bg-white opacity-70 active" data-slide="0"></button>
       <button class="banner-dot w-3 h-3 rounded-full bg-white/50 hover:opacity-80" data-slide="1"></button>
       <button class="banner-dot w-3 h-3 rounded-full bg-white/50 hover:opacity-80" data-slide="2"></button>
     </div>
   </section>
 
-  <div class="max-w-7xl mb-12 mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="flex flex-col lg:flex-row gap-8 mt-8">
-      <!-- Sidebar -->
+      <!-- Sidebar Filters -->
       <aside id="filterSidebar" class="hidden lg:block lg:w-80 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg shadow-lg p-6 h-fit lg:sticky lg:top-24">
         <form id="filterForm" class="space-y-8">
-
-          <!-- Wellness Subcategories -->
           <div class="border-b border-gray-300 pb-7">
-            <div class="flex items-center justify-between cursor-pointer select-none"
-                 onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+            <div class="flex items-center justify-between cursor-pointer select-none" onclick="toggleSection(this)">
               <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Wellness Categories</h3>
-              <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+              <i class="fas fa-chevron-down text-gray-500 transition-transform"></i>
             </div>
-
             <div class="mt-5 space-y-3" id="wellnessSubcategories">
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="vitamins-supplements" class="w-4 h-4 text-primary" checked> <span class="ml-3 text-gray-700">Vitamins and Supplements</span></label>
               <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="hair-skin-care" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Hair or Skin Care</span></label>
-             
-              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="personal-hygiene" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Personal Hygiene</span></label>
               <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="oral-care" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Oral Care</span></label>
-              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="feminine-hygiene" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Feminine Hygiene</span></label>
-              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="sexual-wellness" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Sexual Wellness</span></label>
-              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="adult-diapers" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Adult Diapers & Incontinence</span></label>
-              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="health-supplements" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Health Supplements</span></label>
-              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="ayurvedic" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Ayurvedic & Herbal</span></label>
-              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="body-care" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Body Care</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="menstrual-care" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Menstrual Care</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="fitness-weight" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Fitness and Weight</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="senior-care" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Senior Care</span></label>
+              <label class="flex items-center text-sm cursor-pointer"><input type="radio" name="wellness_subcat" value="immunity-booster" class="w-4 h-4 text-primary"> <span class="ml-3 text-gray-700">Immunity Booster</span></label>
             </div>
           </div>
 
-          <!-- Price Range -->
           <div class="price-slider-container">
             <h4>Price Range</h4>
             <div class="slider-wrapper">
@@ -113,8 +103,8 @@
             </div>
           </div>
 
-          <button type="submit" class="w-full bg-[#8FABD4] hover:bg-[#4A70A9] text-white font-semibold py-3.5 rounded-md transition-all duration-200 shadow-sm">
-            Show results
+          <button type="submit" class="w-full bg-[#8FABD4] hover:bg-[#4A70A9] text-white font-semibold py-3.5 rounded-md transition-all">
+            Show Results
           </button>
         </form>
       </aside>
@@ -123,10 +113,10 @@
       <main class="flex-1">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
-            <h2 id="categoryTitle" class="text-2xl font-bold text-gray-900">Hair Care</h2>
+            <h2 id="categoryTitle" class="text-2xl font-bold text-gray-900">Vitamins and Supplements</h2>
             <p id="resultsCount" class="text-gray-600 mt-1">Showing 24 products</p>
           </div>
-          <select id="sortSelect" class="hidden sm:block border border-gray-300 rounded-lg px-5 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none cursor-pointer">
+          <select id="sortSelect" class="hidden sm:block border border-gray-300 rounded-lg px-5 py-3 text-sm focus:ring-2 focus:ring-blue-500">
             <option value="default">Sort by: Featured</option>
             <option value="price-low">Price: Low to High</option>
             <option value="price-high">Price: High to Low</option>
@@ -136,115 +126,52 @@
         </div>
 
         <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Products load here -->
+          <!-- Products loaded by JS -->
         </div>
       </main>
     </div>
   </div>
 
   <!-- Mobile Bottom Bar -->
-  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 z-50 lg:hidden shadow-2xl">
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-3 flex gap-3 z-50 lg:hidden shadow-2xl">
     <button id="openSortSheet" class="flex-1 bg-blue-500 text-white font-bold py-3.5 rounded-lg">Sort</button>
-    <button id="openFilterSheet" class="flex-1 bg-blue-500 text-white font blue-500 py-3.5 rounded-lg">Filters</button>
+    <button id="openFilterSheet" class="flex-1 bg-blue-500 text-white font-bold py-3.5 rounded-lg">Filters</button>
   </div>
 
   <div id="footer-placeholder"></div>
 
-  <!-- JavaScript -->
-  <script>
-    // Load Header & Footer
-    function loadHeader() { fetch('../Header/header.html').then(r => r.text()).then(html => document.getElementById('header-placeholder').innerHTML = html); }
-    function loadFooter() { fetch('../Footer/footer.html').then(r => r.text()).then(html => document.getElementById('footer-placeholder').innerHTML = html); }
-    document.addEventListener('DOMContentLoaded', () => { loadHeader(); loadFooter(); });
-
-    // Price Slider
-    function initSlider(minId, maxId, fillId, minDisp, maxDisp) {
-      const min = document.getElementById(minId), max = document.getElementById(maxId), fill = document.getElementById(fillId);
-      const update = () => {
-        let mn = parseInt(min.value), mx = parseInt(max.value);
-        if (mn > mx) [mn, mx] = [mx, mn];
-        fill.style.left = (mn/10000)*100 + '%';
-        fill.style.width = (mx-mn)/10000*100 + '%';
-        document.getElementById(minDisp).textContent = '₹' + mn.toLocaleString('en-IN');
-        document.getElementById(maxDisp).textContent = '₹' + mx.toLocaleString('en-IN');
-      };
-      min.oninput = max.oninput = update;
-      update();
-    }
-    initSlider('minThumb','maxThumb','desktopFill','minValue','maxValue');
-
-    // Wellness Data
-    const WELLNESS_DATA = {
-      "hair-skin-care": { title: "Hair or Skin Care", count: 48, products: [
-        { id: 1, title: "Anti-Dandruff Shampoo 200ml", price: 299, image: "https://placehold.co/400x400/3B82F6/white?text=Hair+Shampoo" },
-        { id: 2, title: "Hair Fall Control Oil 100ml", price: 449, image: "https://placehold.co/400x400/10B981/white?text=Hair+Oil" },
-         { id: 101, title: "Vitamin C Face Serum 30ml", price: 799, image: "https://placehold.co/400x400/EC4899/white?text=Face+Serum" },
-      ]},
-      
-      "personal-hygiene": { title: "Personal Hygiene", count: 35, products: [] },
-      "oral-care": { title: "Oral Care", count: 28, products: [] },
-      "feminine-hygiene": { title: "Feminine Hygiene", count: 40, products: [] },
-      "sexual-wellness": { title: "Sexual Wellness", count: 22, products: [] },
-      "adult-diapers": { title: "Adult Diapers & Incontinence", count: 18, products: [] },
-      "health-supplements": { title: "Health Supplements", count: 55, products: [] },
-      "ayurvedic": { title: "Ayurvedic & Herbal", count: 70, products: [] },
-      "body-care": { title: "Body Care", count: 44, products: [] }
-    };
-
-    // Default
-    let currentSub = "hair-skin-care";
-
-    // Render Function
-    function renderSubcategory(key) {
-      if (!WELLNESS_DATA[key]) key = "hair-skin-care";
-      const data = WELLNESS_DATA[key];
-      currentSub = key;
-
-      document.getElementById("categoryTitle").textContent = data.title;
-      document.getElementById("resultsCount").textContent = `Showing ${data.products.length || 24} products`;
-
-      history.pushState({sub: key}, "", `?sub=${key}`);
-
-      const grid = document.getElementById("productsGrid");
-      grid.innerHTML = (data.products.length ? data.products : Array(12).fill(null).map((_,i) => ({
-        id: i+1, title: `Sample Product ${i+1}`, price: 299 + i*50, image: "https://placehold.co/400x400/6366F1/white?text=Wellness"
-      }))).map(p => `
-        <div class="product-card group">
-          <div class="relative overflow-hidden rounded-t-lg">
-            <img src="${p.image}" alt="${p.title}" class="w-full h-64 object-cover image-zoom">
-          </div>
-          <div class="content p-4">
-            <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">${p.title}</h3>
-            <div class="mt-3"><span class="text-xl font-bold text-pink-600">₹${p.price}</span></div>
-            <div class="mt-3"><button class="view-details w-full">View Details</button></div>
-          </div>
-        </div>
-      `).join("");
+   <script>
+    function loadHeader() {
+        fetch('../Header/header.html')
+            .then(r => { if (!r.ok) throw r; return r.text(); })
+            .then(html => {
+                document.getElementById('header-placeholder').innerHTML = html;
+                const script = document.createElement('script');
+                script.src = '../Header/header.js';
+                script.onload = () => console.log('Header JS loaded');
+                document.body.appendChild(script);
+            })
+            .catch(err => console.error('Header load failed:', err));
     }
 
-    // Radio Change
-    document.querySelectorAll('input[name="wellness_subcat"]').forEach(radio => {
-      radio.addEventListener("change", () => { if (radio.checked) renderSubcategory(radio.value); });
+    function loadFooter() {
+        fetch('../Footer/footer.html')
+            .then(r => { if (!r.ok) throw r; return r.text(); })
+            .then(html => {
+                document.getElementById('footer-placeholder').innerHTML = html;
+            })
+            .catch(err => console.error('Footer load failed:', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadHeader();
+        loadFooter();
+        // ... rest of your code
     });
+</script>
 
-    // URL Load
-    const urlSub = new URLSearchParams(window.location.search).get("sub");
-    if (urlSub && WELLNESS_DATA[urlSub]) {
-      currentSub = urlSub;
-      document.querySelector(`input[value="${urlSub}"]`).checked = true;
-    }
-
-    // Back/Forward Support
-    window.addEventListener("popstate", e => {
-      if (e.state && e.state.sub && WELLNESS_DATA[e.state.sub]) {
-        currentSub = e.state.sub;
-        document.querySelector(`input[value="${currentSub}"]`).checked = true;
-        renderSubcategory(currentSub);
-      }
-    });
-
-    // Initial Render
-    renderSubcategory(currentSub);
-  </script>
+  <!-- Load JavaScript at the end -->
+   <script src="../cart-wishlist-system.js"></script>
+  <script src="./wellness.js" defer></script>
 </body>
 </html>

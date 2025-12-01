@@ -27,7 +27,7 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Safe CSS loading – removes the MIME error completely -->
-<link rel="stylesheet" href="./Header/header.css" onerror="this.remove()">
+
     <link rel="stylesheet" href="./Footer/footer.css" onerror="this.remove()">
 
     <style>
@@ -128,16 +128,16 @@
     </main>
 
     <!-- Footer Placeholder -->
-    <!-- <div id="footer-placeholder"></div> -->
+    <div id="footer-placeholder"></div>
 
     <script>
     function loadHeader() {
-        fetch('../Header/header.html')
+        fetch('./Header/header.html')
             .then(r => { if (!r.ok) throw r; return r.text(); })
             .then(html => {
                 document.getElementById('header-placeholder').innerHTML = html;
                 const script = document.createElement('script');
-                script.src = '../Header/header.js';
+                script.src = './Header/header.js';
                 script.onload = () => console.log('Header JS loaded');
                 document.body.appendChild(script);
             })
@@ -145,7 +145,7 @@
     }
 
     function loadFooter() {
-        fetch('../Footer/footer.html')
+        fetch('./Footer/footer.html')
             .then(r => { if (!r.ok) throw r; return r.text(); })
             .then(html => {
                 document.getElementById('footer-placeholder').innerHTML = html;

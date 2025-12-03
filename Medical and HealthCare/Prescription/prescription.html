@@ -6,426 +6,440 @@
   <title>Prescription Medicines - Goodneewz</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../../Footer/footer.css">
-  
-
   <style>
-  /* Hide footer only on mobile & tablet (≤1024px) */
-  @media (max-width: 1024px) {
-    #footer-placeholder {
-      display: none !important;
-    }
-  }
-</style>
-  <style>
-   body { font-family: 'Inter', 'Noto Sans Devanagari', sans-serif; }
+    body { font-family: 'Inter', sans-serif; }
     .line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-    /* Rotate chevron when sub-menu is open */
-    .sub-level-1:not(.hidden) ~ .flex > i,
-    .sub-level-2:not(.hidden) ~ .flex > i,
-    [sub-level-1]:not(.hidden) ~ .flex > i,
-    [sub-level-2]:not(.hidden) ~ .flex > i {
-      transform: rotate(180deg) !important;
+    /* Price Slider Styling */
+    .slider-wrapper {
+      position: relative;
+      height: 6px;
+      background: #e7f7fc;
+      border-radius: 4px;
+      margin: 40px 10px 30px;
     }
-    @media (min-width: 1024px) {
-      .sub-level-1 { display: block !important; }
+
+    .slider-fill {
+      position: absolute;
+      height: 100%;
+      background: linear-gradient(90deg, #a8e2f9, #1d949c);
+      border-radius: 4px;
+      top: 0;
     }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      background: transparent;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      margin: 0;
+      pointer-events: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #208fb1;
+      border: 4px solid white;
+      cursor: pointer;
+      pointer-events: all;
+      box-shadow: 0 4px 12px rgba(72, 189, 236, 0.4);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      height: 24px;
+      width: 24px;
+      border-radius: 50%;
+      background: #28918b;
+      border: 4px solid white;
+      cursor: pointer;
+      pointer-events: all;
+      box-shadow: 0 4px 12px rgba(72, 176, 236, 0.4);
+    }
+
+    .price-values {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      color: #065968;
+      font-size: 14px;
+      padding: 0 10px;
+    }
+
     @media (max-width: 1023px) {
       body { padding-bottom: 90px !important; }
     }
-
-    /* Dual Thumb Price Slider Styling */
-    .price-slider-container h4 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #831843;
-    margin-bottom: 16px;
-  }
-
-  .slider-wrapper {
-    position: relative;
-    height: 6px;
-    background: #fce7f3;
-    border-radius: 4px;
-    margin: 40px 10px 30px;
-  }
-
-  .slider-fill {
-    position: absolute;
-    height: 100%;
-    background: linear-gradient(90deg, #f9a8d4, #ec4899);
-    border-radius: 4px;
-    top: 0;
-  }
-
-  input[type="range"] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    background: transparent;
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    margin: 0;
-    pointer-events: none;
-  }
-
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    height: 24px;
-    width: 24px;
-    border-radius: 50%;
-    background: #ec4899;
-    border: 4px solid white;
-    cursor: pointer;
-    pointer-events: all;
-    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
-  }
-
-  input[type="range"]::-moz-range-thumb {
-    height: 24px;
-    width: 24px;
-    border-radius: 50%;
-    background: #ec4899;
-    border: 4px solid white;
-    cursor: pointer;
-    pointer-events: all;
-    box-shadow: 0 4px 12px rgba(236, 72, 153, 0.4);
-    border: none;
-  }
-
-  .price-values {
-    display: flex;
-    justify-content: space-between;
-    font-weight: 600;
-    color: #9f1239;
-    font-size: 14px;
-    padding: 0 10px;
-  }
   </style>
 </head>
-<body class="bg-[#D6F4ED]" onload="initializePage()">
-  <!-- Header Placeholder -->
+<body class="bg-[#D6F4ED]">
+
   <div id="header-placeholder"></div>
-
-  <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- ✅ Auto Scrolling Banner with Dots -->
-      <section
-        class="mt-36 relative w-full h-[300px] sm:h-[350px] mb-6 overflow-hidden rounded-xl shadow-lg"
-      >
-        <!-- Slides wrapper -->
-        <div id="bannerWrapper" class="w-full h-full relative">
-          <!-- Slide 1 -->
-          <div
-            class="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 opacity-100 slide"
-            style="background-image: url('../../Images/Banners/Banners/Prescription-Based/Prescription.png')"
-          >
-            <!-- <div class="absolute inset-0 bg-white/20"></div> -->
-            <div
-              class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4"
-            >
-              <!-- <h2
-                class="text-2xl sm:text-3xl text-gray-600 font-bold animate-fade-in-up"
-              >
-                Mother Care & Maternity
-              </h2> -->
-              <!-- <p
-                class="mt-2 text-gray-600 text-sm sm:text-base max-w-xl animate-fade-in-up delay-200"
-              >
-                Comfort and confidence through every stage of motherhood.
-              </p> -->
-            </div>
-          </div>
-
-          <!-- Slide 2 -->
-          <div
-            class="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 opacity-0 slide"
-            style="
-              background-image: url('../../Images/IMG/banner1.png');
-            "
-          >
-            <!-- <div class="absolute inset-0 bg-white/40"></div> -->
-            <div
-              class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4"
-            >
-              <!-- <h2 class="text-2xl sm:text-3xl font-bold text-gray-600 animate-fade-in-up">
-                Because Motherhood Has Many Moods
-              </h2>
-              <p
-                class="mt-2 text-sm text-gray-600 sm:text-base max-w-xl animate-fade-in-up delay-200"
-              >
-                Soft wear, soothing care, and joyful essentials to match every stage and feeling.
-              </p> -->
-            </div>
-          </div>
-
-          <!-- Slide 3 -->
-          <div
-            class="absolute inset-0 w-full h-full bg-cover bg-center transition-opacity duration-1000 opacity-0 slide"
-            style="
-              background-image: url('../Images/IMG/banner3.png');
-            "
-          >
-            <!-- <div class="absolute inset-0 bg-black/40"></div> -->
-            <div
-              class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4"
-            >
-              <!-- <h2 class="text-2xl sm:text-3xl font-bold animate-fade-in-up">
-                Caring for Mothers
-              </h2>
-              <p
-                class="mt-2 text-sm sm:text-base max-w-xl animate-fade-in-up delay-200"
-              >
-                Essentials to make your journey stress-free and joyful.
-              </p> -->
-            </div>
-          </div>
-        </div>
-
-        <!-- ✅ Navigation Dots -->
-        <div
-          class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20"
-        >
-          <button
-            class="w-3 h-3 rounded-full bg-white opacity-70 active-dot transition-all duration-300"
-          ></button>
-          <button
-            class="w-3 h-3 rounded-full bg-white/50 hover:opacity-80 transition-all duration-300"
-          ></button>
-          <button
-            class="w-3 h-3 rounded-full bg-white/50 hover:opacity-80 transition-all duration-300"
-          ></button>
-        </div>
-      </section>
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Banner Section -->
+    <section class="mt-8 relative w-full h-[300px] sm:h-[350px] mb-6 overflow-hidden rounded-xl shadow-lg bg-gradient-to-r from-blue-100 to-pink-100">
+      <div class="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+        <h2 class="text-3xl font-bold text-gray-800">Prescription Medicines</h2>
+        <p class="mt-2 text-gray-600">Upload your prescription for safe medication</p>
       </div>
-
-<div class="flex flex-col lg:flex-row gap-8 mt-8">
-      <!-- Sidebar Filters (Desktop) -->
-      <aside id="filterSidebar" class="hidden lg:block lg:w-80 bg-[#ABE0F0] rounded-lg shadow-lg border p-6">
-        <form class="space-y-8">
-          <!-- Categories -->
-          <div class="border-b border-gray-200 pb-7">
-            <div class="flex items-center justify-between cursor-pointer select-none"
-                 onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
-              <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Categories</h3>
-              <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
-            </div>
-            <div class="mt-5 space-y-3 hidden">
-              <label class="flex items-center text-sm cursor-pointer">
-                <input type="radio" name="category" class="w-4 h-4 text-pink-600 rounded border-gray-300" checked>
-                <span class="ml-3 text-gray-700">All categories</span>
-              </label>
-              <label class="flex items-center text-sm cursor-pointer">
-                <input type="radio" name="category" class="w-4 h-4 text-pink-600 rounded border-gray-300">
-                <span class="ml-3 text-gray-700">Allergy and Fever</span>
-              </label>
-              <label class="flex items-center text-sm cursor-pointer">
-                <input type="radio" name="category" class="w-4 h-4 text-pink-600 rounded border-gray-300">
-                <span class="ml-3 text-gray-700">Antibiotics</span>
-              </label>
-              <label class="flex items-center text-sm cursor-pointer">
-                <input type="radio" name="category" class="w-4 h-4 text-pink-600 rounded border-gray-300">
-                <span class="ml-3 text-gray-700">Liver & Kidney Care</span>
-              </label>
-              <label class="flex items-center text-sm cursor-pointer">
-                <input type="radio" name="category" class="w-4 h-4 text-pink-600 rounded border-gray-300">
-                <span class="ml-3 text-gray-700">Stomach Care & Digestion</span>
-              </label>
-              <label class="flex items-center text-sm cursor-pointer">
-                <input type="radio" name="category" class="w-4 h-4 text-pink-600 rounded border-gray-300">
-                <span class="ml-3 text-gray-700">Skin Medicines</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Price Range Slider (0 - 10,000) -->
-          <div class="price-slider-container">
-  <h4>Price Range</h4>
-  <div class="slider-wrapper">
-    <div class="slider-fill" id="desktopFill"></div>
-    <input type="range" min="0" max="10000" value="0"    id="minThumb">
-    <input type="range" min="0" max="10000" value="10000" id="maxThumb">
+    </section>
   </div>
-  <div class="price-values">
-    <span id="minValue">₹0</span>
-    <span id="maxValue">₹10,000</span>
-  </div>
-</div>
 
-          <!-- Brands & Discount (same as before) -->
-          <div class="border-b border-gray-200 pb-7">
-            <div class="flex items-center justify-between cursor-pointer select-none"
-                 onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
-              <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Brands</h3>
-              <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
-            </div>
-            <div class="mt-5 space-y-3 hidden">
-              <label class="flex items-center text-sm"><input type="radio" name="brand" class="w-4 h-4 text-pink-600 rounded" checked><span class="ml-3 text-gray-700">All Brands</span></label>
-              <label class="flex items-center text-sm"><input type="radio" name="brand" class="w-4 h-4 text-pink-600 rounded"><span class="ml-3 text-gray-700">Biofield Pharma</span></label>
-              <label class="flex items-center text-sm"><input type="radio" name="brand" class="w-4 h-4 text-pink-600 rounded"><span class="ml-3 text-gray-700">Abbott</span></label>
-            </div>
+  <div class="flex flex-col lg:flex-row gap-8 mt-8 max-w-7xl mx-auto px-4">
+    <!-- Desktop Sidebar Filters -->
+    <aside id="filterSidebar" class="hidden lg:block lg:w-80 bg-[#ABE0F0] rounded-lg shadow-lg border p-6">
+      <form id="desktopFilterForm" class="space-y-8">
+        <!-- Categories -->
+        <div class="border-b border-gray-200 pb-7">
+          <div class="flex items-center justify-between cursor-pointer select-none"
+               onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+            <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Categories</h3>
+            <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
           </div>
-
-          <div class="border-b border-gray-200 pb-7">
-            <div class="flex items-center justify-between cursor-pointer select-none"
-                 onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
-              <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Discount</h3>
-              <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
-            </div>
-            <div class="mt-5 space-y-3 hidden">
-              <label class="flex items-center text-sm"><input type="radio" name="discount" class="w-4 h-4 text-pink-600 rounded" checked><span class="ml-3 text-gray-700">All Products</span></label>
-              <label class="flex items-center text-sm"><input type="radio" name="discount" class="w-4 h-4 text-pink-600 rounded"><span class="ml-3 text-gray-700">10% or more</span></label>
-              <label class="flex items-center text-sm"><input type="radio" name="discount" class="w-4 h-4 text-pink-600 rounded"><span class="ml-3 text-gray-700">25% or more</span></label>
-            </div>
+          <div class="mt-5 space-y-3">
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopCategory" value="all" class="w-4 h-4 text-pink-600 rounded border-gray-300" checked>
+              <span class="ml-3 text-gray-700">All categories</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopCategory" value="Allergy and Fever" class="w-4 h-4 text-pink-600 rounded border-gray-300">
+              <span class="ml-3 text-gray-700">Allergy and Fever</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopCategory" value="Antibiotics" class="w-4 h-4 text-pink-600 rounded border-gray-300">
+              <span class="ml-3 text-gray-700">Antibiotics</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopCategory" value="Liver & Kidney Care" class="w-4 h-4 text-pink-600 rounded border-gray-300">
+              <span class="ml-3 text-gray-700">Liver & Kidney Care</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopCategory" value="Stomach Care & Digestion" class="w-4 h-4 text-pink-600 rounded border-gray-300">
+              <span class="ml-3 text-gray-700">Stomach Care & Digestion</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopCategory" value="Skin Medicines" class="w-4 h-4 text-pink-600 rounded border-gray-300">
+              <span class="ml-3 text-gray-700">Skin Medicines</span>
+            </label>
           </div>
-
-          <button type="submit" class="w-full bg-[#E49BA6] hover:bg-[#F39F9F] text-white font-semibold py-3.5 rounded-md transition">
-            Show results
-          </button>
-        </form>
-      </aside>
-<!-- Main Products Area -->
-      <main class="flex-1">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-          <div>
-            <h2 id="categoryTitle" class="text-2xl font-bold text-gray-900">All Products</h2>
-            <p id="resultsCount" class="text-gray-600 mt-1">Showing all products</p>
-          </div>
-          <select id="sortSelect" class="hidden sm:block border border-gray-300 rounded-lg px-5 py-3 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none cursor-pointer">
-            <option value="default">Sort by: Featured</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="rating">Customer Rating</option>
-            <option value="newest">Newest First</option>
-          </select>
         </div>
 
-        <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- Products loaded via JS -->
+        <!-- Price Range Slider -->
+        <div class="price-slider-container">
+          <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4">Price Range</h4>
+          <div class="slider-wrapper">
+            <div class="slider-fill" id="desktopFill"></div>
+            <input type="range" min="0" max="10000" value="0" id="desktopMin">
+            <input type="range" min="0" max="10000" value="10000" id="desktopMax">
+          </div>
+          <div class="price-values">
+            <span id="desktopMinVal">₹0</span>
+            <span id="desktopMaxVal">₹10,000</span>
+          </div>
         </div>
-      </main>
-    </div>
 
-    <!-- Mobile Bottom Bar -->
-    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 z-50 lg:hidden shadow-2xl">
-      <button id="openSortSheet" class="flex-1 bg-[#E5BEB5] hover:bg-[#d4a89c] text-white font-bold py-3.5 rounded-lg transition">
-        Sort
-      </button>
-      <button id="openFilterSheet" class="flex-1 bg-[#E5BEB5] hover:bg-[#d4a89c] text-white font-bold py-3.5 rounded-lg transition">
-        Filters
-      </button>
-    </div>
-
-   <div id="filterSheet" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 transform translate-y-full transition-transform duration-300">
-      <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h3 class="text-lg font-bold">Filters</h3>
-        <button id="closeFilterSheet" class="text-2xl">X</button>
-      </div>
-      <div class="p-6 space-y-8">
-        <!-- Mobile Price Slider (inside filter sheet) -->
-<div class="price-slider-container">
-  <h4 class="font-semibold mb-4">Price Range</h4>
-  <div class="slider-wrapper">
-    <div class="slider-fill" id="mobileFill"></div>
-    <input type="range" min="0" max="10000" value="0"    id="mobileMinThumb">
-    <input type="range" min="0" max="10000" value="10000" id="mobileMaxThumb">
-  </div>
-  <div class="price-values">
-    <span id="mobileMinValue">₹0</span>
-    <span id="mobileMaxValue">₹10,000</span>
-  </div>
-</div>
-        <div class="flex gap-3 pt-6 border-t">
-          <button id="clearMobileFilters" class="flex-1 border border-pink-600 text-pink-600 py-3 rounded-lg font-bold">Clear All</button>
-          <button id="applyMobileFilters" class="flex-1 bg-pink-600 text-white py-3 rounded-lg font-bold">Apply Filters</button>
+        <!-- Brands -->
+        <div class="border-b border-gray-200 pb-7">
+          <div class="flex items-center justify-between cursor-pointer select-none"
+               onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+            <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Brands</h3>
+            <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+          </div>
+          <div class="mt-5 space-y-3">
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopBrand" value="all" class="w-4 h-4 text-pink-600 rounded" checked>
+              <span class="ml-3 text-gray-700">All Brands</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopBrand" value="Biofield Pharma" class="w-4 h-4 text-pink-600 rounded">
+              <span class="ml-3 text-gray-700">Biofield Pharma</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopBrand" value="Abbott" class="w-4 h-4 text-pink-600 rounded">
+              <span class="ml-3 text-gray-700">Abbott</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopBrand" value="Evapride" class="w-4 h-4 text-pink-600 rounded">
+              <span class="ml-3 text-gray-700">Evapride</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopBrand" value="FDC Limited" class="w-4 h-4 text-pink-600 rounded">
+              <span class="ml-3 text-gray-700">FDC Limited</span>
+            </label>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Backdrop -->
-    <div id="mobileSheetBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+        <!-- Discount -->
+        <div class="border-b border-gray-200 pb-7">
+          <div class="flex items-center justify-between cursor-pointer select-none"
+               onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+            <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Discount</h3>
+            <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+          </div>
+          <div class="mt-5 space-y-3">
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopDiscount" value="all" class="w-4 h-4 text-pink-600 rounded" checked>
+              <span class="ml-3 text-gray-700">All Products</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopDiscount" value="10" class="w-4 h-4 text-pink-600 rounded">
+              <span class="ml-3 text-gray-700">10% or more</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopDiscount" value="15" class="w-4 h-4 text-pink-600 rounded">
+              <span class="ml-3 text-gray-700">15% or more</span>
+            </label>
+            <label class="flex items-center text-sm cursor-pointer">
+              <input type="radio" name="desktopDiscount" value="20" class="w-4 h-4 text-pink-600 rounded">
+              <span class="ml-3 text-gray-700">20% or more</span>
+            </label>
+          </div>
+        </div>
 
-    <!-- Mobile Sort Sheet (NOW VISIBLE & WORKING) -->
-    <div id="sortSheet" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 transform translate-y-full transition-transform duration-300">
-      <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h3 class="text-lg font-bold">Sort By</h3>
-        <button id="closeSortSheet" class="text-2xl">&times;</button>
-      </div>
-      <div class="p-6 space-y-4">
-        <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-          <input type="radio" name="mobileSort" value="default" checked class="w-5 h-5 text-pink-600">
-          <span class="ml-4 font-medium">Featured</span>
-        </label>
-        <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-          <input type="radio" name="mobileSort" value="price-low" class="w-5 h-5 text-pink-600">
-          <span class="ml-4 font-medium">Price: Low to High</span>
-        </label>
-        <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-          <input type="radio" name="mobileSort" value="price-high" class="w-5 h-5 text-pink-600">
-          <span class="ml-4 font-medium">Price: High to Low</span>
-        </label>
-        <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-          <input type="radio" name="mobileSort" value="rating" class="w-5 h-5 text-pink-600">
-          <span class="ml-4 font-medium">Customer Rating</span>
-        </label>
-        <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-          <input type="radio" name="mobileSort" value="newest" class="w-5 h-5 text-pink-600">
-          <span class="ml-4 font-medium">Newest First</span>
-        </label>
-      </div>
-      <div class="p-4 border-t bg-white sticky bottom-0">
-        <button id="applySortBtn" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3.5 rounded-lg">
-          Apply Sort
+        <button type="submit" class="w-full bg-blue-400 hover:bg-blue-600 text-white font-semibold py-3.5 rounded-md transition">
+          Apply Filters
         </button>
+      </form>
+    </aside>
+
+    <!-- Main Products Area -->
+    <main class="flex-1">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+        <div>
+          <h2 id="categoryTitle" class="text-2xl font-bold text-gray-900">All Products</h2>
+          <p id="resultsCount" class="text-gray-600 mt-1">Showing all products</p>
+        </div>
+        <select id="sortSelect" class="hidden sm:block border border-gray-300 rounded-lg px-5 py-3 text-sm focus:ring-2 focus:ring-pink-500 focus:outline-none cursor-pointer">
+          <option value="default">Sort by: Featured</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="rating">Customer Rating</option>
+          <option value="newest">Newest First</option>
+        </select>
       </div>
+
+      <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Products loaded via JS -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Mobile Bottom Bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-3 z-50 lg:hidden shadow-2xl">
+    <button id="openSortSheet" class="flex-1 bg-blue-400 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg transition">
+      Sort
+    </button>
+    <button id="openFilterSheet" class="flex-1 bg-blue-400 hover:bg-blue-500 text-white font-bold py-3.5 rounded-lg transition">
+      Filters
+    </button>
+  </div>
+
+  <!-- Mobile Filter Sheet -->
+  <div id="filterSheet" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 transform translate-y-full transition-transform duration-300">
+    <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center z-10">
+      <h3 class="text-lg font-bold">Filters</h3>
+      <button id="closeFilterSheet" class="text-2xl">&times;</button>
     </div>
 
-    <!-- Upload Prescription Modal -->
-    <div id="uploadModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-2">
-      <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-6 md:p-8">
-          <button onclick="document.getElementById('uploadModal').classList.add('hidden')" class="float-right text-2xl">&times;</button>
-          <div class="grid md:grid-cols-2 gap-8">
-            <div>
-              <h2 class="text-2xl font-bold mb-4">Upload Prescription</h2>
-              <p class="font-semibold text-pink-600 mb-4" id="modalProductName"></p>
-              <img id="modalProductImage" class="w-full h-28 object-contain rounded-lg mb-6 hidden" alt="Product">
-              <label class="block border-2 border-dashed border-pink-300 rounded-xl p-6 text-center cursor-pointer hover:border-pink-500 transition">
-                <input type="file" id="prescriptionFile" accept="image/*,.pdf" class="hidden">
-                <svg class="w-12 h-12 mx-auto text-pink-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3v-11"/>
-                <p class="font-medium">Click to upload prescription</p></svg>
+    <div class="p-6 space-y-8">
+      <!-- CATEGORIES (Mobile) -->
+      <div class="border-b border-gray-200 pb-6">
+        <div class="flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+          <h4 class="font-bold text-gray-800">Categories</h4>
+          <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+        </div>
+        <div class="mt-4 space-y-3">
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileCategory" value="all" checked class="w-4 h-4 text-pink-600">
+            <span class="ml-3">All categories</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileCategory" value="Allergy and Fever" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">Allergy and Fever</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileCategory" value="Antibiotics" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">Antibiotics</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileCategory" value="Liver & Kidney Care" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">Liver & Kidney Care</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileCategory" value="Stomach Care & Digestion" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">Stomach Care & Digestion</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileCategory" value="Skin Medicines" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">Skin Medicines</span>
+          </label>
+        </div>
+      </div>
 
-                <p class="text-sm text-gray-500 mt-2">Supports JPG, PNG, PDF</p>
-              </label>
-              <!-- <p id="fileNameDisplay" class="mt-3 text-sm text-gray-700"></p> -->
-              <img id="prescriptionPreviewImg" class="hidden w-full mt-4 rounded-lg border" alt="Preview">
-              <button id="submitPrescription" class="mt-6 w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 rounded-lg transition">
-                Submit Prescription
-              </button>
-            </div>
-            <div class="bg-gray-50 rounded-xl p-6">
-              <h3 class="font-bold text-lg mb-4">How it works?</h3>
-              <ol class="space-y-4 text-gray-700">
-                <li>Pharmacist verifies your prescription</li>
-                <li>Items added to cart automatically</li>
-                <li>Get maximum discount applied</li>
-                <li>Choose fastest delivery slot</li>
-                <li>Complete payment securely</li>
-              </ol>
-            </div>
+      <!-- PRICE RANGE (Mobile) -->
+      <div class="price-slider-container">
+        <h4 class="font-semibold mb-4">Price Range</h4>
+        <div class="slider-wrapper">
+          <div class="slider-fill" id="mobileFill"></div>
+          <input type="range" min="0" max="10000" value="0" id="mobileMin">
+          <input type="range" min="0" max="10000" value="10000" id="mobileMax">
+        </div>
+        <div class="price-values">
+          <span id="mobileMinVal">₹0</span>
+          <span id="mobileMaxVal">₹10,000</span>
+        </div>
+      </div>
+
+      <!-- BRANDS (Mobile) -->
+      <div class="border-b border-gray-200 pb-6">
+        <div class="flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+          <h4 class="font-bold text-gray-800">Brands</h4>
+          <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+        </div>
+        <div class="mt-4 space-y-3">
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileBrand" value="all" checked class="w-4 h-4 text-pink-600">
+            <span class="ml-3">All Brands</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileBrand" value="Biofield Pharma" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">Biofield Pharma</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileBrand" value="Abbott" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">Abbott</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileBrand" value="Evapride" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">Evapride</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileBrand" value="FDC Limited" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">FDC Limited</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- DISCOUNT (Mobile) -->
+      <div class="border-b border-gray-200 pb-6">
+        <div class="flex items-center justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
+          <h4 class="font-bold text-gray-800">Discount</h4>
+          <i class="fas fa-chevron-down text-gray-500 transition-transform duration-200"></i>
+        </div>
+        <div class="mt-4 space-y-3">
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileDiscount" value="all" checked class="w-4 h-4 text-pink-600">
+            <span class="ml-3">All Products</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileDiscount" value="10" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">10% or more</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileDiscount" value="15" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">15% or more</span>
+          </label>
+          <label class="flex items-center text-sm">
+            <input type="radio" name="mobileDiscount" value="20" class="w-4 h-4 text-pink-600">
+            <span class="ml-3">20% or more</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Apply & Clear Buttons -->
+      <div class="flex gap-3 pt-6 border-t">
+        <button id="clearMobileFilters" class="flex-1 border border-pink-600 text-pink-600 py-3 rounded-lg font-bold">Clear All</button>
+        <button id="applyMobileFilters" class="flex-1 bg-pink-600 text-white py-3 rounded-lg font-bold">Apply Filters</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backdrop -->
+  <div id="mobileSheetBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+
+  <!-- Mobile Sort Sheet -->
+  <div id="sortSheet" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 transform translate-y-full transition-transform duration-300">
+    <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+      <h3 class="text-lg font-bold">Sort By</h3>
+      <button id="closeSortSheet" class="text-2xl">&times;</button>
+    </div>
+    <div class="p-6 space-y-4">
+      <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+        <input type="radio" name="mobileSort" value="default" checked class="w-5 h-5 text-pink-600">
+        <span class="ml-4 font-medium">Featured</span>
+      </label>
+      <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+        <input type="radio" name="mobileSort" value="price-low" class="w-5 h-5 text-pink-600">
+        <span class="ml-4 font-medium">Price: Low to High</span>
+      </label>
+      <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+        <input type="radio" name="mobileSort" value="price-high" class="w-5 h-5 text-pink-600">
+        <span class="ml-4 font-medium">Price: High to Low</span>
+      </label>
+      <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+        <input type="radio" name="mobileSort" value="rating" class="w-5 h-5 text-pink-600">
+        <span class="ml-4 font-medium">Customer Rating</span>
+      </label>
+      <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+        <input type="radio" name="mobileSort" value="newest" class="w-5 h-5 text-pink-600">
+        <span class="ml-4 font-medium">Newest First</span>
+      </label>
+    </div>
+    <div class="p-4 border-t bg-white sticky bottom-0">
+      <button id="applySortBtn" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3.5 rounded-lg">
+        Apply Sort
+      </button>
+    </div>
+  </div>
+
+  <!-- Upload Prescription Modal -->
+  <div id="uploadModal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-2">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="p-6 md:p-8">
+        <button onclick="document.getElementById('uploadModal').classList.add('hidden')" class="float-right text-2xl">&times;</button>
+        <div class="grid md:grid-cols-2 gap-8">
+          <div>
+            <h2 class="text-2xl font-bold mb-4">Upload Prescription</h2>
+            <p class="font-semibold text-pink-600 mb-4" id="modalProductName"></p>
+            <label class="block border-2 border-dashed border-pink-300 rounded-xl p-6 text-center cursor-pointer hover:border-pink-500 transition">
+              <input type="file" id="prescriptionFile" accept="image/*,.pdf" class="hidden">
+              <svg class="w-12 h-12 mx-auto text-pink-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3v-11"/>
+              </svg>
+              <p class="font-medium">Click to upload prescription</p>
+              <p class="text-sm text-gray-500 mt-2">Supports JPG, PNG, PDF</p>
+            </label>
+            <img id="prescriptionPreviewImg" class="hidden w-full mt-4 rounded-lg border" alt="Preview">
+            <button id="submitPrescription" class="mt-6 w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg transition">
+              Submit Prescription
+            </button>
+          </div>
+          <div class="bg-gray-50 rounded-xl p-6">
+            <h3 class="font-bold text-lg mb-4">How it works?</h3>
+            <ol class="space-y-4 text-gray-700">
+              <li>✓ Pharmacist verifies your prescription</li>
+              <li>✓ Items added to cart automatically</li>
+              <li>✓ Get maximum discount applied</li>
+              <li>✓ Choose fastest delivery slot</li>
+              <li>✓ Complete payment securely</li>
+            </ol>
           </div>
         </div>
       </div>
     </div>
-  <!-- Footer Placeholder -->
-  <div id="footer-placeholder"></div>
+  </div>
 
-  <script>
+  <!-- footer placeholder -->
+   <div id="footer-placeholder"></div>
+
+   <script>
     function loadHeader() {
         fetch('../../Header/header.html')
             .then(r => { if (!r.ok) throw r; return r.text(); })
@@ -455,1361 +469,459 @@
     });
 </script>
 
- <!-- Main JS -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // ================
-      // Data: Only Rx Products
-      // ================
       const products = [
-       
-  {
-    "id": 1,
-    "name": "Isoxsuprine Hydrochloride SR 40mg",
-    "price": 85,
-    "originalPrice": 100,
-    "discount": "15% off",
-    "category": "Women's Health",
-    "brand": "Biofield Pharma",
-    "image": "https://via.placeholder.com/300x200.png?text=Isoxsuprine+40mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 2,
-    "name": "Letrozole Tablet",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Evapride",
-    "image": "https://via.placeholder.com/300x200.png?text=Letrozole+Tablet",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 3,
-    "name": "Doxylamine Succinate Pyridoxine Hydrochloride and Folic Acid",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Ultrableess Remedies Pvt Ltd",
-    "image": "https://via.placeholder.com/300x200.png?text=Doxylamine+Combo",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 4,
-    "name": "Cefixime Tab 200mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Abbott Healthcare Pvt Ltd",
-    "image": "https://via.placeholder.com/300x200.png?text=Cefixime+200mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 5,
-    "name": "Amoxycillin and Potassium Clavunate Tab IP",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Abbott",
-    "image": "https://via.placeholder.com/300x200.png?text=Amoxycillin+Clavunate",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 6,
-    "name": "Tranexamic Acid 500mg and Mefenamic Acid 250mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Biofield Pharma Pvt Ltd",
-    "image": "https://via.placeholder.com/300x200.png?text=Tranexamic+Mefenamic",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 7,
-    "name": "Trypsin 48mg Bromelain 90mg and Rutoside Trihydrate 100mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anti-inflammatory",
-    "brand": "Flexicare CD",
-    "image": "https://via.placeholder.com/300x200.png?text=Trypsin+Bromelain",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 8,
-    "name": "Natural Micronised Progesterone 200mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Evapride Healthcare Pvt Ltd",
-    "image": "https://via.placeholder.com/300x200.png?text=Progesterone+200mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 9,
-    "name": "Levonorgestrel 0.15mg Ethinyloestradiol 0.03mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Lincoln Pharmaceutical Ltd",
-    "image": "https://via.placeholder.com/300x200.png?text=Levonorgestrel+EE",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 10,
-    "name": "Azithromycin 250mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "FDC Limited",
-    "image": "https://via.placeholder.com/300x200.png?text=Azithromycin+250mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 11,
-    "name": "Calcium Carbonate to Elemental Calcium",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Supplements",
-    "brand": "Shiel Healthcare Pvt Ltd",
-    "image": "https://via.placeholder.com/300x200.png?text=Calcium+Carbonate",
-    "prescriptionRequired": false
-  },
-  {
-    "id": 12,
-    "name": "Sildenafil Citrate 25mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Men's Health",
-    "brand": "Wayonext Pharmaceuticals Ltd",
-    "image": "https://via.placeholder.com/300x200.png?text=Sildenafil+25mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 13,
-    "name": "Norethisterone 10mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Norethisterone+10mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 14,
-    "name": "Lajalu 100mg Bala 50mg Ashwagandha 50mg Shatavari 50mg Yashimadhu 25mg Cow Milk 250mg Sesame Oil 500mg Coconut Oil 200mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Ayurvedic",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Ayurvedic+Combo",
-    "prescriptionRequired": false
-  },
-  {
-    "id": 15,
-    "name": "Bacillus Clausii 2 Billion",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Probiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Bacillus+Clausii",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 16,
-    "name": "Saraca Indica 1800mg, Withania Somnifera 50mg, Asparagus Racemosus 15mg, Quercus Infectoria 150mg, Terminalia Chebula 15mg, Emblica Officinalis 15mg, Sida Cordifolia 30mg, Berberis Aristata 30mg, Cyperus Rotundus 30mg, Asparagus Adscendens 15mg, Nardostachys Jatamansi 15mg, Mesua Ferra 15mg, Symplocos Racemosa 15mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Ayurvedic",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Herbal+Blend",
-    "prescriptionRequired": false
-  },
-  {
-    "id": 17,
-    "name": "Frusemide IP 10mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Diuretics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Frusemide+10mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 18,
-    "name": "Promethazine Hydrochloride 25mg, Sodium Metabisulphite 0.1%w/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antihistamine",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Promethazine+25mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 19,
-    "name": "Labetalol Hydrochloride 5mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Cardiovascular",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Labetalol+5mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 20,
-    "name": "Isoxsuprine Hydrochloride 5mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Isoxsuprine+5mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 21,
-    "name": "Drotaverine Hydrochloride 40mg, Absolute Alcohol 8.0%v/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antispasmodic",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Drotaverine+40mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 22,
-    "name": "Polidocanol 30mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Sclerosing Agent",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Polidocanol+30mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 23,
-    "name": "Hydrocortisone Sodium 100mg, Sodium Phosphate IP",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Corticosteroid",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Hydrocortisone+100mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 24,
-    "name": "Paracetamol 0.150g Benzyl Alcohol 2%v/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Analgesic",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Paracetamol+Injection",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 25,
-    "name": "Dexamethasone Sodium Phosphate 4mg, Propyl Paraben 0.02%w/v, Methyl Paraben 0.18%w/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Corticosteroid",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Dexamethasone+4mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 26,
-    "name": "NADPH Not Less Than 10ml, Total Peptide Not Less Than 90ml, Total Nitrogen Not More Than 0.08%w/v, Benzyl Alcohol IP 1.5%v/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Injectables",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Peptide+Injection",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 27,
-    "name": "Tranexamic Acid 100mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Hemostatics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Tranexamic+100mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 28,
-    "name": "Valethamate Bromide 8mg, Sodium Chloride 8mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antispasmodic",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Valethamate+8mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 29,
-    "name": "Pheniramine Maleate 22.75mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antihistamine",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Pheniramine+22.75mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 30,
-    "name": "Ceftriaxone 1000mg, Sulbactam 500mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Ceftriaxone+Sulbactam",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 31,
-    "name": "Vancomycin 1000mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Vancomycin+1000mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 32,
-    "name": "Cefotaxime Sodium 1g",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Cefotaxime+1g",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 33,
-    "name": "Amoxicillin 1000mg, Potassium Clavunate 200mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Amoxicillin+Clavunate+High",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 34,
-    "name": "Ceftriaxone 1000mg, Sulbactam 500mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Ceftriaxone+Sulbactam",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 35,
-    "name": "Ceftriaxone 1g",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Ceftriaxone+1g",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 36,
-    "name": "Misoprostol 200mcg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Misoprostol+200mcg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 37,
-    "name": "Ropivacaine Hydrochloride 7.5mg, Sodium Chloride 7.5mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Ropivacaine+7.5mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 38,
-    "name": "Diluted Ethanol 25% IP",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Disinfectant",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Ethanol+25%",
-    "prescriptionRequired": false
-  },
-  {
-    "id": 39,
-    "name": "Hydrogen Peroxide",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Disinfectant",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Hydrogen+Peroxide",
-    "prescriptionRequired": false
-  },
-  {
-    "id": 40,
-    "name": "Isoflurane IP 100ml",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Isoflurane+100ml",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 41,
-    "name": "Mioprostol IP 200mcg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Mioprostol+200mcg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 42,
-    "name": "Adrenalin 1000",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Emergency",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Adrenalin+1000",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 43,
-    "name": "Aminophylline 25mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Respiratory",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Aminophylline+25mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 44,
-    "name": "Etofylline 84.70mg, Theophylline 25.30mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Respiratory",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Etofylline+Theophylline",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 45,
-    "name": "Lignocaine Hydrochloride 21.3mg, Sodium Chloride 6mg, Methyl Paraben 1mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Lignocaine+21.3mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 46,
-    "name": "Halothane",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Halothane",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 47,
-    "name": "Sterile Haemocoagulase Solution 0.2CU",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Hemostatics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Haemocoagulase+0.2CU",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 48,
-    "name": "Bupivacaine Hydrochloride 5mg, Sodium Chloride 8mg, Methylparaben 1mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Bupivacaine+5mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 49,
-    "name": "Midazolam 1mg, Benzyl Alcohol 1%v/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Sedatives",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Midazolam+1mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 50,
-    "name": "Mephentermine Sulphate 30mg, Methylparaben 0.18%w/v, Propylparaben 0.02%w/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Vasopressor",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Mephentermine+30mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 51,
-    "name": "Ketamine Hydrochloride 50mg, Benzethonium Chloride 0.01%w/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Ketamine+50mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 52,
-    "name": "Propofol 1%w/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Propofol+1%",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 53,
-    "name": "Succinylcholine Chloride 50mg, Benzyl Alcohol 1.5%v/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Muscle Relaxant",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Succinylcholine+50mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 54,
-    "name": "Lignocaine Hydrochloride 21.3mg, Adrenaline Bitartrate 0.009mg, Adrenaline 0.005mg, Potassium Metabisulfite 12mg, Sodium Chloride 65mg, Methylparaben 1.0mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Lignocaine+Adrenaline",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 55,
-    "name": "Bupivacaine Hydrochloride 5mg, Dextrose Anhydrous 80mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Bupivacaine+Heavy",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 56,
-    "name": "Atropine Sulphate 0.64mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anticholinergic",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Atropine+0.64mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 57,
-    "name": "Methylergometrine 0.2mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Methylergometrine+0.2mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 58,
-    "name": "Adrenaline Bitartrate 1mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Emergency",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Adrenaline+1mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 59,
-    "name": "Cefotaxime Sodium 1g",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Cefotaxime+1g",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 60,
-    "name": "Cefotaxime Sodium 1g",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Cefotaxime+1g",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 61,
-    "name": "Cefixime 200mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Cefixime+200mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 62,
-    "name": "Tocopheryl Acetate 400mg Alpha Tocopherol 182mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Supplements",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Vitamin+E+400mg",
-    "prescriptionRequired": false
-  },
-  {
-    "id": 63,
-    "name": "Lignocaine 21.3mg, Sodium Chloride 6mg, Methylparaben 1mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Lignocaine+21.3mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 64,
-    "name": "Amoxycillin 500mg, Potassium Clavunate 125mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Amoxycillin+Clavunate+625",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 65,
-    "name": "Cefotaxime Sodium 1g",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Cefotaxime+1g",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 66,
-    "name": "Azithromycin 250mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Azithromycin+250mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 67,
-    "name": "Piperacillin Sodium 4000mg, Tazobactam Sodium 500mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Piperacillin+Tazobactam",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 68,
-    "name": "Amoxycillin 500mg, Potassium Clavunate 125mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Amoxycillin+Clavunate+625",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 69,
-    "name": "Norethisterone 10mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Norethisterone+10mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 70,
-    "name": "Lignocaine Hydrochloride 21.3mg, Adrenaline Bitartrate 0.009mg, Adrenaline 0.005mg, Potassium Metabisulfite 12mg, Sodium Chloride 65mg, Methylparaben 1.0mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Lignocaine+Adrenaline",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 71,
-    "name": "Bupivacaine Hydrochloride 5mg, Dextrose Anhydrous 80mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Bupivacaine+Heavy",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 72,
-    "name": "Atropine Sulphate 0.64mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anticholinergic",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Atropine+0.64mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 73,
-    "name": "Methylergometrine 0.2mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Methylergometrine+0.2mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 74,
-    "name": "Adrenaline Bitartrate 1mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Emergency",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Adrenaline+1mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 75,
-    "name": "Cefotaxime Sodium 1g",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Cefotaxime+1g",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 76,
-    "name": "Cefixime 200mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Cefixime+200mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 77,
-    "name": "Tocopheryl Acetate 400mg Alpha Tocopherol 182mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Supplements",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Vitamin+E+400mg",
-    "prescriptionRequired": false
-  },
-  {
-    "id": 78,
-    "name": "Lignocaine 21.3mg, Sodium Chloride 6mg, Methylparaben 1mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anesthetics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Lignocaine+21.3mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 79,
-    "name": "Amoxycillin 500mg, Potassium Clavunate 125mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Amoxycillin+Clavunate+625",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 80,
-    "name": "Cefotaxime Sodium 1g",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Cefotaxime+1g",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 81,
-    "name": "Azithromycin 250mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Azithromycin+250mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 82,
-    "name": "Piperacillin Sodium 4000mg, Tazobactam Sodium 500mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Piperacillin+Tazobactam",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 83,
-    "name": "Amoxycillin 500mg, Potassium Clavunate 125mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Antibiotics",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Amoxycillin+Clavunate+625",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 84,
-    "name": "Norethisterone 10mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Women's Health",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Norethisterone+10mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 85,
-    "name": "Levetiracetam 100mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Neurology",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Levetiracetam+100mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 86,
-    "name": "Clonidine Hydrochloride 150mcg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Cardiovascular",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Clonidine+150mcg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 87,
-    "name": "Glycopyrrolate 0.5mg, Neostigmine Methylsulphate 2.5mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Reversal Agent",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Glycopyrrolate+Neostigmine",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 88,
-    "name": "Dexmedetomidine 50mcg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Sedatives",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Dexmedetomidine+50mcg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 89,
-    "name": "Glycopyrrolate 0.2mg, Benzyl Alcohol 0.9%w/v",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Anticholinergic",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Glycopyrrolate+0.2mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 90,
-    "name": "Menadione Sodium 10mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Vitamin K",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Menadione+10mg",
-    "prescriptionRequired": true
-  },
-  {
-    "id": 91,
-    "name": "Pentazocine 30mg",
-    "price": 0,
-    "originalPrice": 0,
-    "discount": "",
-    "category": "Analgesic",
-    "brand": "Unknown",
-    "image": "https://via.placeholder.com/300x200.png?text=Pentazocine+30mg",
-    "prescriptionRequired": true
-  }
-
+        {
+          "id": 1,
+          "name": "Isoxsuprine Hydrochloride SR 40mg",
+          "price": 85,
+          "originalPrice": 100,
+          "discount": "15% off",
+          "category": "Women's Health",
+          "brand": "Biofield Pharma",
+          "image": "https://via.placeholder.com/300x200.png?text=Isoxsuprine+40mg",
+          "prescriptionRequired": true,
+          "rating": 4.5
+        },
+        {
+          "id": 2,
+          "name": "Letrozole Tablet",
+          "price": 150,
+          "originalPrice": 180,
+          "discount": "17% off",
+          "category": "Women's Health",
+          "brand": "Evapride",
+          "image": "https://via.placeholder.com/300x200.png?text=Letrozole+Tablet",
+          "prescriptionRequired": true,
+          "rating": 4.2
+        },
+        {
+          "id": 3,
+          "name": "Doxylamine Succinate Combo",
+          "price": 95,
+          "originalPrice": 120,
+          "discount": "21% off",
+          "category": "Women's Health",
+          "brand": "Ultrableess Remedies",
+          "image": "https://via.placeholder.com/300x200.png?text=Doxylamine+Combo",
+          "prescriptionRequired": true,
+          "rating": 4.0
+        },
+        {
+          "id": 4,
+          "name": "Cefixime Tab 200mg",
+          "price": 120,
+          "originalPrice": 150,
+          "discount": "20% off",
+          "category": "Antibiotics",
+          "brand": "Abbott Healthcare Pvt Ltd",
+          "image": "https://via.placeholder.com/300x200.png?text=Cefixime+200mg",
+          "prescriptionRequired": true,
+          "rating": 4.7
+        },
+        {
+          "id": 5,
+          "name": "Amoxycillin and Potassium Clavunate Tab IP",
+          "price": 95,
+          "originalPrice": 120,
+          "discount": "21% off",
+          "category": "Antibiotics",
+          "brand": "Abbott",
+          "image": "https://via.placeholder.com/300x200.png?text=Amoxycillin+Clavunate",
+          "prescriptionRequired": true,
+          "rating": 4.6
+        },
+        {
+          "id": 6,
+          "name": "Tranexamic Acid 500mg and Mefenamic Acid 250mg",
+          "price": 110,
+          "originalPrice": 140,
+          "discount": "21% off",
+          "category": "Women's Health",
+          "brand": "Biofield Pharma Pvt Ltd",
+          "image": "https://via.placeholder.com/300x200.png?text=Tranexamic+Mefenamic",
+          "prescriptionRequired": true,
+          "rating": 4.3
+        },
+        {
+          "id": 7,
+          "name": "Trypsin 48mg Bromelain 90mg",
+          "price": 180,
+          "originalPrice": 220,
+          "discount": "18% off",
+          "category": "Anti-inflammatory",
+          "brand": "Flexicare CD",
+          "image": "https://via.placeholder.com/300x200.png?text=Trypsin+Bromelain",
+          "prescriptionRequired": true,
+          "rating": 4.1
+        },
+        {
+          "id": 8,
+          "name": "Natural Micronised Progesterone 200mg",
+          "price": 250,
+          "originalPrice": 300,
+          "discount": "17% off",
+          "category": "Women's Health",
+          "brand": "Evapride Healthcare",
+          "image": "https://via.placeholder.com/300x200.png?text=Progesterone+200mg",
+          "prescriptionRequired": true,
+          "rating": 4.8
+        },
+        {
+          "id": 9,
+          "name": "Azithromycin 250mg",
+          "price": 140,
+          "originalPrice": 170,
+          "discount": "18% off",
+          "category": "Antibiotics",
+          "brand": "FDC Limited",
+          "image": "https://via.placeholder.com/300x200.png?text=Azithromycin+250mg",
+          "prescriptionRequired": true,
+          "rating": 4.4
+        },
+        {
+          "id": 10,
+          "name": "Labetalol Hydrochloride 5mg",
+          "price": 200,
+          "originalPrice": 250,
+          "discount": "20% off",
+          "category": "Cardiovascular",
+          "brand": "Unknown",
+          "image": "https://via.placeholder.com/300x200.png?text=Labetalol+5mg",
+          "prescriptionRequired": true,
+          "rating": 4.5
+        },
+        {
+          "id": 11,
+          "name": "Ropivacaine Hydrochloride 7.5mg",
+          "price": 450,
+          "originalPrice": 500,
+          "discount": "10% off",
+          "category": "Anesthetics",
+          "brand": "Unknown",
+          "image": "https://via.placeholder.com/300x200.png?text=Ropivacaine+7.5mg",
+          "prescriptionRequired": true,
+          "rating": 4.2
+        },
+        {
+          "id": 12,
+          "name": "Lignocaine Hydrochloride 21.3mg",
+          "price": 180,
+          "originalPrice": 220,
+          "discount": "18% off",
+          "category": "Anesthetics",
+          "brand": "Unknown",
+          "image": "https://via.placeholder.com/300x200.png?text=Lignocaine+21.3mg",
+          "prescriptionRequired": true,
+          "rating": 4.3
+        },
+        {
+          "id": 13,
+          "name": "Propofol 1%w/v",
+          "price": 650,
+          "originalPrice": 750,
+          "discount": "13% off",
+          "category": "Anesthetics",
+          "brand": "Unknown",
+          "image": "https://via.placeholder.com/300x200.png?text=Propofol+1%",
+          "prescriptionRequired": true,
+          "rating": 4.6
+        },
+        {
+          "id": 14,
+          "name": "Vancomycin 1000mg",
+          "price": 850,
+          "originalPrice": 1000,
+          "discount": "15% off",
+          "category": "Antibiotics",
+          "brand": "Unknown",
+          "image": "https://via.placeholder.com/300x200.png?text=Vancomycin+1000mg",
+          "prescriptionRequired": true,
+          "rating": 4.9
+        },
+        {
+          "id": 15,
+          "name": "Ceftriaxone 1000mg Sulbactam 500mg",
+          "price": 320,
+          "originalPrice": 400,
+          "discount": "20% off",
+          "category": "Antibiotics",
+          "brand": "Unknown",
+          "image": "https://via.placeholder.com/300x200.png?text=Ceftriaxone+Sulbactam",
+          "prescriptionRequired": true,
+          "rating": 4.7
+        }
       ];
 
-      // ================
-        function initSlider(minThumbId, maxThumbId, fillId, minDisplayId, maxDisplayId) {
-   const minThumb = document.getElementById(minThumbId);
-   const maxThumb = document.getElementById(maxThumbId);
-   const fill = document.getElementById(fillId);
-   const minDisplay = document.getElementById(minDisplayId);
-   const maxDisplay = document.getElementById(maxDisplayId);
+      const grid = document.getElementById('productsGrid');
 
-   function update() {
-     let minVal = parseInt(minThumb.value);
-     let maxVal = parseInt(maxThumb.value);
+      // FILTER STATE
+      let currentFilters = {
+        category: 'all',
+        minPrice: 0,
+        maxPrice: 10000,
+        sortBy: 'default',
+        brand: 'all',
+        discount: 'all'
+      };
 
-     if (minVal > maxVal) {
-       [minVal, maxVal] = [maxVal, minVal];
-       minThumb.value = minVal;
-       maxThumb.value = maxVal;
-     }
-
-     const percentMin = (minVal / 10000) * 100;
-     const percentMax = (maxVal / 10000) * 100;
-
-     fill.style.left = percentMin + '%';
-     fill.style.width = (percentMax - percentMin) + '%';
-
-     minDisplay.textContent = '₹' + minVal.toLocaleString('en-IN');
-     maxDisplay.textContent = '₹' + maxVal.toLocaleString('en-IN');
-   }
-
-   minThumb.addEventListener('input', update);
-   maxThumb.addEventListener('input', update);
-   update(); // initial
- }
-
- // Initialize both sliders
- initSlider('minThumb', 'maxThumb', 'desktopFill', 'minValue', 'maxValue');
- initSlider('mobileMinThumb', 'mobileMaxThumb', 'mobileFill', 'mobileMinValue', 'mobileMaxValue');
-
- // ... rest of your existing JS stays the same
-
-
-   
-        // Mobile sheets
-        const backdrop = document.getElementById('mobileSheetBackdrop');
-        const sortSheet = document.getElementById('sortSheet');
-        const filterSheet = document.getElementById('filterSheet');
-
-        document.getElementById('openSortSheet').onclick = () => { sortSheet.classList.remove('translate-y-full'); backdrop.classList.remove('hidden'); };
-        document.getElementById('openFilterSheet').onclick = () => { filterSheet.classList.remove('translate-y-full'); backdrop.classList.remove('hidden'); };
-        document.getElementById('closeSortSheet').onclick = document.getElementById('closeFilterSheet').onclick = backdrop.onclick = () => {
-          sortSheet.classList.add('translate-y-full');
-          filterSheet.classList.add('translate-y-full');
-          backdrop.classList.add('hidden');
-        };
-      
-
-        
-
-      const productsGrid = document.getElementById('productsGrid'); // Fixed ID!
-      const categoryList = document.getElementById('categoryList');
-      const brandList = document.getElementById('brandList');
-      const brandToggle = brandList?.previousElementSibling?.querySelector('span');
-      const brandFilters = document.querySelectorAll('.brand-filter');
-      const sortSelect = document.getElementById('sortSelect');
-      const uploadModal = document.getElementById('uploadModal');
-      const validPrescriptionModal = document.getElementById('validPrescriptionModal');
-      const validPrescriptionBtn = document.getElementById('validPrescriptionBtn');
-
-      let activeCategory = null;
-      let activeSort = null;
-
-      // ================
-      // Helpers
-      // ================
-      function escapeHtml(str) {
-        if (typeof str !== 'string') return str;
-        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-      }
-
-      // ================
-      // Product Card (Always Rx)
-      // ================
-      function createProductCard(product) {
+      // Product Card
+      function createCard(p) {
         const div = document.createElement('div');
-        div.className = 'product-card bg-white p-4 shadow rounded-lg flex flex-col justify-between relative cursor-pointer hover:shadow-lg transition-shadow';
-
+        div.className = 'bg-white rounded-lg shadow hover:shadow-xl transition p-4 relative';
         div.innerHTML = `
-          <div class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">Rx Required</div>
-          <img src="${product.image}" alt="${escapeHtml(product.name)}" class="product-image w-full h-32 rounded-lg mb-3">
-          <p class="text-sm text-gray-600 font-medium">${escapeHtml(product.name)}</p>
-          <p class="text-xs text-gray-500">${escapeHtml(product.brand)}</p>
-          <p class="text-red-600 text-xs mt-1 font-semibold">Prescription needed</p>
-          <p class="text-green-600 font-bold mt-2">₹${product.price.toFixed(2)} 
-            ${product.originalPrice ? `<span class="text-gray-500 line-through text-sm">₹${product.originalPrice.toFixed(2)}</span> <span class="text-green-600 text-sm">${escapeHtml(product.discount)}</span>` : ''}</p>
-          <button class="mt-3 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition flex items-center justify-center gap-2 upload-pres-btn" data-product='${escapeHtml(JSON.stringify(product))}'>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
+          <div class="absolute top-2 right-2 bg-red-600 text-white text-xs px-2 py-1 rounded-full z-10">Rx Required</div>
+          <img src="${p.image}" class="w-full h-40 object-cover rounded mb-3">
+          <h3 class="font-semibold text-sm line-clamp-2">${p.name}</h3>
+          <p class="text-xs text-gray-600">${p.brand}</p>
+          <p class="text-lg font-bold text-green-600 mt-2">₹${p.price}</p>
+          ${p.originalPrice ? `<p class="text-xs"><span class="line-through text-gray-400">₹${p.originalPrice}</span> <span class="text-green-600">${p.discount}</span></p>` : ''}
+          <button class="mt-3 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg upload-pres-btn" data-product='${JSON.stringify(p).replace(/'/g, "&apos;")}'>
             Upload Prescription
           </button>
         `;
-
-        // Click anywhere → open modal
-        div.addEventListener('click', (e) => {
-          if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-          openUploadModalForProduct(product);
-        });
-
         return div;
       }
 
-      function displayProducts() {
-        productsGrid.innerHTML = '';
-        products.forEach(p => productsGrid.appendChild(createProductCard(p)));
-      }
-
-      displayProducts();
-
-     // Mobile sheet controls
-        document.getElementById('openFilterSheet')?.addEventListener('click', () => {
-          document.getElementById('filterSheet').classList.remove('translate-y-full');
-          document.getElementById('mobileSheetBackdrop').classList.remove('hidden');
-        });
-        document.getElementById('closeFilterSheet')?.addEventListener('click', () => {
-          document.getElementById('filterSheet').classList.add('translate-y-full');
-          document.getElementById('mobileSheetBackdrop').classList.add('hidden');
-        });
-        document.getElementById('mobileSheetBackdrop')?.addEventListener('click', () => {
-          document.getElementById('filterSheet').classList.add('translate-y-full');
-          document.getElementById('mobileSheetBackdrop').classList.add('hidden');
-        });
-
-        // Upload modal logic (simplified)
-       window.openUploadModalForProduct = function(product) {
-          document.getElementById('modalProductName').textContent = 'Upload Prescription for: ' + product.name;
-          document.getElementById('modalProductImage').src = product.image;
-          document.getElementById('modalProductImage').classList.remove('hidden');
-          document.getElementById('uploadModal').classList.remove('hidden');
-        };
-
-        document.body.addEventListener('click', e => {
-          if (e.target.closest('.upload-pres-btn')) {
-            const data = e.target.closest('.upload-pres-btn').dataset.product;
-            const product = JSON.parse(data.replace(/&apos;/g, "'"));
-            openUploadModalForProduct(product);
-          }
-        });
-      });
-
-      // ================
-      // Filters & Sorting
-      // ================
-      categoryList?.addEventListener('click', (e) => {
-        if (e.target.classList.contains('expand-toggle')) {
-          const sub = e.target.parentElement.querySelector('.subcategory');
-          if (sub) sub.classList.toggle('hidden');
-          e.target.textContent = e.target.textContent === '+' ? '-' : '+';
-          return;
+      // Show Products
+      function displayProducts(list) {
+        grid.innerHTML = '';
+        if (list.length === 0) {
+          grid.innerHTML = '<p class="col-span-full text-center py-16 text-gray-500 text-xl">No products found</p>';
+        } else {
+          list.forEach(p => grid.appendChild(createCard(p)));
         }
-        if (e.target.classList.contains('category-link')) {
-          e.preventDefault();
-          const cat = e.target.textContent.trim();
-          activeCategory = cat;
-          applyFilters(products.filter(p => p.category === cat));
+        document.getElementById('resultsCount').textContent = `Showing ${list.length} product${list.length !== 1 ? 's' : ''}`;
+        document.getElementById('categoryTitle').textContent = currentFilters.category === 'all' ? 'All Products' : currentFilters.category;
+      }
+
+      // APPLY FILTER FUNCTION
+      function applyFilters() {
+        let filtered = products;
+
+        // Category
+        if (currentFilters.category !== 'all') {
+          filtered = filtered.filter(p => p.category === currentFilters.category);
         }
+
+        // Brand
+        if (currentFilters.brand !== 'all') {
+          filtered = filtered.filter(p => p.brand === currentFilters.brand);
+        }
+
+        // Discount
+        if (currentFilters.discount !== 'all') {
+          const minDiscount = parseInt(currentFilters.discount);
+          filtered = filtered.filter(p => {
+            if (!p.discount) return false;
+            const discountPercent = parseInt(p.discount.replace(/[^0-9]/g, ''));
+            return discountPercent >= minDiscount;
+          });
+        }
+
+        // Price
+        filtered = filtered.filter(p => p.price >= currentFilters.minPrice && p.price <= currentFilters.maxPrice);
+
+        // Sort
+        const sortedFiltered = [...filtered];
+        switch(currentFilters.sortBy) {
+          case 'price-low':
+            sortedFiltered.sort((a, b) => a.price - b.price);
+            break;
+          case 'price-high':
+            sortedFiltered.sort((a, b) => b.price - a.price);
+            break;
+          case 'rating':
+            sortedFiltered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            break;
+          case 'newest':
+            sortedFiltered.sort((a, b) => b.id - a.id);
+            break;
+          default:
+            // Featured - keep original order
+            break;
+        }
+
+        displayProducts(sortedFiltered);
+      }
+
+      // === DESKTOP FILTERS ===
+      document.getElementById('desktopFilterForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        applyFilters();
       });
 
-      if (brandToggle) {
-        brandToggle.addEventListener('click', () => {
-          brandList.classList.toggle('hidden');
-          brandToggle.textContent = brandToggle.textContent === '+' ? '-' : '+';
+      document.querySelectorAll('input[name="desktopCategory"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          currentFilters.category = radio.value;
         });
-      }
-
-      brandFilters.forEach(f => f.addEventListener('change', () => applyFilters(products)));
-      sortSelect?.addEventListener('change', () => { activeSort = sortSelect.value; applyFilters(products); });
-
-      function applyFilters(startList) {
-        let list = [...(startList || products)];
-        const brands = Array.from(brandFilters).filter(f => f.checked).map(f => f.value);
-        if (brands.length) list = list.filter(p => brands.includes(p.brand));
-        if (activeSort === 'Price: Low to High') list.sort((a,b) => a.price - b.price);
-        else if (activeSort === 'Price: High to Low') list.sort((a,b) => b.price - a.price);
-        displayProducts(list);
-      }
-
-      // ================
-      // Upload Modal Logic
-      // ================
-      function openUploadModalForProduct(product) {
-        if (!uploadModal) return;
-        uploadModal.dataset.productId = product.id;
-        document.getElementById('modalProductName').textContent = `Upload Prescription for: ${product.name}`;
-        const img = document.getElementById('modalProductImage');
-        if (img) { img.src = product.image; img.classList.remove('hidden'); }
-
-        const fileInput = document.getElementById('prescriptionFile');
-        const fileNameDisplay = document.getElementById('fileNameDisplay');
-        const previewImg = document.getElementById('prescriptionPreviewImg');
-
-        const newInput = fileInput.cloneNode();
-        newInput.id = fileInput.id;
-        fileInput.parentNode.replaceChild(newInput, fileInput);
-
-        newInput.addEventListener('change', () => {
-          const file = newInput.files[0];
-          if (!file) { fileNameDisplay.textContent = ''; return; }
-          fileNameDisplay.textContent = file.name;
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = e => {
-              previewImg.src = e.target.result;
-              previewImg.classList.remove('hidden');
-              uploadModal.dataset.tempDataURL = e.target.result;
-              uploadModal.dataset.tempFileName = file.name;
-            };
-            reader.readAsDataURL(file);
-          } else {
-            uploadModal.dataset.tempDataURL = '';
-            uploadModal.dataset.tempFileName = file.name;
-          }
-        });
-
-        document.querySelector('label').addEventListener('click', (e) => {
-          e.preventDefault(); newInput.click();
-        }, { once: true });
-
-        uploadModal.classList.remove('hidden');
-      }
-
-      document.getElementById('submitPrescription')?.addEventListener('click', () => {
-        const prodId = uploadModal.dataset.productId;
-        const name = uploadModal.dataset.tempFileName;
-        const data = uploadModal.dataset.tempDataURL;
-
-        if (!name) return alert('Please select a file.');
-
-        const prescriptions = JSON.parse(localStorage.getItem('prescriptions') || '{}');
-        prescriptions[prodId] = { fileName: name, dataURL: data || null, uploadedAt: new Date().toISOString() };
-        localStorage.setItem('prescriptions', JSON.stringify(prescriptions));
-
-        uploadModal.classList.add('hidden');
-        alert('Prescription uploaded successfully!');
-        clearModal();
       });
 
-      function clearModal() {
-        delete uploadModal.dataset.tempDataURL;
-        delete uploadModal.dataset.tempFileName;
-        document.getElementById('fileNameDisplay').textContent = '';
-        document.getElementById('prescriptionPreviewImg').classList.add('hidden');
-        document.getElementById('prescriptionFile').value = '';
+      document.querySelectorAll('input[name="desktopBrand"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          currentFilters.brand = radio.value;
+        });
+      });
+
+      document.querySelectorAll('input[name="desktopDiscount"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          currentFilters.discount = radio.value;
+        });
+      });
+
+      // === MOBILE CATEGORY CHANGE ===
+      document.querySelectorAll('input[name="mobileCategory"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          currentFilters.category = radio.value;
+        });
+      });
+
+      // === MOBILE BRAND CHANGE ===
+      document.querySelectorAll('input[name="mobileBrand"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          currentFilters.brand = radio.value;
+        });
+      });
+
+      // === MOBILE DISCOUNT CHANGE ===
+      document.querySelectorAll('input[name="mobileDiscount"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          currentFilters.discount = radio.value;
+        });
+      });
+
+      // === PRICE SLIDERS ===
+      function setupSlider(prefix) {
+        const minSlider = document.getElementById(prefix + 'Min');
+        const maxSlider = document.getElementById(prefix + 'Max');
+        const fill = document.getElementById(prefix + 'Fill');
+        const minVal = document.getElementById(prefix + 'MinVal');
+        const maxVal = document.getElementById(prefix + 'MaxVal');
+
+        function update() {
+          let min = parseInt(minSlider.value);
+          let max = parseInt(maxSlider.value);
+          if (min > max) [min, max] = [max, min];
+
+          currentFilters.minPrice = min;
+          currentFilters.maxPrice = max;
+
+          fill.style.left = (min / 10000) * 100 + '%';
+          fill.style.width = ((max - min) / 10000) * 100 + '%';
+          minVal.textContent = '₹' + min;
+          maxVal.textContent = '₹' + max;
+        }
+        minSlider.oninput = maxSlider.oninput = update;
+        update();
       }
+      setupSlider('desktop');
+      setupSlider('mobile');
 
-      // Close modals
-      uploadModal?.addEventListener('click', e => { if (e.target === uploadModal) { uploadModal.classList.add('hidden'); clearModal(); } });
-      document.getElementById('closeUploadModal')?.addEventListener('click', () => { uploadModal.classList.add('hidden'); clearModal(); });
-      validPrescriptionModal?.addEventListener('click', e => { if (e.target === validPrescriptionModal) validPrescriptionModal.classList.add('hidden'); });
-      document.getElementById('closeValidPrescriptionModal')?.addEventListener('click', () => validPrescriptionModal.classList.add('hidden'));
-      validPrescriptionBtn?.addEventListener('click', () => validPrescriptionModal.classList.remove('hidden'));
+      // === APPLY FILTERS BUTTON (Mobile) ===
+      document.getElementById('applyMobileFilters').addEventListener('click', () => {
+        applyFilters();
+        document.getElementById('filterSheet').classList.add('translate-y-full');
+        document.getElementById('mobileSheetBackdrop').classList.add('hidden');
+      });
 
-      // Delegation for upload buttons
+      // === CLEAR ALL ===
+      document.getElementById('clearMobileFilters').addEventListener('click', () => {
+        currentFilters = { category: 'all', minPrice: 0, maxPrice: 10000, sortBy: 'default', brand: 'all', discount: 'all' };
+        document.querySelectorAll('input[value="all"]').forEach(el => el.checked = true);
+        document.querySelectorAll('input[type="range"]').forEach(el => {
+          el.value = el.id.includes('Min') ? 0 : 10000;
+        });
+        setupSlider('desktop');
+        setupSlider('mobile');
+        applyFilters();
+      });
+
+      // === DESKTOP SORT ===
+      document.getElementById('sortSelect').addEventListener('change', (e) => {
+        currentFilters.sortBy = e.target.value;
+        applyFilters();
+      });
+
+      // === MOBILE SORT ===
+      document.querySelectorAll('input[name="mobileSort"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          currentFilters.sortBy = radio.value;
+        });
+      });
+
+      document.getElementById('applySortBtn').addEventListener('click', () => {
+        applyFilters();
+        document.getElementById('sortSheet').classList.add('translate-y-full');
+        document.getElementById('mobileSheetBackdrop').classList.add('hidden');
+      });
+
+      // Mobile Sort Sheet Open/Close
+      document.getElementById('openSortSheet').onclick = () => {
+        document.getElementById('mobileSheetBackdrop').classList.remove('hidden');
+        document.getElementById('sortSheet').classList.remove('translate-y-full');
+      };
+      
+      document.getElementById('closeSortSheet').onclick = () => {
+        document.getElementById('sortSheet').classList.add('translate-y-full');
+        document.getElementById('mobileSheetBackdrop').classList.add('hidden');
+      };
+
+      // Mobile Sheet Open/Close
+      document.getElementById('openFilterSheet').onclick = () => {
+        document.getElementById('mobileSheetBackdrop').classList.remove('hidden');
+        document.getElementById('filterSheet').classList.remove('translate-y-full');
+      };
+      
+      document.getElementById('closeFilterSheet').onclick = () => {
+        document.getElementById('mobileSheetBackdrop').classList.add('hidden');
+        document.getElementById('filterSheet').classList.add('translate-y-full');
+      };
+      
+      document.getElementById('mobileSheetBackdrop').onclick = () => {
+        document.getElementById('mobileSheetBackdrop').classList.add('hidden');
+        document.getElementById('filterSheet').classList.add('translate-y-full');
+        document.getElementById('sortSheet').classList.add('translate-y-full');
+      };
+
+      // Upload Modal
       document.body.addEventListener('click', e => {
-        const btn = e.target.closest('.upload-pres-btn');
-        if (btn) {
-          e.stopPropagation();
-          try {
-            const product = JSON.parse(btn.getAttribute('data-product').replace(/&quot;/g, '"').replace(/&amp;/g, '&'));
-            openUploadModalForProduct(product);
-          } catch {}
+        if (e.target.classList.contains('upload-pres-btn')) {
+          const product = JSON.parse(e.target.dataset.product.replace(/&apos;/g, "'"));
+          document.getElementById('modalProductName').textContent = 'Upload Prescription for: ' + product.name;
+          document.getElementById('uploadModal').classList.remove('hidden');
         }
       });
 
-      // Expose
-      window.uploadPrescription = (obj) => {
-        const p = typeof obj === 'object' ? obj : products.find(x => x.id == obj);
-        if (p) openUploadModalForProduct(p);
-      };
-
-      applyFilters(products);
-    
-  </script>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const backdrop = document.getElementById('mobileSheetBackdrop');
-      const sortSheet = document.getElementById('sortSheet');
-      const filterSheet = document.getElementById('filterSheet');
-
-      // Open
-      document.getElementById('openSortSheet')?.addEventListener('click', () => {
-        backdrop.classList.remove('hidden');
-        sortSheet.classList.remove('translate-y-full');
-      });
-      document.getElementById('openFilterSheet')?.addEventListener('click', () => {
-        backdrop.classList.remove('hidden');
-        filterSheet.classList.remove('translate-y-full');
+      // File Preview
+      document.getElementById('prescriptionFile').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const preview = document.getElementById('prescriptionPreviewImg');
+            preview.src = event.target.result;
+            preview.classList.remove('hidden');
+          };
+          reader.readAsDataURL(file);
+        }
       });
 
-      // Close
-      function closeSheets() {
-        backdrop.classList.add('hidden');
-        sortSheet.classList.add('translate-y-full');
-        filterSheet.classList.add('translate-y-full');
-      }
-      backdrop.onclick = closeSheets;
-      document.getElementById('closeSortSheet').onclick = closeSheets;
-      document.getElementById('closeFilterSheet').onclick = closeSheets;
+      // Submit Prescription
+      document.getElementById('submitPrescription').addEventListener('click', () => {
+        const file = document.getElementById('prescriptionFile').files[0];
+        if (file) {
+          alert('Prescription uploaded successfully! Our pharmacist will verify it shortly.');
+          document.getElementById('uploadModal').classList.add('hidden');
+          document.getElementById('prescriptionFile').value = '';
+          document.getElementById('prescriptionPreviewImg').classList.add('hidden');
+        } else {
+          alert('Please select a prescription file first.');
+        }
+      });
 
-      // Apply Sort → sync with desktop select
-      document.getElementById('applySortBtn').onclick = () => {
-        const val = document.querySelector('input[name="mobileSort"]:checked')?.value || 'default';
-        document.getElementById('sortSelect').value = val;
-        document.getElementById('sortSelect').dispatchEvent(new Event('change'));
-        closeSheets();
-      };
-
-      // Mobile Price Slider Logic (same as desktop)
-      const mMin = document.getElementById('mobileMinThumb');
-      const mMax = document.getElementById('mobileMaxThumb');
-      const mRange = document.getElementById('mobileRange');
-      const mMinInput = document.getElementById('mobileMinPrice');
-      const mMaxInput = document.getElementById('mobileMaxPrice');
-
-      function updateMobileRange() {
-        const minP = ((mMin.value / 1000) * 100);
-        const maxP = ((mMax.value / 1000) * 100);
-        mRange.style.left = minP + '%';
-        mRange.style.width = (maxP - minP) + '%';
-        mMinInput.value = '₹' + mMin.value;
-        mMaxInput.value = '₹' + mMax.value;
-      }
-      mMin.oninput = mMax.oninput = updateMobileRange;
-      mMinInput.onchange = () => { mMin.value = mMinInput.value.replace('₹',''); updateMobileRange(); };
-      mMaxInput.onchange = () => { mMax.value = mMaxInput.value.replace('₹',''); updateMobileRange(); };
-      updateMobileRange();
-
-      // Apply Filters button (you can expand this later)
-      document.getElementById('applyMobileFilters').onclick = closeSheets;
-      document.getElementById('clearMobileFilters').onclick = () => {
-        document.querySelectorAll('input[name="mobileCat"]').forEach(r => r.checked = r.value === 'all');
-        mMin.value = 0; mMax.value = 1000;
-        updateMobileRange();
-      };
+      // Initial display
+      displayProducts(products);
     });
   </script>
 </body>

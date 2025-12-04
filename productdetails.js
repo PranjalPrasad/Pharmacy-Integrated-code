@@ -132,8 +132,8 @@ function renderFrequentlyBought(products) {
         const card = document.createElement('div');
         card.className = 'bg-white rounded-xl shadow-md p-4 hover:shadow-lg transition cursor-pointer';
         card.innerHTML = `
-            <img src="${p.image}" class="w-full h-40 object-cover rounded-lg mb-3">
-            <h4 class="font-medium text-sm line-clamp-2 mb-1">${p.name}</h4>
+            <img src="${p.mainImageUrl}" class="w-full h-40 object-cover rounded-lg mb-3">
+            <h4 class="font-medium text-sm line-clamp-2 mb-1">${p.title}</h4>
             <p class="text-xs text-gray-500">${p.brand || 'Generic'}</p>
             <div class="mt-2 flex items-center gap-2">
                 <span class="text-lg font-bold text-green-600">₹${p.price}</span>

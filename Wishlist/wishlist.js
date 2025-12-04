@@ -151,7 +151,7 @@ function createWishlistCard(item, index) {
     const savings = originalPrice - currentPrice;
 
     return `
-        <div class="wishlist-item fade-in" style="animation-delay: ${index * 0.1}s">
+        <div class="wishlist-item fade-in h-40" style="animation-delay: ${index * 0.1}s">
             <!-- Image Container -->
             <div class="item-image-container">
                 <img src="${item.image || 'https://via.placeholder.com/300'}" 

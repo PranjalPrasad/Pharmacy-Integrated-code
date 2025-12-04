@@ -1,24 +1,23 @@
-// FAKE PRODUCTS – 100% FRONTEND ONLY (Updated with real images)
+// =============== FAKE PRODUCTS (unchanged) ===============
 const fakeProducts = [
-  { id: 1, name: "Dolo 650 Tablet", brand: "Micro Labs", price: 32, originalPrice: 45, discount: 29, category: "fever", image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop", prescription: false, description: "Paracetamol 650mg for fever and pain relief. Trusted by millions." },
-  { id: 2, name: "Saridon Tablet", brand: "Piramal", price: 42, originalPrice: 55, discount: 24, category: "pain", image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=400&fit=crop", prescription: false, description: "Fast-acting headache relief with Propyphenazone, Paracetamol & Caffeine." },
-  { id: 3, name: "Crocin Advance", brand: "GSK", price: 28, originalPrice: 40, discount: 30, category: "fever", image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop", prescription: false, description: "Optizorb technology for faster pain relief." },
-  { id: 4, name: "Eno Lemon 5g x30", brand: "GSK", price: 135, originalPrice: 180, discount: 25, category: "allergy", image: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&h=400&fit=crop", prescription: false, description: "Instant relief from acidity & heartburn." },
-  { id: 5, name: "Volini Gel 30g", brand: "Sun Pharma", price: 115, originalPrice: 150, discount: 23, category: "ointments", image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=400&fit=crop", prescription: false, description: "Pain relief gel for sprains, muscle pain & joint pain." },
-  { id: 6, name: "Vicks VapoRub 25ml", brand: "P&G", price: 98, originalPrice: 125, discount: 22, category: "ointments", image: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=400&h=400&fit=crop", prescription: false, description: "Relief from cold, cough, blocked nose & body ache." },
-  { id: 7, name: "Himalaya Liv.52", brand: "Himalaya", price: 135, originalPrice: 180, discount: 25, category: "health-supp", image: "https://images.unsplash.com/photo-1550572017-4876b7788da6?w=400&h=400&fit=crop", prescription: false, description: "Protects liver & improves appetite." },
-  { id: 8, name: "Moov Cream 35g", brand: "Paras", price: 105, originalPrice: 140, discount: 25, category: "pain", image: "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=400&h=400&fit=crop", prescription: false, description: "Instant relief from back pain, joint pain & inflammation." },
-  { id: 9, name: "Ayurvedic Tablets", brand: "Himalaya", price: 250, originalPrice: 350, discount: 29, category: "ayurvedic", image: "https://images.unsplash.com/photo-1599932887768-d6cb80133949?w=400&h=400&fit=crop", prescription: false, description: "Natural ayurvedic supplement for overall wellness." },
-  { id: 10, name: "Cetrizine 10mg", brand: "BabyHug", price: 45, originalPrice: 60, discount: 25, category: "allergy", image: "https://images.unsplash.com/photo-1628771065518-0d82f1938462?w=400&h=400&fit=crop", prescription: false, description: "Fast relief from allergic reactions and symptoms." },
-  { id: 11, name: "Baby Diaper Cream", brand: "Pampers", price: 180, originalPrice: 250, discount: 28, category: "ointments", image: "https://images.unsplash.com/photo-1620485843666-c561c49f1c17?w=400&h=400&fit=crop", prescription: false, description: "Gentle cream for baby's sensitive skin." },
-  { id: 12, name: "Multivitamin Tablets", brand: "MeeMee", price: 320, originalPrice: 450, discount: 29, category: "health-supp", image: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop", prescription: false, description: "Complete daily nutrition supplement." }
+  { id: 1, name: "Dolo 650 Tablet", brand: "Micro Labs", price: 32, originalPrice: 45, discount: 29, category: "fever", image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop", prescription: false, description: "Paracetamol 650mg for fever and pain relief." },
+  { id: 2, name: "Saridon Tablet", brand: "Piramal", price: 42, originalPrice: 55, discount: 24, category: "pain", image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=400&fit=crop", prescription: false, description: "Fast-acting headache relief..." },
+  { id: 3, name: "Crocin Advance", brand: "GSK", price: 28, originalPrice: 40, discount: 30, category: "fever", image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop", prescription: false, description: "Optizorb technology..." },
+  { id: 4, name: "Eno Lemon 5g x30", brand: "GSK", price: 135, originalPrice: 180, discount: 25, category: "allergy", image: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&h=400&fit=crop", prescription: false, description: "Instant relief from acidity..." },
+  { id: 5, name: "Volini Gel 30g", brand: "Sun Pharma", price: 115, originalPrice: 150, discount: 23, category: "ointments", image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=400&fit=crop", prescription: false, description: "Pain relief gel..." },
+  { id: 6, name: "Vicks VapoRub 25ml", brand: "P&G", price: 98, originalPrice: 125, discount: 22, category: "ointments", image: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=400&h=400&fit=crop", prescription: false, description: "Relief from cold, cough..." },
+  { id: 7, name: "Himalaya Liv.52", brand: "Himalaya", price: 135, originalPrice: 180, discount: 25, category: "health-supp", image: "https://images.unsplash.com/photo-1550572017-4876b7788da6?w=400&h=400&fit=crop", prescription: false, description: "Protects liver..." },
+  { id: 8, name: "Moov Cream 35g", brand: "Paras", price: 105, originalPrice: 140, discount: 25, category: "pain", image: "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=400&h=400&fit=crop", prescription: false, description: "Instant relief from back pain..." },
+  { id: 9, name: "Ayurvedic Tablets", brand: "Himalaya", price: 250, originalPrice: 350, discount: 29, category: "ayurvedic", image: "https://images.unsplash.com/photo-1599932887768-d6cb80133949?w=400&h=400&fit=crop", prescription: false, description: "Natural ayurvedic supplement..." },
+  { id: 10, name: "Cetrizine 10mg", brand: "BabyHug", price: 45, originalPrice: 60, discount: 25, category: "allergy", image: "https://images.unsplash.com/photo-1628771065518-0d82f1938462?w=400&h=400&fit=crop", prescription: false, description: "Fast relief from allergy..." },
+  { id: 11, name: "Baby Diaper Cream", brand: "Pampers", price: 180, originalPrice: 250, discount: 28, category: "ointments", image: "https://images.unsplash.com/photo-1620485843666-c561c49f1c17?w=400&h=400&fit=crop", prescription: false, description: "Gentle cream..." },
+  { id: 12, name: "Multivitamin Tablets", brand: "MeeMee", price: 320, originalPrice: 450, discount: 29, category: "health-supp", image: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop", prescription: false, description: "Complete daily nutrition..." }
 ];
 
 let products = [...fakeProducts];
 let filteredProducts = [...fakeProducts];
 let productGrid, sortSelect;
 
-// Filter state
 let currentFilters = {
   category: 'all',
   brand: 'all',
@@ -27,37 +26,60 @@ let currentFilters = {
   maxPrice: 2000
 };
 
+// ======================================================
 document.addEventListener('DOMContentLoaded', () => {
   productGrid = document.getElementById('productGrid');
   sortSelect = document.getElementById('sortSelect');
-  
-  // Store products in sessionStorage with unique identifier
-  // This will be used by product details page to show related items
+
   sessionStorage.setItem('currentPageProducts', JSON.stringify(fakeProducts));
-  
+
   render(filteredProducts);
   updateResultsCount();
   initSlider();
   initSorting();
   initMobileSheets();
   initFilters();
+
+  // ONE single delegated listener for the whole grid – solves the duplicate-heart bug
+  productGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.wishlist-btn');
+    if (!btn) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const productId = Number(btn.dataset.id);
+    toggleWishlist(productId, btn);
+  });
 });
 
+// =============== CARD CREATION (now safe) ===============
 function createCard(p) {
   const div = document.createElement('div');
-  div.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition cursor-pointer';
-  
-  const priceLine = p.originalPrice 
+  div.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition cursor-pointer relative';
+
+  const priceLine = p.originalPrice
     ? `₹${p.price} <s class="text-gray-400 text-sm">₹${p.originalPrice}</s> <span class="text-green-600 text-sm font-bold">${p.discount}% off</span>`
     : `₹${p.price}`;
 
+  // check current wishlist state
+  const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+  const isWishlisted = wishlist.some(item => item.id === p.id);
+
   div.innerHTML = `
-    <img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">
-    <div class="p-4">
+    <div class="relative">
+      <img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">
+      
+      <!-- Wishlist button – data-id is the only thing we need -->
+      <button class="wishlist-btn ${isWishlisted ? 'active' : ''}" data-id="${p.id}">
+        <i class="fa-${isWishlisted ? 'solid' : 'regular'} fa-heart"></i>
+      </button>
+    </div>
+    <div class="p-2">
       <h3 class="font-semibold text-sm">${p.name}</h3>
       <p class="text-xs text-gray-500 mt-1">${p.brand}</p>
       <div class="mt-2 font-bold text-lg text-green-600">${priceLine}</div>
-      <button onclick="navigateToProductDetails(${p.id})" class="view-details-btn mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition">
+      <button onclick="navigateToProductDetails(${p.id})" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition">
         View Details
       </button>
     </div>
@@ -65,10 +87,36 @@ function createCard(p) {
   return div;
 }
 
+// =============== WISHLIST TOGGLE (single listener ===============
+function toggleWishlist(productId, buttonElement) {
+  let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+  const product = products.find(p => p.id === productId);
+
+  const index = wishlist.findIndex(item => item.id === productId);
+
+  if (index === -1) {
+    // add
+    wishlist.push(product);
+    buttonElement.classList.add('active');
+    buttonElement.innerHTML = '<i class="fa-solid fa-heart"></i>';
+  } else {
+    // remove
+    wishlist.splice(index, 1);
+    buttonElement.classList.remove('active');
+    buttonElement.innerHTML = '<i class="fa-regular fa-heart"></i>';
+  }
+
+  localStorage.setItem('wishlist', JSON.stringify(wishlist));
+
+  // let header badge know that wishlist changed
+  window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+}
+
+// =============== RENDER (unchanged except calling createCard) ===============
 function render(list) {
-  productGrid.innerHTML = '';
+  productGrid.innerHTML = ''; // clear
   if (list.length === 0) {
-    productGrid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-500 text-xl">No products found matching your filters</div>';
+    productGrid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-500 text-xl">No products found</div>';
     return;
   }
   list.forEach(p => productGrid.appendChild(createCard(p)));

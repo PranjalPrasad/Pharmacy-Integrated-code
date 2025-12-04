@@ -25,7 +25,7 @@ products = [
     rating: 4.6,
     brand: "Pampers",
     category: "diapers-hygiene",
-    image: "https://m.media-amazon.com/images/I/71N3kZZyZAL._SL1500_.jpg",
+    mainImageUrl: "https://m.media-amazon.com/images/I/71N3kZZyZAL._SL1500_.jpg",
     description: "India's softest diaper with magic gel. 12-hour leak-lock. Wetness indicator. Ideal for 0-5 kg babies.",
     availableSizes: ["Newborn", "Small (S)", "Medium (M)", "Large (L)", "XL", "XXL"]
   },
@@ -37,7 +37,7 @@ products = [
     rating: 4.7,
     brand: "Huggies",
     category: "diapers-hygiene",
-    image: "https://m.media-amazon.com/images/I/81fF2n7kMGL._SL1500_.jpg",
+    mainImageUrl: "https://m.media-amazon.com/images/I/81fF2n7kMGL._SL1500_.jpg",
     description: "Bubble bed technology. Double leak guard. Overnight protection up to 12 hours.",
     availableSizes: ["Small (S)", "Medium (M)", "Large (L)", "XL", "XXL"]
   },
@@ -49,7 +49,7 @@ products = [
     rating: 4.5,
     brand: "MamyPoko",
     category: "diapers-hygiene",
-    image: "https://m.media-amazon.com/images/I/81X5o2d2KZL._SL1500_.jpg",
+    mainImageUrl: "https://m.media-amazon.com/images/I/81X5o2d2KZL._SL1500_.jpg",
     description: "Crisscross sheet absorbs 12 hours. Prevents redness. Easy to wear & remove.",
     availableSizes: ["Small (S)", "Medium (M)", "Large (L)", "XL", "XXL", "XXXL"]
   },
@@ -61,7 +61,7 @@ products = [
     rating: 4.5,
     brand: "Pampers",
     category: "diapers-hygiene",
-    image: "https://m.media-amazon.com/images/I/81s7K9m1JUL._SL1500_.jpg",
+    mainImageUrl: "https://m.media-amazon.com/images/I/81s7K9m1JUL._SL1500_.jpg",
     description: "Gentle on skin. Refreshing scent. Alcohol-free. Dermatologically tested.",
     availableSizes: ["72×2 Pack", "72×4 Pack", "72×6 Pack", "72×8 Pack"]
   },
@@ -73,7 +73,7 @@ products = [
     rating: 4.3,
     brand: "MeeMee",
     category: "diapers-hygiene",
-    image: "https://m.media-amazon.com/images/I/81Q4QbA8kUL._SL1500_.jpg",
+    mainImageUrl: "https://m.media-amazon.com/images/I/81Q4QbA8kUL._SL1500_.jpg",
     description: "99% purified water. Aloe vera & vitamin E. Extra thick. Paraben free.",
     availableSizes: ["72×1 Pack", "72×3 Pack", "72×5 Pack"]
   },
@@ -87,7 +87,7 @@ products = [
     rating: 4.3,
     brand: "Himalaya",
     category: "bath-body",
-    image: "https://m.media-amazon.com/images/I/71pIlb8rKUL._SL1500_.jpg",
+    mainImageUrl: "https://m.media-amazon.com/images/I/71pIlb8rKUL._SL1500_.jpg",
     description: "Tear-free formula. Natural proteins. Chickpea & fenugreek extract. No parabens.",
     availableSizes: ["200 ml", "400 ml", "700 ml"]
   },
@@ -242,15 +242,15 @@ products = [
     grid.innerHTML = items.map(p => `
   <div class="product-card bg-white rounded-lg  shadow-lg overflow-hidden transition-all duration-300 cursor-pointer"
        onclick="openProductDetails(${p.id})">
-    <div class="cursor-pointer relative bg-gray-50 aspect-[6/4] overflow-hidden">
+    <div class="cursor-pointer relative bg-gray-50 aspect-[9/6] overflow-hidden">
 
      <img src="${p.mainImageUrl}" alt="${p.title}"
              class="w-full h-full object-contain p-5 transition-transform duration-500 group-hover:scale-110">
 
-        ${p.discount ? `<div class="absolute top-2 left-2 bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded">${p.discount}% OFF</div>` : ''}
+        ${p.discount ? `<div class="absolute top-2 left-2 bg-[#00809D] text-white text-xs font-bold px-2 py-1 rounded">${p.discount}% OFF</div>` : ''}
     </div>
     <button 
-  class="absolute top-3 left-3 bg-white/90 backdrop-blur hover:bg-white p-3 rounded-full shadow-lg transition-all duration-300 z-10"
+  class="absolute top-3 left-64 bg-white/90 backdrop-blur hover:bg-white p-3 rounded-full shadow-lg transition-all duration-300 z-10"
   onclick="event.stopPropagation(); addToWishlist(${p.id}); 
            this.classList.toggle('active-wish');
            this.querySelector('i').classList.toggle('fas');
@@ -258,17 +258,17 @@ products = [
            this.querySelector('i').classList.toggle('text-red-600');">
   <i class="far fa-heart text-xl ${JSON.parse(localStorage.getItem('wishlist')||'[]').some(w => w.id === p.id) ? 'fas text-red-600' : 'text-gray-600'}"></i>
 </button>
-    <div class="p-5">
-      <h3 class="font-bold text-lg mb-2 line-clamp-2 text-gray-800">${p.title}</h3>
+    <div class="p-3">
+      <h3 class="font-bold text-md mb-2  text-gray-800">${p.title}</h3>
       <div class="flex items-center gap-1 mb-2">
         <span class="text-yellow-500">★</span>
         <span class="text-sm font-medium text-gray-700">${p.rating}</span>
       </div>
       <div class="flex items-baseline gap-2">
-        <p class="text-2xl font-bold text-pink-600">₹${p.price}</p>
+        <p class="text-xl font-bold text-green-600">₹${p.price}</p>
         ${p.discount ? `<p class="text-sm text-gray-400 line-through">₹${Math.round(p.price/(1-p.discount/100))}</p>` : ''}
       </div>
-      <button class="mt-4 w-full bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-700 hover:to-pink-800 text-white font-bold py-3 rounded-xl transition prevent-click"
+      <button class="mt-4 w-full bg-[#239BA7] hover:bg-[#00809D] text-white font-bold py-3 rounded-xl transition prevent-click"
               onclick="event.stopPropagation(); addToCart(${p.id})">
         Add to Cart
       </button>

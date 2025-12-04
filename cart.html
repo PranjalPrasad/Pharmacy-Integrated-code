@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +16,7 @@
                         'pharmacy-blue': '#2563eb',
                         'pharmacy-light-blue': '#dbeafe',
                         'pharmacy-green': '#16a34a',
+                        'myntra-pink': '#ff3f6c',
                     }
                 }
             }
@@ -26,22 +28,48 @@
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Safe CSS loading – removes the MIME error completely -->
 
     <link rel="stylesheet" href="./Footer/footer.css" onerror="this.remove()">
 
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .cart-item:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); transition: all 0.3s ease; }
+        .cart-item:hover { background-color: #fafafa; transition: all 0.2s ease; }
+        .line-through { text-decoration: line-through; }
+        .coupon-input:focus { outline: none; border-color: #ff3f6c; }
+        
+        /* Custom Scrollbar for Cart Items */
+        #cart-items-container {
+            max-height: 600px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        
+        #cart-items-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #cart-items-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        #cart-items-container::-webkit-scrollbar-thumb {
+            background: #c0c0c0;
+            border-radius: 10px;
+        }
+        
+        #cart-items-container::-webkit-scrollbar-thumb:hover {
+            background: #a0a0a0;
+        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-white">
 
     <!-- HEADER PLACEHOLDER -->
     <div id="header-placeholder"></div>
 
     <!-- MAIN CART CONTENT -->
-    <main class="container mx-auto px-4 py-8 mt-20 max-w-6xl">
+    <main class="container mx-auto px-4 py-6 mt-20 max-w-7xl">
         <!-- EMPTY CART -->
         <div id="empty-cart-fullscreen" class="hidden mt-8">
             <div class="text-center py-20">
@@ -57,70 +85,135 @@
         </div>
 
         <!-- CART WITH ITEMS -->
-        <div id="cart-with-items" class="hidden">
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-3xl font-bold text-gray-900">Shopping Cart</h1>
-                <span id="cart-count-badge" class="bg-pharmacy-blue text-white px-4 py-2 rounded-full text-sm font-bold hidden">
-                    <span id="cart-count">0</span> items
-                </span>
-            </div>
-
-            <div class="grid lg:grid-cols-3 gap-8">
-                <!-- Cart Items -->
-                <div class="lg:col-span-2">
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h2 class="text-xl font-semibold">Cart Items</h2>
-                            <span class="text-gray-500" id="item-count">0 items</span>
+        <div id="cart-with-items" class="mt-20">
+            <!-- Delivery Address Bar (Myntra Style) -->
+            <!-- <div class="bg-white border-b mb-4 pb-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt text-gray-600"></i>
                         </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Deliver to: <span class="font-semibold text-gray-800">Current Location</span></p>
+                            <p class="text-xs text-gray-500">Pune, Maharashtra 411001</p>
+                        </div>
+                    </div>
+                    <button class="text-blue-600 font-semibold text-sm hover:underline">CHANGE</button>
+                </div>
+            </div> -->
 
-                        <!-- Prescription Notice -->
-                        <div id="prescription-notice" class="hidden bg-yellow-50 border border-yellow-300 rounded-lg p-4 mb-6">
-                            <div class="flex items-start gap-3">
-                                <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
-                                <div>
-                                    <p class="font-semibold text-yellow-900">Prescription Required</p>
-                                    <p class="text-sm text-yellow-800">You need to upload a valid prescription during checkout.</p>
+            <!-- Offers Banner -->
+            <!-- <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-tag text-myntra-pink text-xl"></i>
+                        <div>
+                            <p class="font-semibold text-gray-800">Available Offers</p>
+                            <p class="text-xs text-gray-600">Get extra discounts on your purchase</p>
+                        </div>
+                    </div>
+                    <button class="text-myntra-pink font-semibold text-sm">VIEW OFFERS</button>
+                </div>
+            </div> -->
+
+            <div class="grid lg:grid-cols-3 gap-6">
+                <!-- Cart Items (Left Side - 2/3) -->
+                <div class="lg:col-span-2">
+                    <!-- Item Count Header -->
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                            <i class="fas fa-shopping-bag text-gray-700"></i>
+                        </div>
+                        <h2 class="text-xl font-bold text-gray-800" id="item-count-header">0 Items</h2>
+                    </div>
+
+                    <!-- Prescription Notice -->
+                    <div id="prescription-notice" class="hidden bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 text-lg"></i>
+                            <div>
+                                <p class="font-semibold text-yellow-900 text-sm">Prescription Required</p>
+                                <p class="text-xs text-yellow-800">Upload valid prescription during checkout</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Items Container -->
+                    <div id="cart-items-container" class="space-y-0 border rounded-lg overflow-hidden"></div>
+
+                    <!-- Wishlist Section -->
+                    <!-- <div class="mt-8">
+                        <h3 class="text-lg font-bold text-gray-800 mb-4">
+                            <i class="far fa-heart text-gray-500"></i> Items in your Wishlist
+                        </h3>
+                        <p class="text-gray-500 text-sm">No items in wishlist</p>
+                    </div> -->
+                </div>
+
+                <!-- Price Details (Right Side - 1/3) -->
+                <div class="lg:col-span-1">
+                    <div class="bg-white border rounded-lg p-5 sticky top-24">
+                        <!-- Coupon Section -->
+                        <div class="mb-6 pb-5 border-b">
+                            <p class="text-gray-600 text-sm font-semibold mb-3">COUPONS</p>
+                            <div class="flex gap-2">
+                                <div class="flex-1 border rounded-lg px-3 py-2 flex items-center">
+                                    <i class="fas fa-tag text-gray-400 mr-2"></i>
+                                    <input type="text" placeholder="Enter coupon code" 
+                                           class="coupon-input flex-1 text-sm border-none outline-none">
                                 </div>
+                                <button class="bg-white border border-myntra-pink text-myntra-pink font-bold px-6 py-2 rounded-lg text-sm hover:bg-pink-50">
+                                    APPLY
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Items Container -->
-                        <div id="cart-items-container" class="space-y-4"></div>
-                    </div>
-                </div>
-
-                <!-- Order Summary -->
-                <div class="lg:col-span-1">
-                    <div class="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-                        <h2 class="text-xl font-bold mb-6">Order Summary</h2>
-                        <div class="space-y-3 text-gray-700">
-                            <div class="flex justify-between"><span>Subtotal</span><span id="subtotal">₹0.00</span></div>
-                            <div class="flex justify-between"><span>Shipping</span><span id="shipping-text">₹49.00</span></div>
-                            
-                            <div class="flex justify-between text-green-600"><span>Discount</span><span id="discount">-₹0.00</span></div>
-                            <div class="border-t pt-4 mt-4">
-                                <div class="flex justify-between text-xl font-bold">
-                                    <span>Total</span>
-                                    <span id="total" class="text-pharmacy-blue">₹0.00</span>
+                        <!-- Price Details -->
+                        <div class="mb-6">
+                            <p class="text-gray-800 font-bold mb-4 text-sm">PRICE DETAILS <span id="item-count-price" class="font-normal text-gray-600">(0 Items)</span></p>
+                            <div class="space-y-3 text-sm">
+                                <div class="flex justify-between text-gray-700">
+                                    <span>Total MRP</span>
+                                    <span id="mrp-total">₹0</span>
+                                </div>
+                                <div class="flex justify-between text-green-600">
+                                    <span>Discount on MRP</span>
+                                    <span id="discount-amount">-₹0</span>
+                                </div>
+                                <div class="flex justify-between text-gray-700">
+                                    <span>Coupon Discount</span>
+                                    <button class="text-myntra-pink font-semibold text-xs">Apply Coupon</button>
+                                </div>
+                                <div class="flex justify-between text-gray-700">
+                                    <span class="flex items-center gap-1">
+                                        Convenience Fee 
+                                        <i class="fas fa-info-circle text-xs text-gray-400"></i>
+                                    </span>
+                                    <div class="text-right">
+                                        <span id="shipping-striked" class="line-through text-gray-500 mr-2">₹49</span>
+                                        <span id="shipping-text" class="text-green-600 font-semibold">FREE</span>
+                                    </div>
+                                </div>
+                                <div class="border-t pt-4 mt-4">
+                                    <div class="flex justify-between font-bold text-base">
+                                        <span>Total Amount</span>
+                                        <span id="total" class="text-gray-900">₹0</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <button onclick="proceedToCheckout()" 
-                                class="w-full mt-6 bg-pharmacy-blue hover:bg-blue-700 text-white font-bold py-4 rounded-lg text-lg transition">
-                            Proceed to Checkout
+                                class="w-full bg-[#3B9797] hover:bg-[#16476A] text-white font-bold py-3 rounded-lg transition shadow-md">
+                            PROCEED TO BUY
                         </button>
 
-                        <p class="text-center text-xs text-gray-500 mt-4">
-                            <i class="fas fa-lock"></i> Secure Checkout • Free delivery above ₹799
-                        </p>
-                    </div>
-
-                    <div class="text-center mt-6">
-                        <a href="./index.html" class="text-pharmacy-blue hover:underline font-medium">
-                            ← Continue Shopping
-                        </a>
+                        <div class="mt-4 bg-gray-50 rounded-lg p-3">
+                            <p class="text-xs text-gray-600 flex items-center gap-2">
+                                <i class="fas fa-shield-alt text-green-600"></i>
+                                Safe and Secure Payments. Easy returns. 100% Authentic products.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -156,7 +249,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadHeader();
         loadFooter();
-        // ... rest of your code
     });
 </script>
 <script src="../cart-wishlist-system.js" defer></script>

@@ -123,17 +123,17 @@ input[type=range] {
 
     /* Price Slider */
     .slider-wrapper { position: relative; height: 6px; background: #fce7f3; border-radius: 4px; margin: 35px 10px 25px; }
-    .slider-fill { position: absolute; height: 100%; background: linear-gradient(90deg, #ec4899, #f43f5e); border-radius: 4px; }
+    .slider-fill { position: absolute; height: 100%; background: linear-gradient(90deg, #2067a1, #0c5a79); border-radius: 4px; }
     input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; position: absolute; top: 0; pointer-events: none; }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none; height: 24px; width: 24px; border-radius: 4px solid white;
-      background: #ec4899; border-radius: 50%; cursor: pointer; pointer-events: all;
-      box-shadow: 0 4px 15px rgba(236,72,153,0.5);
+      background: rgb(57, 138, 192); border-radius: 50%; cursor: pointer; pointer-events: all;
+      box-shadow: 0 4px 15px rgba(37, 120, 175, 0.5);
     }
-    .price-values { display: flex; justify-content: space-between; color: #be123c; font-weight: 600; padding: 0 10px; }
+    .price-values { display: flex; justify-content: space-between; color: #0f8b8f; font-weight: 600; padding: 0 10px; }
   </style>
 </head>
-<body class="bg-[#f0fdf4] min-h-screen">
+<body class="bg-[#BBE9FF] min-h-screen">
 
   <div id="header-placeholder"></div>
 
@@ -156,8 +156,8 @@ input[type=range] {
     <div class="flex flex-col lg:flex-row gap-8">
 
       <!-- ==================== DESKTOP SIDEBAR ==================== -->
-      <aside id="filterSidebar" class="hidden lg:block lg:w-80 bg-[#CBDCEB] rounded-2xl shadow-xl p-6 sticky top-24 h-fit">
-        <form id="filterForm" class="space-y-8">
+      <aside id="filterSidebar" class="hidden lg:block lg:w-60 bg-[#CBDCEB] rounded-2xl shadow-xl p-3 sticky top-24 h-fit">
+        <form id="filterForm" class="space-y-3">
 
           <!-- Categories -->
           <div class="border-b pb-6">
@@ -170,13 +170,13 @@ input[type=range] {
               <label class="flex items-center"><input type="radio" name="category" value="bath-body" class="w-5 h-5 text-pink-600"> <span class="ml-3">Bath & Body</span></label>
               <label class="flex items-center"><input type="radio" name="category" value="diapers-hygiene" class="w-5 h-5 text-pink-600"> <span class="ml-3">Diapers & Hygiene</span></label>
               <label class="flex items-center"><input type="radio" name="category" value="nutrition-feeding" class="w-5 h-5 text-pink-600"> <span class="ml-3">Feeding & Nutrition</span></label>
-              <label class="flex items-center"><input type="radio" name="category" value="gift-hampers" class="w-5 h-5 text-pink-600"> <span class="ml-ml-3">Gift Hampers</span></label>
+              <label class="flex items-center"><input type="radio" name="category" value="gift-hampers" class="w-5 h-5 text-pink-600"> <span class="ml-3">Gift Hampers</span></label>
             </div>
           </div>
 
           <!-- Price Range -->
           <div class="price-slider-container">
-            <h4 class="font-bold text-lg mb-4">Price Range</h4>
+            <h4 class="font-bold text-lg mb-3">Price Range</h4>
             <div class="slider-wrapper">
               <div class="slider-fill" id="desktopFill"></div>
               <input type="range" min="0" max="10000" value="0" id="minThumb">
@@ -189,7 +189,7 @@ input[type=range] {
           </div>
 
           <!-- Brands -->
-          <div class="border-b pb-6">
+          <div class="border-b pb-4">
             <div class="flex justify-between cursor-pointer select-none" onclick="this.nextElementSibling.classList.toggle('hidden'); this.querySelector('i').classList.toggle('rotate-180')">
               <h3 class="font-bold text-lg">Brands</h3>
               <i class="fas fa-chevron-down transition-transform"></i>
@@ -217,7 +217,7 @@ input[type=range] {
             </div>
           </div>
 
-          <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-4 rounded-xl transition">
+          <button type="submit" class="w-full bg-[#1581BF] hover:bg-[#1C6EA4] text-white font-bold py-2 rounded-xl transition">
             Apply Filters
           </button>
         </form>
@@ -227,10 +227,10 @@ input[type=range] {
       <main class="flex-1">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div>
-            <h2 class="text-3xl font-bold text-gray-800">All Baby Products</h2>
+            <h2 class="text-2xl font-bold text-gray-800">All Baby Products</h2>
             <p id="resultsCount" class="text-gray-600 mt-2">Loading...</p>
           </div>
-          <select id="sortSelect" class="mt-4 md:mt-0 border rounded-xl px-6 py-3 text-sm font-medium">
+          <select id="sortSelect" class="mt-4 md:mt-0 border rounded-xl px-6 py-3 bg-gray-100 text-sm font-medium">
             <option value="default">Sort: Featured</option>
             <option value="price-low">Price: Low to High</option>
             <option value="price-high">Price: High to Low</option>
@@ -247,12 +247,12 @@ input[type=range] {
 
   <!-- ==================== MOBILE BOTTOM BAR ==================== -->
   <div class="fixed bottom-0 left-0 right-0 bg-white border-t px-4 py-3 flex gap-4 z-50 lg:hidden shadow-2xl">
-    <button id="openSortSheet" class="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 rounded-xl">Sort</button>
-    <button id="openFilterSheet" class="flex-1 bg-gradient-to-r from-pink-600 to-pink-700 text-white font-bold py-4 rounded-xl">Filters</button>
+    <button id="openSortSheet" class="flex-1 bg-[#6FA4AF] text-white font-bold py-4 rounded-xl">Sort</button>
+    <button id="openFilterSheet" class="flex-1 bg-[#6FA4AF] text-white font-bold py-4 rounded-xl">Filters</button>
   </div>
 
   <!-- ==================== MOBILE FILTER SHEET ==================== -->
-  <div id="filterSheet" class="fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 translate-y-full transition-transform duration-300">
+  <div id="filterSheet" class="fixed inset-x-0 bottom-0 bg-gray-100 rounded-t-3xl shadow-2xl max-h-[90vh] overflow-y-auto z-50 translate-y-full transition-transform duration-300">
     <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
       <h3 class="text-xl font-bold">Filters</h3>
       <button id="closeFilterSheet" class="text-2xl">X</button>
@@ -265,7 +265,9 @@ input[type=range] {
           <label class="flex items-center"><input type="radio" name="mobileCategory" value="all" checked class="w-5 h-5 text-pink-600"> <span class="ml-3">All Categories</span></label>
           <label class="flex items-center"><input type="radio" name="mobileCategory" value="bath-body" class="w-5 h-5 text-pink-600"> <span class="ml-3">Bath & Body</span></label>
           <label class="flex items-center"><input type="radio" name="mobileCategory" value="diapers-hygiene" class="w-5 h-5 text-pink-600"> <span class="ml-3">Diapers & Hygiene</span></label>
-          <label class="flex items-center"><input type="radio" name="mobileCategory" value="nutrition-feeding" class="w-5 h-5 text-pink-600"> <span class="ml-3">Feeding</span></label>
+          <label class="flex items-center"><input type="radio" name="mobileCategory" value="nutrition-feeding" class="w-5 h-5 text-pink-600"> <span class="ml-3">Feeding Nutritions</span></label>
+          <label class="flex items-center"><input type="radio" name="mobileCategory" value="gift-hamper" class="w-5 h-5 text-pink-600"> <span class="ml-3">Gift Hampers</span></label>
+          <label class="flex items-center"><input type="radio" name="mobileCategory" value="photoshoot-essentials" class="w-5 h-5 text-pink-600"> <span class="ml-3">Photoshoot Essentials</span></label>
         </div>
       </div>
 

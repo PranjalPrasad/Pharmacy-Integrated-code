@@ -724,7 +724,7 @@ function createCard(p) {
   const cleanOriginalPrice = p.originalPrice ? String(p.originalPrice).replace('₹', '').trim() : '';
   
   return `
-    <div class="card relative group overflow-hidden bg-white rounded-2xl shadow-lg">
+    <div class="card relative group overflow-hidden bg-white rounded-xl shadow-lg">
       <div class="discount-badge mt-3">${p.discount || ''}</div>
       
       <!-- WISHLIST BUTTON -->
@@ -752,8 +752,8 @@ function createCard(p) {
         </div>
       </div>
       
-      <div class="p-5 flex flex-col">
-        <h3 class="product-name font-medium text-gray-800 mb-3 text-center">${p.name}</h3>
+      <div class="p-3 flex flex-col">
+        <h3 class="product-name font-medium text-gray-800 mb-2 text-center">${p.name}</h3>
         <div class="price-row flex items-center justify-center gap-3 mb-3">
           <span class="current-price text-xl font-bold text-green-600">₹${cleanPrice}</span>
           ${p.originalPrice ? `<span class="original-price text-sm text-gray-500 line-through">₹${cleanOriginalPrice}</span>` : ''}
@@ -954,24 +954,48 @@ function openProductDetails(productId) {
 }
 
 function renderInfinite(trackId, data) {
- const track = document.getElementById(trackId);
- if (!track) return;
+  const track = document.getElementById(trackId);
+  if (!track) return;
 
- // Duplicate data for infinite scroll effect
-  const duplicated = [...data, ...data, ...data]; // 3x for smooth loop
-
+  const duplicated = [...data, ...data, ...data];
   track.innerHTML = duplicated.map(createCard).join('');
-
-  // Enable smooth horizontal scrolling
+  
+  // Styling
   track.classList.add('flex', 'gap-6', 'overflow-x-auto', 'scrollbar-hide', 'pb-4', 'px-4', 'snap-x', 'snap-mandatory');
-
-  // Optional: Add inertia/smooth scroll feel (works great on mobile)
   track.style.scrollBehavior = 'smooth';
+//   track.querySelectorAll('.card').forEach(c => c.classList.add('snap-center', 'flex-shrink-0', 'w-32'));
 
-  // Make cards snap to center (optional but looks premium)
-  track.querySelectorAll('.card').forEach(card => {
-    card.classList.add('snap-center', 'flex-shrink-0', 'w-80', 'md:w-72', 'lg:w-80');
-  });
+  // === ADD SCROLL ARROWS FUNCTIONALITY ===
+  const prevBtn = document.getElementById(trackId.replace('-track', '-prev'));
+  const nextBtn = document.getElementById(trackId.replace('-track', '-next'));
+
+  const scrollAmount = 320; // Width of one card (~w-80 + gap)
+
+  if (nextBtn) {
+    nextBtn.onclick = () => {
+      track.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    };
+  }
+
+  if (prevBtn) {
+    prevBtn.onclick = () => {
+      track.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    };
+  }
+
+  // Optional: Hide arrows when at start/end
+  const updateArrows = () => {
+    if (!prevBtn || !nextBtn) return;
+    prevBtn.style.opacity = track.scrollLeft <= 50 ? '0.3' : '1';
+    prevBtn.style.pointerEvents = track.scrollLeft <= 50 ? 'none' : 'auto';
+    
+    const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 50;
+    nextBtn.style.opacity = atEnd ? '0.3' : '1';
+    nextBtn.style.pointerEvents = atEnd ? 'none' : 'auto';
+  };
+
+  track.addEventListener('scroll', updateArrows);
+  updateArrows(); // Initial check
 }
 
 
@@ -1001,20 +1025,7 @@ window.updateCartCount = updateCartCount;
       container.scrollBy({ left: amount, behavior: 'smooth' });
     }
 
-        // NEW: Dynamic data for Doctor Section (can be fetched from backend)
-        let doctorData = [
-            {
-                name: "Dr. Alok Gandhi",
-                title: "MBBS, DGO (ObGyn)",
-                experience: "8 years",
-                achievements: "8,000 successful deliveries, MyFm Sangli’s Award for excellence in infertility management",
-                association: "Indian Medical Association (IMA)",
-                image: "https://i.pinimg.com/736x/02/23/c5/0223c5a858e8c9e57e8f73dfadad85d0.jpg",
-                description: "Dr. Alok Gandhi brings over 8 years of experience in maternal and reproductive healthcare. He has performed over 8,000 successful deliveries, including cesarean, vaginal, forceps, vacuum-assisted, preterm, and post-date cases. Recipient of MyFm Sangli’s Award for excellence in infertility management, Dr. Gandhi combines advanced medical expertise with compassion, ensuring safe and personalized care for every patient. An active member of the Indian Medical Association (IMA), he regularly updates his knowledge through seminars, workshops, and conferences. Dr. Gandhi’s patient-centered approach helps individuals navigate complex pregnancies with confidence and peace of mind.",
-                backgroundImage: "IMG/BG44.jpg"
-            }
-            // Add more doctors if needed
-        ];
+        
         // NEW: Dynamic data for Articles (can be fetched from backend)
         let articlesData = [
             {
@@ -1313,34 +1324,34 @@ function renderProductGrid(containerId, productsArray) {
 
     productsArray.forEach(product => {
         const card = document.createElement('div');
-        card.className = 'bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300';
+        card.className = 'bg-red rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300';
 
         card.innerHTML = `
             <div class="relative group">
-                <div class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded z-10">
+                <div class="absolute top-2 left-2 bg-red-500 text-white text-xs px-1 py-1 rounded z-10">
                     ${product.discount}
                 </div>
                 <img src="${product.image}" alt="${product.name}" 
                      class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500">
                 <div class="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <button onclick="openProductDetails(${product.id})"
-                            class="bg-white text-gray-800 font-bold px-6 py-3 rounded-full hover:bg-gray-100 transition">
-                        Quick View
-                    </button>
+                    // <button onclick="openProductDetails(${product.id})"
+                    //         class="bg-white text-gray-800 font-bold px-6 py-3 rounded-full hover:bg-gray-100 transition">
+                    //     Quick View
+                    // </button>
                 </div>
             </div>
             <div class="p-5">
-                <h3 class="font-semibold text-lg text-center mb-3 line-clamp-2">${product.name}</h3>
-                <div class="flex items-center justify-center gap-3 mb-4">
-                    <span class="text-2xl font-bold text-green-600">${product.price}</span>
+                <h3 class="font-semibold text-md text-center mb-2 line-clamp-2">${product.name}</h3>
+                <div class="flex items-center justify-center gap-3 mb-2">
+                    <span class="text-xl font-bold text-green-600">${product.price}</span>
                     <span class="text-gray-500 line-through">${product.originalPrice}</span>
                 </div>
                 <div class="flex gap-3">
                     <button onclick="openProductDetails(${product.id})"
-                            class="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-medium">
+                            class="flex-1 bg-blue-600 text-white py-1 rounded-lg hover:bg-blue-700 transition font-medium">
                         View Details
                     </button>
-                    <button class="add-to-cart-btn bg-teal-600 text-white px-6 py-3 rounded-lg hover:bg-teal-700 transition font-bold"
+                    <button class="add-to-cart-btn bg-teal-600 text-white px-6 py-1 rounded-lg hover:bg-teal-700 transition font-bold"
                             data-product-id="${product.id}"
                             data-product-name="${product.name}"
                             data-product-price="${product.price.replace('₹', '')}"

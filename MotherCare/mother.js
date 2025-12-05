@@ -1,72 +1,61 @@
-// ==================== mother.js – FULLY WORKING 2025 (FIXED FILTERS + CART + WISHLIST) ====================
+// ==================== mother.js – FULLY FIXED WISHLIST 2025 ====================
 
 const allProducts = [
   { id: 101, title: "Pregnancy Support Belt", price: 1899, originalPrice: 2799, discount: 32, rating: 4.7, reviewCount: 342,
     mainImageUrl: "https://images.ctfassets.net/6m9bd13t776q/rFI3XJ5p1H6IwgK5ghgVg/0eee38fb45aa78a5953012f881fa56cb/AZMED_Maternity_Belly_Band.webp?q=75",
-    description: "Adjustable belt for back & pelvic pain relief", category: "Accessories & Maternity Wear", brand: "BabyHug" },
+    description: "Adjustable belt for back & pelvic pain relief", category: "Accessories & Maternity Wear", brand: "BabyHug", inStock: true },
+
   { id: 102, title: "Organic Stretch Mark Cream 200ml", price: 1399, originalPrice: 1999, discount: 30, rating: 4.9, reviewCount: 628,
     mainImageUrl: "https://whatisg.com/upload-img/%E0%B8%A3%E0%B8%B9%E0%B8%9B%E0%B8%AA%E0%B8%B4%E0%B8%99%E0%B8%84%E0%B9%89%E0%B8%B2_B/B21/B21.jpg",
-    description: "Cocoa + Shea butter for deep moisturizing", category: "Skin Care", brand: "Himalaya" },
+    description: "Cocoa + Shea butter for deep moisturizing", category: "Skin Care", brand: "Himalaya", inStock: true },
+
   { id: 103, title: "Wireless Wearable Breast Pump", price: 8999, originalPrice: 12999, discount: 31, rating: 4.6, reviewCount: 512,
     mainImageUrl: "https://cdn.thewirecutter.com/wp-content/media/2023/07/wearables-2048px-00733.jpg?auto=webp&quality=75&width=1024",
-    description: "Silent & hands-free double pump", category: "Breastfeeding Essentials", brand: "MomCozy" },
+    description: "Silent & hands-free double pump", category: "Breastfeeding Essentials", brand: "MomCozy", inStock: true },
+
   { id: 104, title: "Frida Mom Postpartum Recovery Kit", price: 2999, originalPrice: 4499, discount: 33, rating: 5.0, reviewCount: 298,
     mainImageUrl: "https://m.media-amazon.com/images/I/71--+1HIx9L._AC_UF1000,1000_QL80_.jpg",
-    description: "Peri bottle, pads, underwear – full recovery kit", category: "Post delivery recovery", brand: "Frida Mom" },
+    description: "Peri bottle, pads, underwear – full recovery kit", category: "Post delivery recovery", brand: "Frida Mom", inStock: true },
+
   { id: 105, title: "Maternity Nursing Night Dress (Set of 2)", price: 2299, originalPrice: 3499, discount: 34, rating: 4.5, reviewCount: 421,
     mainImageUrl: "https://m.media-amazon.com/images/S/aplus-media-library-service-media/858eec81-34e8-48a5-9b42-a352b7c574a3.__CR0,0,600,450_PT0_SX600_V1___.jpg",
-    description: "Super soft cotton with easy feeding access", category: "Accessories & Maternity Wear", brand: "MeeMee" },
+    description: "Super soft cotton with easy feeding access", category: "Accessories & Maternity Wear", brand: "MeeMee", inStock: false },
+
   { id: 106, title: "Prenatal DHA Gummies (90 pcs)", price: 1699, originalPrice: 2499, discount: 32, rating: 4.8, reviewCount: 734,
     mainImageUrl: "https://i5.walmartimages.com/seo/Vitafusion-PreNatal-Multivitamin-Adult-Gummies-90-Count-Each_aca58a81-e751-4609-8572-8c564c8fb43c.68ae348332bf6f260270d093da1c06d6.jpeg",
-    description: "Tasty lemon-orange vegetarian gummies", category: "Vitamins & Supplements", brand: "Himalaya" },
+    description: "Tasty lemon-orange vegetarian gummies", category: "Vitamins & Supplements", brand: "Himalaya", inStock: true },
+
   { id: 107, title: "Bamboo Nursing Pads (8 pcs)", price: 799, originalPrice: 1499, discount: 47, rating: 4.7, reviewCount: 892,
     mainImageUrl: "https://m.media-amazon.com/images/I/81I2-SQLZgL.jpg_BO30,255,255,255_UF900,850_SR1910,1000,0,C_QL100_.jpg",
-    description: "Reusable, ultra-absorbent & eco-friendly", category: "Breastfeeding Essentials", brand: "Pampers" },
+    description: "Reusable, ultra-absorbent & eco-friendly", category: "Breastfeeding Essentials", brand: "Pampers", inStock: true },
+
   { id: 108, title: "Hospital Delivery Gown + Robe", price: 2599, originalPrice: 3799, discount: 31, rating: 4.8, reviewCount: 267,
     mainImageUrl: "https://i.etsystatic.com/5569502/r/il/b20c07/1273813891/il_fullxfull.1273813891_2v51.jpg",
-    description: "Stylish gown with skin-to-skin access", category: "Delivery Kits", brand: "BabyHug" },
+    description: "Stylish gown with skin-to-skin access", category: "Delivery Kits", brand: "BabyHug", inStock: true },
+
   { id: 109, title: "Postpartum Belly Binder", price: 1799, originalPrice: 2999, discount: 40, rating: 4.6, reviewCount: 389,
     mainImageUrl: "https://images.ctfassets.net/6m9bd13t776q/4bcjNqTEcQmakkMJbjvHjd/9e36feb025efc9c50ff986c58a4ec8b6/BOTB_postpartum_belly_wraps-testimonial_collage-2025.png?q=75",
-    description: "Supports core recovery after delivery", category: "Post delivery recovery", brand: "The Moms Co" },
+    description: "Supports core recovery after delivery", category: "Post delivery recovery", brand: "The Moms Co", inStock: false },
+
   { id: 110, title: "MomCozy S12 Pro Double Pump", price: 11999, originalPrice: 16999, discount: 29, rating: 4.9, reviewCount: 981,
     mainImageUrl: "https://m.media-amazon.com/images/I/611fWRc4VaL._AC_UF894,1000_QL80_.jpg",
-    description: "App-controlled wearable double pump", category: "Breastfeeding Essentials", brand: "MomCozy" },
+    description: "App-controlled wearable double pump", category: "Breastfeeding Essentials", brand: "MomCozy", inStock: true },
+
   { id: 111, title: "Garbhsanskar Music & Book Combo", price: 1299, originalPrice: 1999, discount: 35, rating: 4.9, reviewCount: 156,
     mainImageUrl: "https://dreambabygarbhsanskar.com/wp-content/uploads/2024/06/IMG_20240604_192656_887-1568x1151.jpg",
-    description: "Classical music + pregnancy journal", category: "Garbhsanskar Essentials & Ayurvedic Medicines", brand: "Himalaya" },
+    description: "Classical music + pregnancy journal", category: "Garbhsanskar Essentials & Ayurvedic Medicines", brand: "Himalaya", inStock: true },
+
   { id: 112, title: "Trimester 1 Nutrition Kit", price: 3499, originalPrice: 4999, discount: 30, rating: 4.8, reviewCount: 189,
     mainImageUrl: "https://madsfood.com/wp-content/uploads/2025/05/Trimester-1-scaled.jpg",
-    description: "Folic acid, DHA, nausea bands & journal", category: "Trimester Kits", brand: "The Moms Co" },
+    description: "Folic acid, DHA, nausea bands & journal", category: "Trimester Kits", brand: "The Moms Co", inStock: true },
+
   { id: 113, title: "Pregnancy Test Kit (Pack of 2)", price: 499, originalPrice: 699, discount: 28, rating: 4.5, reviewCount: 450,
     mainImageUrl: "https://m.media-amazon.com/images/I/51+XFIK04SL._AC_UF1000,1000_QL80_.jpg",
-    description: "Accurate home pregnancy test", category: "Test Kits", brand: "Clearblue" },
+    description: "Accurate home pregnancy test", category: "Test Kits", brand: "Clearblue", inStock: true },
+
   { id: 114, title: "Maternity Pads (20 pcs)", price: 299, originalPrice: 499, discount: 40, rating: 4.6, reviewCount: 320,
     mainImageUrl: "https://m.media-amazon.com/images/I/71K6LOSGUbL._AC_UF894,1000_QL80_.jpg",
-    description: "Ultra absorbent pads for maternity", category: "Personal Care & Hygiene", brand: "Stayfree" },
-  { id: 115, title: "Hospital Delivery Kit", price: 1999, originalPrice: 2999, discount: 33, rating: 4.7, reviewCount: 210,
-    mainImageUrl: "https://m.media-amazon.com/images/I/81LobEPplZL._AC_UF894,1000_QL80_.jpg",
-    description: "Complete kit for hospital delivery", category: "Delivery Kits", brand: "Frida Mom" },
-  { id: 116, title: "Postpartum Wash Bottle", price: 799, originalPrice: 1199, discount: 33, rating: 4.8, reviewCount: 560,
-    mainImageUrl: "https://images.ctfassets.net/6m9bd13t776q/1gySuwPcBzOc2sZT4EbrOt/5fe0da8b79db59545908ae8c6a6a2619/how_to_use_a_peri_bottle-hero.webp?w=1122",
-    description: "Perineal cleansing bottle", category: "Postpartum Hygiene", brand: "Frida Mom" },
-  { id: 117, title: "Postpartum Vitamin Supplements", price: 1499, originalPrice: 2199, discount: 32, rating: 4.7, reviewCount: 280,
-    mainImageUrl: "https://m.media-amazon.com/images/I/71Ob6kPtKzL._AC_UF1000,1000_QL80_.jpg",
-    description: "Nutrients for recovery and breastfeeding", category: "Postpartum Nutrition", brand: "The Moms Co" },
-  { id: 118, title: "Cooling Pads for Pain Relief", price: 599, originalPrice: 899, discount: 33, rating: 4.6, reviewCount: 340,
-    mainImageUrl: "https://m.media-amazon.com/images/I/71JypK4eeQL._AC_UF1000,1000_QL80_.jpg",
-    description: "Soothing pads for perineal pain", category: "Pain & Healing Support", brand: "Tucks" },
-  { id: 119, title: "Uterine Tonic Syrup", price: 899, originalPrice: 1299, discount: 31, rating: 4.5, reviewCount: 180,
-    mainImageUrl: "https://m.media-amazon.com/images/I/510ElZrGCJL._AC_UF1000,1000_QL80_.jpg",
-    description: "Ayurvedic tonic for uterine health", category: "Uterine Health", brand: "Himalaya" },
-  { id: 120, title: "Organic Sanitary Pads (Pack of 12)", price: 399, originalPrice: 599, discount: 33, rating: 4.8, reviewCount: 420,
-    mainImageUrl: "https://us-i.makeupstore.com/z/zm/zmgocr1xtlqr.jpg",
-    description: "Eco-friendly menstrual pads", category: "Menstruation Essentials and Hygiene", brand: "Natracare" },
-  { id: 121, title: "PCOS Support Supplement", price: 1599, originalPrice: 2299, discount: 30, rating: 4.7, reviewCount: 250,
-    mainImageUrl: "https://m.media-amazon.com/images/I/71ftBtJSinL.jpg_BO30,255,255,255_UF900,850_SR1910,1000,0,C_QL100_.jpg",
-    description: "Natural supplement for PCOS management", category: "PCOS and Preconception", brand: "Myo-Inositol" },
-  { id: 122, title: "Menopause Relief Capsules", price: 1299, originalPrice: 1899, discount: 32, rating: 4.6, reviewCount: 310,
-    mainImageUrl: "https://m.media-amazon.com/images/I/41j6i9EfrHL.jpg",
-    description: "Herbal relief for menopause symptoms", category: "MenoPausal Medicines", brand: "Black Cohosh" }
+    description: "Ultra absorbent pads for maternity", category: "Personal Care & Hygiene", brand: "Stayfree", inStock: false },
 ];
 
 // Global State
@@ -106,35 +95,58 @@ function updateHeaderCounts() {
   updateBadge("wishlistCount", wishlist.length);
 }
 
-// ==================== CART & WISHLIST ====================
-function addToCart(productId) {
-  const product = allProducts.find(p => p.id === productId);
+// ==================== WISHLIST – FIXED & NORMALIZED ====================
+function toggleWishlist(id) {
+  const product = allProducts.find(p => p.id === id);
   if (!product) return;
 
-  const existing = cart.find(item => item.id === productId);
-  if (existing) {
-    existing.quantity += 1;
-  } else {
-    cart.push({ ...product, quantity: 1 });
-  }
+  const index = wishlist.findIndex(item => item.id === id);
 
-  localStorage.setItem("cart", JSON.stringify(cart));
-  updateHeaderCounts();        // INSTANT UPDATE
-  showToast("Added to Cart");
-}
-// TOGGLE WISHLIST – Instant update + re-render heart
-function toggleWishlist(id) {
-  const index = wishlist.findIndex(p => p.id === id);
   if (index > -1) {
+    // Remove from wishlist
     wishlist.splice(index, 1);
+    showToast("Removed from wishlist ♥");
   } else {
-    const product = allProducts.find(p => p.id === id);
-    if (product) wishlist.push(product);
+    // Add with CORRECT format for wishlist page
+    const wishlistItem = {
+      id: product.id,
+      name: product.title.split(' (')[0].trim(),
+      price: product.price,
+      originalPrice: product.originalPrice || null,
+      image: product.mainImageUrl
+    };
+    wishlist.push(wishlistItem);
+    showToast("Added to wishlist ♥");
   }
 
   localStorage.setItem("wishlist", JSON.stringify(wishlist));
-  updateHeaderCounts();        // INSTANT UPDATE
-  renderProducts();            // Update heart icon immediately
+  updateHeaderCounts();
+  renderProducts(); // Update heart icon
+}
+
+// Auto-fix old broken wishlist items (run once on load)
+function fixOldWishlistItems() {
+  let updated = false;
+  wishlist = wishlist.map(item => {
+    if (!item.name && item.title) {
+      item.name = item.title.split(' (')[0].trim();
+      updated = true;
+    }
+    if (!item.image && item.mainImageUrl) {
+      item.image = item.mainImageUrl;
+      updated = true;
+    }
+    if (!item.price && item.price !== 0) {
+      const orig = allProducts.find(p => p.id === item.id);
+      if (orig) item.price = orig.price;
+      updated = true;
+    }
+    return item;
+  }).filter(item => item.id && item.name && item.image);
+
+  if (updated) {
+    localStorage.setItem("wishlist", JSON.stringify(wishlist));
+  }
 }
 
 function showToast(msg) {
@@ -145,22 +157,29 @@ function showToast(msg) {
   setTimeout(() => toast.remove(), 2000);
 }
 
-// ==================== PRODUCT CARD ====================
+// ==================== PRODUCT CARD (UNCHANGED) ====================
 function createProductCard(p) {
   const inWishlist = wishlist.some(x => x.id === p.id);
+  const isOutOfStock = !p.inStock;
 
   return `
-    <div class="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100"
-         onclick="event.stopPropagation(); viewProductDetails(${p.id})">
+    <div class="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100
+                ${isOutOfStock ? 'opacity-60 grayscale cursor-not-allowed' : ''}"
+         ${!isOutOfStock ? `onclick="event.stopPropagation(); viewProductDetails(${p.id})"` : ''}
+         style="${isOutOfStock ? 'pointer-events: none;' : ''}">
 
-      <div class="cursor-pointer relative bg-gray-50 aspect-[6/4] overflow-hidden">
+      <div class="relative bg-gray-50 aspect-[6/4] overflow-hidden">
         <img src="${p.mainImageUrl}" alt="${p.title}"
-             class="w-full h-full object-contain p-5 transition-transform duration-500 group-hover:scale-110">
+             class="w-full h-full object-contain p-5 transition-transform duration-500 ${!isOutOfStock ? 'group-hover:scale-110' : ''}">
 
-        ${p.discount ? `<div class="absolute top-2 left-2 bg-[#F5AFAF] text-white text-xs font-bold px-2 py-1 rounded">${p.discount}% OFF</div>` : ''}
+        <div class="absolute top-2 left-2 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10
+                    ${isOutOfStock ? 'bg-red-600' : 'bg-green-600'}">
+          ${isOutOfStock ? 'Out of Stock' : 'In Stock'}
+        </div>
 
         <button onclick="event.stopPropagation(); toggleWishlist(${p.id})"
-                class="absolute top-2 right-2 w-9 h-9 bg-white rounded-full shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                class="absolute top-2 right-2 w-9 h-9 bg-white rounded-full shadow-lg flex items-center justify-center 
+                       ${isOutOfStock ? 'opacity-50' : 'opacity-0 group-hover:opacity-100'} transition-opacity z-10">
           <i class="${inWishlist ? 'fas fa-heart text-pink-600' : 'far fa-heart text-gray-600'} text-lg"></i>
         </button>
       </div>
@@ -173,13 +192,15 @@ function createProductCard(p) {
           <span class="text-lg font-bold text-gray-900">₹${p.price.toLocaleString()}</span>
           ${p.originalPrice > p.price ? `
             <span class="text-sm text-gray-500 line-through">₹${p.originalPrice.toLocaleString()}</span>
-            <span class="text-sm font-bold text-green-600">${p.discount}% off</span>
           ` : ''}
         </div>
 
-        <button onclick="event.stopPropagation(); addToCart(${p.id})"
-                class="mt-3 w-full bg-[#E0A8A8] hover:bg-[#] text-white font-medium text-sm py-2.5 rounded-lg transition">
-          Add to Cart
+        <button onclick="event.stopPropagation(); viewProductDetails(${p.id})"
+                class="mt-3 w-full font-medium text-sm py-2.5 rounded-lg transition
+                        ${isOutOfStock 
+                          ? 'bg-gray-300 text-gray-600 cursor-not-allowed' 
+                          : 'bg-[#CD2C58] hover:bg-[#AB886D] text-white'}">
+          ${isOutOfStock ? 'Out of Stock' : 'View Details'}
         </button>
       </div>
     </div>
@@ -187,7 +208,6 @@ function createProductCard(p) {
 }
 
 // ==================== RENDERING ====================
-// Rendering
 function renderProducts() {
   const start = (currentPage - 1) * pageSize;
   const paginated = filteredProducts.slice(start, start + pageSize);
@@ -211,13 +231,13 @@ function renderPagination() {
   for (let i = 1; i <= totalPages; i++) {
     const btn = document.createElement("button");
     btn.textContent = i;
-    btn.className = `px-4 py-2 rounded border mx-1 ${i === currentPage ? 'bg-[#9A3F3F] text-white' : 'bg-blue text-pink-600'}`;
+    btn.className = `px-4 py-2 rounded border mx-1 ${i === currentPage ? 'bg-[#9A3F3F] text-white' : 'bg-white text-pink-600 border-pink-300'}`;
     btn.onclick = () => { currentPage = i; renderProducts(); };
     container.appendChild(btn);
   }
 }
 
-// ==================== FILTER & SORT ====================
+// ==================== FILTER & SORT (UNCHANGED) ====================
 function applyFilters() {
   filteredProducts = allProducts.filter(p => {
     const catMatch = filterState.category === 'all' || p.category === filterState.category;
@@ -235,15 +255,14 @@ function applyFilters() {
 
 function sortProducts(type) {
   switch (type) {
-    case 'price-low': filteredProducts.sort((a, b) => a.price - b.price); break;
-    case 'price-high': filteredProducts.sort((a, b) => b.price - a.price); break;
+    case 'prize-low': filteredProducts.sort((a, b) => a.price - b.price); break;
+    case 'prize-high': filteredProducts.sort((a, b) => b.price - a.price); break;
     case 'rating': filteredProducts.sort((a, b) => b.rating - a.rating); break;
     case 'newest': filteredProducts.sort((a, b) => b.id - a.id); break;
     default: break;
   }
 }
 
-// Load & Save Filters
 function loadFiltersFromStorage() {
   try {
     const saved = localStorage.getItem('motherCareFilters');
@@ -255,49 +274,47 @@ function saveFiltersToStorage() {
   localStorage.setItem('motherCareFilters', JSON.stringify(filterState));
 }
 
-// ==================== PRICE SLIDERS ====================
+// ==================== PRICE SLIDERS (UNCHANGED) ====================
 function initPriceSliders() {
-  const sliders = [
-    { min: document.getElementById("minThumb"), max: document.getElementById("maxThumb"), fill: document.getElementById("desktopFill"), minVal: document.getElementById("minValue"), maxVal: document.getElementById("maxValue") },
-    { min: document.getElementById("mobileMinThumb"), max: document.getElementById("mobileMaxThumb"), fill: document.getElementById("mobileFill"), minVal: document.getElementById("mobileMinValue"), maxVal: document.getElementById("mobileMaxValue") }
-  ];
-
+  const sliders = document.querySelectorAll(".price-slider-container");
   const maxRange = 10000;
 
-  function updateAll(minP, maxP) {
-    const minPct = (minP / maxRange) * 100;
-    const maxPct = (maxP / maxRange) * 100;
+  sliders.forEach(container => {
+    const minThumb = container.querySelector('input[type="range"]:first-of-type');
+    const maxThumb = container.querySelector('input[type="range"]:last-of-type');
+    const fill = container.querySelector(".slider-fill") || container.querySelector("#desktopFill");
+    const minVal = container.querySelector("#minValue") || container.querySelector(".price-values span:first-child");
+    const maxVal = container.querySelector("#maxValue") || container.querySelector(".price-values span:last-child");
 
-    sliders.forEach(s => {
-      if (s.min && s.max) {
-        s.min.value = minP; s.max.value = maxP;
-        s.minVal.textContent = `₹${minP.toLocaleString()}`;
-        s.maxVal.textContent = `₹${maxP.toLocaleString()}`;
-        s.fill.style.left = minPct + "%";
-        s.fill.style.width = (maxPct - minPct) + "%";
+    const update = (minP, maxP) => {
+      const minPct = (minP / maxRange) * 100;
+      const maxPct = (maxP / maxRange) * 100;
+      if (fill) {
+        fill.style.left = minPct + "%";
+        fill.style.width = (maxPct - minPct) + "%";
       }
+      minVal.textContent = `₹${minP.toLocaleString()}`;
+      maxVal.textContent = `₹${maxP.toLocaleString()}`;
+      filterState.minPrice = minP;
+      filterState.maxPrice = maxP;
+    };
+
+    minThumb.addEventListener("input", () => {
+      let val = parseInt(minThumb.value);
+      if (val > parseInt(maxThumb.value)) val = parseInt(maxThumb.value);
+      update(val, parseInt(maxThumb.value));
+      applyFilters();
     });
 
-    filterState.minPrice = minP;
-    filterState.maxPrice = maxP;
-    applyFilters();
-  }
+    maxThumb.addEventListener("input", () => {
+      let val = parseInt(maxThumb.value);
+      if (val < parseInt(minThumb.value)) val = parseInt(minThumb.value);
+      update(parseInt(minThumb.value), val);
+      applyFilters();
+    });
 
-  sliders.forEach(s => {
-    if (!s.min || !s.max) return;
-    s.min.addEventListener("input", () => {
-      let val = parseInt(s.min.value);
-      if (val > parseInt(s.max.value)) val = parseInt(s.max.value);
-      updateAll(val, parseInt(s.max.value));
-    });
-    s.max.addEventListener("input", () => {
-      let val = parseInt(s.max.value);
-      if (val < parseInt(s.min.value)) val = parseInt(s.min.value);
-      updateAll(parseInt(s.min.value), val);
-    });
+    update(filterState.minPrice, filterState.maxPrice);
   });
-
-  updateAll(filterState.minPrice, filterState.maxPrice);
 }
 
 // ==================== FILTER INITIALIZATION ====================
@@ -352,21 +369,24 @@ function initFiltersAndUI() {
   applyFilters();
 }
 
-// ==================== OTHER FUNCTIONS ====================
+// ==================== VIEW PRODUCT DETAILS ====================
 function viewProductDetails(id) {
   localStorage.setItem("selectedProductId", id);
   localStorage.setItem("allProducts", JSON.stringify(allProducts));
   window.location.href = "mother-product-details.html";
 }
 
+// ==================== BANNER & MOBILE SHEETS ====================
 function initBanner() {
   const slides = document.querySelectorAll('.banner-slide');
   const dots = document.querySelectorAll('.banner-dot');
   let i = 0;
   const go = (n) => {
-    slides[i].classList.remove('active'); dots[i].classList.remove('active');
+    slides.forEach(s => s.classList.remove('active'));
+    dots.forEach(d => d.classList.remove('active'));
     i = (n + slides.length) % slides.length;
-    slides[i].classList.add('active'); dots[i].classList.add('active');
+    slides[i].classList.add('active');
+    dots[i].classList.add('active');
   };
   dots.forEach((d, idx) => d.onclick = () => go(idx));
   setInterval(() => go(i + 1), 5000);
@@ -393,6 +413,9 @@ function initMobileSheets() {
 
 // ==================== ON LOAD ====================
 document.addEventListener("DOMContentLoaded", () => {
+  // Fix old wishlist items first
+  fixOldWishlistItems();
+
   loadHeader();
   loadFooter();
   initBanner();

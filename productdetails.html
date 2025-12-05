@@ -32,6 +32,7 @@
     }
   }
 </style> 
+
 <style>
      #share-btn:hover ~ #share-overlay,
     #share-overlay:not(.hidden) {
@@ -44,22 +45,22 @@
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
-<body class="bg-gray-300 top-0">
+<body class="bg-[#F7F1DE] top-0">
 
     <div id="header-placeholder"></div>
 
     <!-- MAIN CONTAINER -->
-    <div class="max-w-7xl mx-auto bg-gray-100 px-4 sm:px-6 lg:px-8 pt-20 lg:pt-44 pb-24">
+    <div class="max-w-7xl mx-auto bg-[#F7F1DE] px-1 sm:px-4 lg:px-6 pt-20 lg:pt-44 pb-24">
         <div class="flex gap-8">
 
             <!-- LEFT + CENTER: Product Details -->
             <div class="flex-1">
-                <div class="bg-gray-100 rounded-lg shadow-sm border overflow-hidden">
+                <div class="bg-[#F0F0F0] rounded-lg shadow-sm border overflow-hidden">
                     <div class="flex flex-col lg:flex-row">
 
                        <!-- Image Section - REDUCED HEIGHT & BETTER PROPORTIONS -->
-<div class="lg:w-3/5 p-6 lg:p-8 lg:mr-12 bg-white">
-    <div class="absolute">
+<div class="lg:w-10/8 p-2 lg:p-1 lg:mr-12 bg-[#F7F1DE] mb-6">
+    <div class="relative">
         <!-- Share Button (Bottom-Right) -->
         <button id="share-btn" 
                 class="absolute bottom-3 right-3 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all duration-300 border border-gray-300 hover:border-pharmeasy-green group z-10">
@@ -73,26 +74,28 @@
         <img id="main-product-image" 
              src="https://via.placeholder.com/600x600" 
              alt="Product" 
-             class="w-full h-80 lg:h-96 object-contain rounded-lg shadow-sm skeleton">
+             class="w-full h-64 lg:h-80 object-contain rounded-lg shadow-sm skeleton">
 
         <!-- Visit Store Badge -->
-        <div class="absolute cursor-pointer top-3 left-3 bg-white px-4 py-1.5 rounded-full shadow-md text-xs lg:text-sm font-semibold text-pharmeasy-green border border-gray-200">
+        <!-- <div class="absolute cursor-pointer top-1 left-3 bg-white px-6 py-1.5 rounded-full shadow-md text-xs lg:text-sm font-semibold text-pharmeasy-green border border-gray-200">
             <a href="./index.html">
             Visit GOODNEEWS
             </a>
-        </div>
+        </div> -->
     </div>
 
     <!-- Thumbnails -->
     <div class="flex gap-3 mt-6 justify-center" id="thumbnail-container">
-        <div class="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-lg skeleton"></div>
+        <div class="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-lg skeleton">
+            <img src="" alt="">
+        </div>
         <div class="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-lg skeleton"></div>
         <div class="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-lg skeleton"></div>
     </div>
 </div>
 
                         <!-- Product Info -->
-                        <div class="lg:w-3/5 p-8 border-t lg:border-t-0 lg:border-l">
+                        <div class="lg:w-3/5 p-8 border-t lg:border-t-0 lg:border-l bg-[#F0F0F0]">
                             <h1 id="product-name" class="text-2xl lg:text-2xl font-bold text-gray-900 leading-snug skeleton h-14 w-35 rounded mt-4">
                                 Loading Product...
                             </h1>
@@ -100,16 +103,16 @@
                             <!-- WISHLIST HEART BUTTON (RIGHT SIDE OF TITLE) -->
                             
                             <div class="flex items-baseline gap-4 mb-4">
-                                <span id="selling-price" class="text-4xl font-bold text-pharmeasy-green skeleton h-12  rounded">₹0</span>
-                                <span class="text-lg text-gray-500 line-through">MRP <span id="mrp-price">₹0</span></span>
-                                <span id="discount-badge" class="bg-pharmeasy-red text-white px-2 py-2 rounded-full text-sm font-bold">55% OFF</span>
+                                <span id="selling-price" class="text-2xl font-bold text-pharmeasy-green skeleton h-12  rounded">₹0</span>
+                                <span class="text-md text-gray-500 line-through">MRP <span id="mrp-price">₹0</span></span>
+                                <span id="discount-badge" class="bg-pharmeasy-red text-white px-2 py-2 rounded-full text-md font-semibold">55% OFF</span>
                             </div>
                             
 
-                            <p class="text-sm text-gray-600 mb-6">Inclusive of all taxes</p>
+                            <!-- <p class="text-sm text-gray-600 mb-6">Inclusive of all taxes</p> -->
 
                             <div class="bg-pharmeasy-light-green border border-green-300 rounded-lg p-5 mb-8">
-                                <p class="text-pharmeasy-green font-bold text-lg">
+                                <p class="text-pharmeasy-green font-bold text-md">
                                     Delivery by <span class="font-bold">Tomorrow, before 10:00 pm</span>
                                 </p>
                                 <p class="text-xs text-gray-600 mt-2">*Offer applicable on order above ₹1000</p>
@@ -122,7 +125,7 @@
                                     <option>Qty 3</option>
                                 </select>
 
-                                <button class="flex-1 px-4 bg-pharmeasy-green hover:bg-green-700 text-white font-bold py-2 rounded-lg text-md shadow-lg transition flex items-center justify-center  transition">
+                                <button class="flex-1 px-2 bg-pharmeasy-green hover:bg-green-700 text-white font-bold py-2 rounded-lg text-md shadow-lg transition flex items-center justify-center  transition">
                                     Add
                                 </button>
                                 <button class="px-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-lg text-md shadow-lg transition">

@@ -12,30 +12,50 @@
     tailwind.config = { theme: { extend: { colors: { primary: '#36C2CE', accent: '#10b981' }}}}
   </script>
   <style>
-    body { background-color: #FCF6D9; padding-bottom: 100px; }
-    .wishlist-item { transition: all 0.3s; }
-    .wishlist-item:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    .empty-state { min-height: 60vh; }
-  </style>
+  body { 
+    background-color: #FCF6D9; 
+    padding-bottom: 0; 
+    min-height: 100vh; 
+    display: flex;
+    flex-direction: column;
+  }
+  .wishlist-item { transition: all 0.3s; }
+  .wishlist-item:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+  .empty-state { min-height: 60vh; }
+
+  /* Make main content grow so footer is pushed to bottom on short pages */
+  main { flex: 1; }
+</style>
 </head>
 <body class="min-h-screen">
-
   <div id="header-placeholder"></div>
-
-  <div class="max-w-7xl mx-auto px-4 py-8 mt-32">
+  <div class="max-w-7xl mx-auto px-4 py-8 mt-40">
     <h1 class="text-2xl font-bold text-gray-800 mb-8 text-center">
       <i class="fas fa-heart text-red-500 mr-3"></i> My Wishlist
     </h1>
 
-    <div id="wishlistContainer" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-      <!-- Items will be injected here -->
+    <button id="clear-wishlist-btn" 
+          onclick="clearWishlist()" 
+          class="hidden bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition shadow-md mb-5 ">
+    <i class="fas fa-trash mr-2"></i> Clear Wishlist
+  </button>
+
+    <!-- This container will be used by backend wishlist JS -->
+    <div id="wishlist-items" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+      <!-- Items injected by wishlist.js (backend) -->
     </div>
 
-    <div id="emptyState" class="empty-state flex flex-col items-center justify-center text-center hidden">
+    <!-- Loading & Empty States -->
+    <div id="loading-state" class="text-center py-10">
+      <i class="fas fa-spinner fa-spin text-4xl text-gray-400"></i>
+      <p class="mt-4 text-gray-600">Loading your wishlist...</p>
+    </div>
+
+    <div id="empty-state" class="empty-state flex flex-col items-center justify-center text-center hidden">
       <i class="fas fa-heart-broken text-8xl text-gray-300 mb-6"></i>
       <h2 class="text-2xl font-bold text-gray-600 mb-3">Your wishlist is empty</h2>
       <p class="text-gray-500 mb-8">Add products you love and they'll appear here!</p>
-      <a href="/index.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 px-10 rounded-xl transition">
+      <a href="/index.html" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-12 rounded-xl transition">
         Continue Shopping
       </a>
     </div>
@@ -43,6 +63,10 @@
 
   <div id="footer-placeholder"></div>
 
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-50"></div>
+
+  <!-- Load Header & Footer -->
   <script>
     function loadHeader() {
       fetch('../Header/header.html')
@@ -54,7 +78,6 @@
           document.body.appendChild(script);
         });
     }
-
     function loadFooter() {
       fetch('../Footer/footer.html')
         .then(r => r.text())
@@ -62,77 +85,13 @@
           document.getElementById('footer-placeholder').innerHTML = html;
         });
     }
-
-    function renderWishlist() {
-      const container = document.getElementById('wishlistContainer');
-      const emptyState = document.getElementById('emptyState');
-      const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-
-      if (wishlist.length === 0) {
-        container.classList.add('hidden');
-        emptyState.classList.remove('hidden');
-        return;
-      }
-
-      container.classList.remove('hidden');
-      emptyState.classList.add('hidden');
-      container.innerHTML = '';
-
-      wishlist.forEach(product => {
-        const div = document.createElement('div');
-        div.className = 'wishlist-item bg-white rounded-xl shadow-lg overflow-hidden';
-
-        const priceLine = product.originalPrice
-          ? `<div class="text-lg font-bold  text-green-600">₹${product.price} <s class="text-gray-400 text-sm">₹${product.originalPrice}</s> <span class="text-sm font-bold">${product.discount}% off</span></div>`
-          : `<div class="text-lg font-bold text-green-600">₹${product.price}</div>`;
-
-        div.innerHTML = `
-          <div class="relative group">
-            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover">
-            <button onclick="removeFromWishlist(${product.id})" class="absolute top-2 right-2 bg-white/90 hover:bg-red-500 text-red-600 hover:text-white w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition">
-              <i class="fas fa-trash-alt"></i>
-            </button>
-          </div>
-          <div class="p-4">
-            <h3 class="font-semibold text-sm line-clamp-2 h-6">${product.name}</h3>
-            <p class="text-xs text-gray-500 mt-1">${product.brand}</p>
-            ${priceLine}
-            <button onclick="goToProduct(${product.id})" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold text-sm transition">
-              View Details
-            </button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function removeFromWishlist(id) {
-      let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-      wishlist = wishlist.filter(item => item.id !== id);
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
-      renderWishlist();
-
-      // Update header badge
-      window.dispatchEvent(new CustomEvent('wishlistUpdated'));
-    }
-
-    function goToProduct(id) {
-      const product = JSON.parse(localStorage.getItem('wishlist') || '[]').find(p => p.id === id);
-      if (product) {
-        sessionStorage.setItem('selectedProduct', JSON.stringify(product));
-        window.location.href = `../productdetails.html?id=${id}`;
-      }
-    }
-
-    // Load header/footer and render wishlist
     document.addEventListener('DOMContentLoaded', () => {
       loadHeader();
       loadFooter();
-      renderWishlist();
-
-      // Listen for wishlist changes from other pages
-      window.addEventListener('wishlistUpdated', renderWishlist);
     });
   </script>
+
+  <!-- Your main wishlist script (backend-based) -->
+  <script src="wishlist.js"></script>
 </body>
 </html>

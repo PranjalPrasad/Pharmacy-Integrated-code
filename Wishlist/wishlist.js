@@ -1,109 +1,323 @@
-// ==================== ENHANCED WISHLIST PAGE SCRIPT ====================
+// ==================== ENHANCED WISHLIST PAGE SCRIPT - FULL BACKEND INTEGRATION ====================
+const API_BASE_URL = 'http://localhost:8083/api/wishlist';
+const CART_API_URL = 'http://localhost:8083/api/cart';
+const PRODUCT_API_URL = 'http://localhost:8083/api/products';
+const MBP_PRODUCT_API = 'http://localhost:8083/api/mb/products';
 
-// Utility: Show toast notification
+// ==================== UTILITY FUNCTIONS ====================
+function getUserId() {
+    const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+    if (!userId) {
+        console.error('User not logged in');
+        return null;
+    }
+    return parseInt(userId);
+}
+
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     if (!toast) return;
-    
     const icon = type === 'success' ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-exclamation-circle"></i>';
     toast.innerHTML = `${icon} ${message}`;
-    toast.className = `toast ${type} show`;
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 3000);
+    toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg text-white font-medium shadow-xl z-50 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} show`;
+    setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// Get wishlist from localStorage
-function getWishlist() {
+function getProductImageUrl(productId, productType) {
+    return productType === 'MOTHER' || productType === 'BABY'
+        ? `${MBP_PRODUCT_API}/${productId}/image`
+        : `${PRODUCT_API}/${productId}/image`;
+}
+
+function calculateDiscount(originalPrice, currentPrice) {
+    if (!originalPrice || originalPrice <= currentPrice) return 0;
+    return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+}
+
+// ==================== WISHLIST FUNCTIONS ====================
+async function fetchWishlistFromBackend() {
+    const userId = getUserId();
+    if (!userId) {
+        showToast('Please login to view wishlist', 'error');
+        return [];
+    }
+    
     try {
-        return JSON.parse(localStorage.getItem('wishlist') || '[]');
-    } catch (e) {
-        console.error('Error reading wishlist:', e);
-        localStorage.removeItem('wishlist');
+        const response = await fetch(`${API_BASE_URL}/get-wishlist-items?userId=${userId}`);
+        if (!response.ok) throw new Error('Failed to fetch wishlist');
+        const data = await response.json();
+
+        return data.map(item => {
+            const productType = item.productType || 'MEDICINE';
+            // Determine type based on productType: MOTHER/BABY = MBP, MEDICINE = PRODUCT
+            const itemType = (productType === 'MOTHER' || productType === 'BABY') ? 'MBP' : 'PRODUCT';
+            
+            return {
+                id: item.productId,
+                name: item.title || 'Unknown Product',
+                price: item.price || 0,
+                originalPrice: item.originalPrice || item.price || 0,
+                image: getProductImageUrl(item.productId, productType),
+                productType: productType,
+                sizes: item.sizes || [],
+                type: itemType // PRODUCT or MBP based on productType
+            };
+        });
+    } catch (error) {
+        console.error('Error fetching wishlist:', error);
+        showToast('Failed to load wishlist', 'error');
         return [];
     }
 }
 
-// Save wishlist to localStorage
-function saveWishlist(wishlist) {
-    try {
-        localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    } catch (e) {
-        console.error('Error saving wishlist:', e);
+async function removeFromWishlist(productId, productType = 'MEDICINE') {
+    const userId = getUserId();
+    if (!userId) {
+        showToast('Please login', 'error');
+        return;
     }
-}
 
-// Calculate discount percentage
-function calculateDiscount(originalPrice, currentPrice) {
-    if (!originalPrice || originalPrice === currentPrice) return 0;
-    const discount = ((parseFloat(originalPrice) - parseFloat(currentPrice)) / parseFloat(originalPrice)) * 100;
-    return Math.round(discount);
-}
-
-// Remove item from wishlist
-function removeFromWishlist(productId) {
-    let wishlist = getWishlist();
-    const itemToRemove = wishlist.find(item => item.id == productId);
-    
-    if (!itemToRemove) return;
-    
-    wishlist = wishlist.filter(item => item.id != productId);
-    saveWishlist(wishlist);
-    
-    showToast('Item removed from wishlist', 'error');
-    renderWishlist(); // Re-render the wishlist
-    updateWishlistCount();
-    
-    // Trigger storage event for other tabs
-    window.dispatchEvent(new Event('storage'));
-}
-
-// Move item to cart
-function moveToCart(productId) {
-    const wishlist = getWishlist();
-    const item = wishlist.find(i => i.id == productId);
-    
-    if (!item) return;
-    
-    // Add to cart
-    let cart = [];
     try {
-        cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    } catch (e) {
-        cart = [];
-    }
-    
-    const existingInCart = cart.find(c => c.id == item.id);
-    
-    if (existingInCart) {
-        existingInCart.quantity = (existingInCart.quantity || 1) + 1;
-    } else {
-        cart.push({
-            id: item.id,
-            name: item.name,
-            price: parseFloat(item.price),
-            image: item.image,
-            quantity: 1
+        const response = await fetch(`${API_BASE_URL}/remove-wishlist-items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: userId,
+                productId: productId,
+                productType: productType.toUpperCase()
+            })
         });
-    }
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    
-    // Remove from wishlist
-    removeFromWishlist(productId);
-    
-    showToast('Item moved to cart!', 'success');
-    
-    // Update cart count if function exists
-    if (typeof updateCartCount === 'function') {
-        updateCartCount();
+
+        if (response.ok) {
+            showToast('Removed from wishlist', 'success');
+            await renderWishlist();
+            await updateWishlistCount();
+        } else {
+            const errorText = await response.text();
+            showToast('Failed to remove item', 'error');
+            console.error('Remove failed:', errorText);
+        }
+    } catch (error) {
+        console.error('Network error:', error);
+        showToast('Network error', 'error');
     }
 }
 
-// Update wishlist count in header
-function updateWishlistCount() {
-    const count = getWishlist().length;
+async function clearWishlist() {
+    const userId = getUserId();
+    if (!userId) {
+        showToast('Please login first', 'error');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to clear your entire wishlist?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/clear-wishlist`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+        });
+
+        if (response.ok) {
+            showToast('Wishlist cleared successfully', 'success');
+            await renderWishlist();
+            await updateWishlistCount();
+        } else {
+            showToast('Failed to clear wishlist', 'error');
+        }
+    } catch (error) {
+        console.error('Network error:', error);
+        showToast('Network error', 'error');
+    }
+}
+
+// ==================== CART FUNCTIONS - BACKEND ONLY ====================
+async function addToCartBackend(productId, productType, type, quantity = 1, selectedSize = '') {
+    const userId = getUserId();
+    if (!userId) {
+        showToast('Please login to add items to cart', 'error');
+        return false;
+    }
+
+    try {
+        const requestBody = {
+            userId: userId,
+            type: type, // 'PRODUCT' or 'MBP'
+            quantity: quantity,
+            productType: productType.toUpperCase(), // 'MEDICINE', 'MOTHER', 'BABY'
+            selectedSize: selectedSize
+        };
+
+        // Add productId or mbpId based on type
+        if (type === 'PRODUCT') {
+            requestBody.productId = productId;
+        } else if (type === 'MBP') {
+            requestBody.mbpId = productId;
+        }
+
+        console.log('Adding to cart:', requestBody);
+
+        const response = await fetch(`${CART_API_URL}/add-cart-items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showToast('Added to cart successfully', 'success');
+            // Update cart count if function exists
+            if (typeof updateCartCount === 'function') {
+                await updateCartCount();
+            }
+            return true;
+        } else {
+            showToast(result.error || 'Failed to add to cart', 'error');
+            console.error('Add to cart failed:', result);
+            return false;
+        }
+    } catch (error) {
+        console.error('Network error:', error);
+        showToast('Network error', 'error');
+        return false;
+    }
+}
+
+async function moveToCart(productId, productType = 'MEDICINE') {
+    const userId = getUserId();
+    if (!userId) {
+        showToast('Please login', 'error');
+        return;
+    }
+
+    // Fetch current wishlist to get item details
+    const wishlist = await fetchWishlistFromBackend();
+    const item = wishlist.find(i => i.id === productId && i.productType === productType);
+    
+    if (!item) {
+        showToast('Item not found in wishlist', 'error');
+        return;
+    }
+
+    // Determine correct type: if productType is MOTHER or BABY, use MBP, otherwise PRODUCT
+    const itemType = (item.productType === 'MOTHER' || item.productType === 'BABY') ? 'MBP' : 'PRODUCT';
+
+    // Check if item has sizes and show size selector if needed
+    if (item.sizes && item.sizes.length > 0) {
+        const selectedSize = await showSizeSelector(item.sizes, item.name);
+        if (!selectedSize) {
+            showToast('Please select a size', 'error');
+            return;
+        }
+        
+        // Add to cart with selected size
+        const success = await addToCartBackend(
+            item.id,
+            item.productType,
+            itemType,
+            1,
+            selectedSize
+        );
+
+        if (success) {
+            // Remove from wishlist after successful cart addition
+            await removeFromWishlist(productId, item.productType);
+            showToast('Item moved to cart!', 'success');
+        }
+    } else {
+        // Add to cart without size
+        const success = await addToCartBackend(
+            item.id,
+            item.productType,
+            itemType,
+            1,
+            ''
+        );
+
+        if (success) {
+            // Remove from wishlist after successful cart addition
+            await removeFromWishlist(productId, item.productType);
+            showToast('Item moved to cart!', 'success');
+        }
+    }
+}
+
+// ==================== SIZE SELECTOR MODAL ====================
+function showSizeSelector(sizes, productName) {
+    return new Promise((resolve) => {
+        // Create modal HTML
+        const modalHTML = `
+            <div id="size-selector-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                    <h3 class="text-xl font-bold mb-4">Select Size for ${productName}</h3>
+                    <div class="grid grid-cols-3 gap-3 mb-6">
+                        ${sizes.map(size => `
+                            <button class="size-option border-2 border-gray-300 hover:border-blue-500 rounded-lg py-3 px-4 font-semibold transition" data-size="${size}">
+                                ${size}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="confirm-size-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            Confirm
+                        </button>
+                        <button id="cancel-size-btn" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-lg font-bold">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Insert modal into document
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        const modal = document.getElementById('size-selector-modal');
+        const confirmBtn = document.getElementById('confirm-size-btn');
+        const cancelBtn = document.getElementById('cancel-size-btn');
+        const sizeOptions = modal.querySelectorAll('.size-option');
+
+        let selectedSize = null;
+
+        // Handle size selection
+        sizeOptions.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sizeOptions.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-50'));
+                btn.classList.add('border-blue-500', 'bg-blue-50');
+                selectedSize = btn.dataset.size;
+                confirmBtn.disabled = false;
+            });
+        });
+
+        // Handle confirm
+        confirmBtn.addEventListener('click', () => {
+            modal.remove();
+            resolve(selectedSize);
+        });
+
+        // Handle cancel
+        cancelBtn.addEventListener('click', () => {
+            modal.remove();
+            resolve(null);
+        });
+
+        // Handle click outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+                resolve(null);
+            }
+        });
+    });
+}
+
+// ==================== UPDATE COUNTS ====================
+async function updateWishlistCount() {
+    const wishlist = await fetchWishlistFromBackend();
+    const count = wishlist.length;
     
     document.querySelectorAll('#desktop-wishlist-count, #mobile-wishlist-count, .wishlist-count, [class*="wishlist-count"]').forEach(el => {
         if (el) {
@@ -113,161 +327,148 @@ function updateWishlistCount() {
     });
 }
 
-// Calculate and display wishlist statistics
-function updateWishlistStats(wishlist) {
-    const statsContainer = document.getElementById('wishlist-stats');
-    if (!statsContainer) return;
+async function updateCartCount() {
+    const userId = getUserId();
+    if (!userId) return;
 
-    if (wishlist.length === 0) {
-        statsContainer.classList.add('hidden');
-        return;
-    }
-
-    statsContainer.classList.remove('hidden');
-
-    // Calculate totals
-    let totalValue = 0;
-    let totalSavings = 0;
-
-    wishlist.forEach(item => {
-        const currentPrice = parseFloat(item.price) || 0;
-        const originalPrice = parseFloat(item.originalPrice) || currentPrice;
+    try {
+        const response = await fetch(`${CART_API_URL}/get-cart-items?userId=${userId}`);
+        if (!response.ok) throw new Error('Failed to fetch cart');
         
-        totalValue += currentPrice;
-        totalSavings += (originalPrice - currentPrice);
-    });
-
-    // Update DOM
-    document.getElementById('total-items').textContent = wishlist.length;
-    document.getElementById('total-value').textContent = `₹${totalValue.toFixed(0)}`;
-    document.getElementById('total-savings').textContent = `₹${totalSavings.toFixed(0)}`;
+        const cartItems = await response.json();
+        const count = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        
+        document.querySelectorAll('#desktop-cart-count, #mobile-cart-count, .cart-count, [class*="cart-count"]').forEach(el => {
+            if (el) {
+                el.textContent = count;
+                el.style.display = count > 0 ? 'flex' : 'none';
+            }
+        });
+    } catch (error) {
+        console.error('Error updating cart count:', error);
+    }
 }
 
-// Create wishlist item card HTML
-function createWishlistCard(item, index) {
-    const currentPrice = parseFloat(item.price) || 0;
-    const originalPrice = parseFloat(item.originalPrice) || currentPrice;
-    const discount = calculateDiscount(originalPrice, currentPrice);
-    const savings = originalPrice - currentPrice;
+// ==================== RENDER FUNCTIONS ====================
+function createWishlistCard(item) {
+    const discount = calculateDiscount(item.originalPrice, item.price);
 
     return `
-        <div class="wishlist-item fade-in h-40" style="animation-delay: ${index * 0.1}s">
-            <!-- Image Container -->
-            <div class="item-image-container">
-                <img src="${item.image || 'https://via.placeholder.com/300'}" 
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden relative group hover:shadow-2xl transition-shadow duration-300">
+            <div class="relative">
+                <img src="${item.image}" 
                      alt="${item.name}" 
-                     class="item-image">
-                
-                <!-- Discount Badge -->
-                ${discount > 0 ? `<div class="discount-badge">${discount}% OFF</div>` : ''}
-                
-                <!-- Remove Button -->
-                <button onclick="removeFromWishlist(${item.id})" 
-                        class="remove-btn"
+                     class="w-full h-48 object-contain p-4" 
+                     onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'">
+                ${discount > 0 ? `
+                    <div class="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                        ${discount}% OFF
+                    </div>
+                ` : ''}
+                <button onclick="removeFromWishlist(${item.id}, '${item.productType}')" 
+                        class="absolute top-2 right-2 bg-white/90 hover:bg-red-500 text-red-600 hover:text-white w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-200"
                         title="Remove from wishlist">
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-trash-alt"></i>
                 </button>
             </div>
-            
-            <!-- Card Content -->
-            <div class="item-content">
-                <h3 class="item-name" title="${item.name}">
-                    ${item.name || 'Product Name'}
-                </h3>
-                
-                <!-- Price Container -->
-                <div class="price-container">
-                    <span class="current-price text-green-600 text-xl font-bold">₹${currentPrice}</span>
-                    ${originalPrice > currentPrice ? `
-                        <span class="original-price">₹${originalPrice}</span>
-                        <span class="savings-badge">Save ₹${savings.toFixed(0)}</span>
+            <div class="p-4">
+                <h3 class="font-semibold text-sm line-clamp-2 h-10 mb-2">${item.name}</h3>
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-lg font-bold text-green-600">₹${item.price.toFixed(2)}</span>
+                    ${item.originalPrice > item.price ? `
+                        <span class="text-sm text-gray-500 line-through">₹${item.originalPrice.toFixed(2)}</span>
                     ` : ''}
                 </div>
-                
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button onclick="moveToCart(${item.id})" 
-                            class="btn-add-cart bg-blue-600"
-                            title="Move to cart">
-                        <i class="fas fa-shopping-cart"></i>
-                        Add to Cart
-                    </button>
-                    
-                    <button onclick="removeFromWishlist(${item.id})" 
-                            class="btn-delete"
-                            title="Remove">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
+                ${item.sizes && item.sizes.length > 0 ? `
+                    <div class="text-xs text-gray-600 mb-2">
+                        <i class="fas fa-ruler"></i> Available sizes: ${item.sizes.join(', ')}
+                    </div>
+                ` : ''}
+                <button onclick="moveToCart(${item.id}, '${item.productType}')" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold text-sm transition-colors duration-200 flex items-center justify-center gap-2">
+                    <i class="fas fa-shopping-cart"></i>
+                    Add to Cart
+                </button>
             </div>
         </div>
     `;
 }
 
-// Main function to render wishlist
-function renderWishlist() {
-    const loadingState = document.getElementById('loading-state');
-    const emptyState = document.getElementById('empty-state');
-    const wishlistItems = document.getElementById('wishlist-items');
-    
-    // Hide loading state
-    if (loadingState) loadingState.classList.add('hidden');
-    
-    // Get wishlist data
-    const wishlist = getWishlist();
-    
-    console.log('Rendering wishlist with', wishlist.length, 'items:', wishlist);
-    
-    // Update statistics
-    updateWishlistStats(wishlist);
-    
-    // Show empty state if no items
-    if (wishlist.length === 0) {
-        if (emptyState) emptyState.classList.remove('hidden');
-        if (wishlistItems) wishlistItems.classList.add('hidden');
+function toggleClearButton(show) {
+    const btn = document.getElementById('clear-wishlist-btn');
+    if (btn) {
+        if (show) {
+            btn.classList.remove('hidden');
+        } else {
+            btn.classList.add('hidden');
+        }
+    }
+}
+
+async function renderWishlist() {
+    const loading = document.getElementById('loading-state');
+    const empty = document.getElementById('empty-state');
+    const container = document.getElementById('wishlist-items');
+
+    // Show loading state
+    if (loading) loading.classList.remove('hidden');
+    if (empty) empty.classList.add('hidden');
+    if (container) container.classList.add('hidden');
+    toggleClearButton(false);
+
+    // Check if user is logged in
+    if (!getUserId()) {
+        if (loading) loading.classList.add('hidden');
+        if (empty) empty.classList.remove('hidden');
         return;
     }
+
+    // Fetch wishlist items
+    const items = await fetchWishlistFromBackend();
     
-    // Show wishlist items
-    if (emptyState) emptyState.classList.add('hidden');
-    if (wishlistItems) {
-        wishlistItems.classList.remove('hidden');
-        wishlistItems.innerHTML = wishlist.map((item, index) => createWishlistCard(item, index)).join('');
+    // Hide loading state
+    if (loading) loading.classList.add('hidden');
+
+    // Handle empty wishlist
+    if (items.length === 0) {
+        if (empty) empty.classList.remove('hidden');
+        toggleClearButton(false);
+        return;
     }
+
+    // Render wishlist items
+    if (container) {
+        container.classList.remove('hidden');
+        container.innerHTML = items.map(createWishlistCard).join('');
+    }
+    toggleClearButton(true);
 }
 
-// Clear entire wishlist
-function clearWishlist() {
-    if (!confirm('Are you sure you want to clear your entire wishlist?')) return;
-    
-    localStorage.removeItem('wishlist');
-    showToast('Wishlist cleared', 'error');
-    renderWishlist();
-    updateWishlistCount();
-}
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Wishlist page loaded');
-    
-    // Small delay to ensure localStorage is accessible
-    setTimeout(() => {
-        renderWishlist();
-        updateWishlistCount();
-    }, 100);
-});
-
-// Listen for storage changes (from other tabs)
-window.addEventListener('storage', (e) => {
-    if (e.key === 'wishlist') {
-        console.log('Wishlist updated in another tab');
-        renderWishlist();
-        updateWishlistCount();
-    }
-});
-
-// Make functions globally accessible
+// ==================== GLOBAL FUNCTIONS ====================
 window.removeFromWishlist = removeFromWishlist;
 window.moveToCart = moveToCart;
 window.clearWishlist = clearWishlist;
-window.renderWishlist = renderWishlist;
+window.updateWishlistCount = updateWishlistCount;
+window.updateCartCount = updateCartCount;
+
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Wishlist page loaded - Backend integration active');
+    
+    // Small delay to ensure DOM is fully ready
+    setTimeout(() => {
+        renderWishlist();
+        updateWishlistCount();
+        updateCartCount();
+    }, 100);
+});
+
+// ==================== AUTO-REFRESH ON VISIBILITY CHANGE ====================
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) {
+        // Refresh wishlist when user returns to tab
+        renderWishlist();
+        updateWishlistCount();
+        updateCartCount();
+    }
+});

@@ -25,7 +25,7 @@ function getWishlist() {
     return JSON.parse(localStorage.getItem('wishlist') || '[]');
   } catch (e) {
     console.warn('Wishlist corrupted, resetting...');
-    localStorage.removeItem('wishlist');
+    // localStorage.removeItem('wishlist');
     return [];
   }
 }

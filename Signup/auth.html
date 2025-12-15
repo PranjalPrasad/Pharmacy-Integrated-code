@@ -821,8 +821,7 @@
       </div>
     </div>
   </div>
-
-  <script>
+<script>
     // DOM Elements
     const container = document.getElementById('container');
     const signUpButton = document.getElementById('signUp');
@@ -830,358 +829,252 @@
     const switchToSignup = document.getElementById('switchToSignup');
     const backFromSignin = document.getElementById('backFromSignin');
     const backFromSignup = document.getElementById('backFromSignup');
-    
+
     // Password toggle buttons
     const toggleLoginPassword = document.getElementById('toggleLoginPassword');
     const toggleSignupPassword = document.getElementById('toggleSignupPassword');
     const toggleSignupConfirmPassword = document.getElementById('toggleSignupConfirmPassword');
-    
+
     // Form elements
     const signinForm = document.getElementById('signinForm');
     const signupForm = document.getElementById('signupForm');
     const forgotPasswordLink = document.getElementById('forgotPasswordLink');
 
-    // Switch between sign in and sign up
-    signUpButton.addEventListener('click', () => {
-      container.classList.add("right-panel-active");
-    });
+    // Backend URL
+    const API_BASE_URL = 'http://localhost:8083/api/users';
 
-    signInButton.addEventListener('click', () => {
-      container.classList.remove("right-panel-active");
-    });
-    
-    // Back arrow functionality
-    if (backFromSignin) {
-      backFromSignin.addEventListener('click', (e) => {
-        e.preventDefault();
-        // If on sign-in form, go back to overlay (center position)
-        container.classList.remove("right-panel-active");
-      });
-    }
-    
-    if (backFromSignup) {
-      backFromSignup.addEventListener('click', (e) => {
-        e.preventDefault();
-        // If on sign-up form, go back to overlay (center position)
-        container.classList.remove("right-panel-active");
-      });
-    }
-    
-    // Additional signup link in signin form
-    if (switchToSignup) {
-      switchToSignup.addEventListener('click', (e) => {
-        e.preventDefault();
-        container.classList.add("right-panel-active");
-      });
-    }
+    // Switch panels
+    signUpButton.addEventListener('click', () => container.classList.add("right-panel-active"));
+    signInButton.addEventListener('click', () => container.classList.remove("right-panel-active"));
 
-    // Password toggle functionality
+    // Back arrows
+    if (backFromSignin) backFromSignin.addEventListener('click', (e) => { e.preventDefault(); container.classList.remove("right-panel-active"); });
+    if (backFromSignup) backFromSignup.addEventListener('click', (e) => { e.preventDefault(); container.classList.remove("right-panel-active"); });
+    if (switchToSignup) switchToSignup.addEventListener('click', (e) => { e.preventDefault(); container.classList.add("right-panel-active"); });
+
+    // Password toggle
     function togglePasswordVisibility(inputId, toggleBtn) {
-      const passwordInput = document.getElementById(inputId);
-      const icon = toggleBtn.querySelector('i');
-      
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        icon.classList.remove('fa-eye');
-        icon.classList.add('fa-eye-slash');
-      } else {
-        passwordInput.type = 'password';
-        icon.classList.remove('fa-eye-slash');
-        icon.classList.add('fa-eye');
-      }
+        const input = document.getElementById(inputId);
+        const icon = toggleBtn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+    toggleLoginPassword?.addEventListener('click', () => togglePasswordVisibility('loginPassword', toggleLoginPassword));
+    toggleSignupPassword?.addEventListener('click', () => togglePasswordVisibility('signupPassword', toggleSignupPassword));
+    toggleSignupConfirmPassword?.addEventListener('click', () => togglePasswordVisibility('signupConfirmPassword', toggleSignupConfirmPassword));
+
+    // Error helpers
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = msg; el.classList.add('show'); }
+    }
+    function hideError(id) {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = ''; el.classList.remove('show'); }
     }
 
-    // Initialize password toggles
-    if (toggleLoginPassword) {
-      toggleLoginPassword.addEventListener('click', () => {
-        togglePasswordVisibility('loginPassword', toggleLoginPassword);
-      });
-    }
-
-    if (toggleSignupPassword) {
-      toggleSignupPassword.addEventListener('click', () => {
-        togglePasswordVisibility('signupPassword', toggleSignupPassword);
-      });
-    }
-
-    if (toggleSignupConfirmPassword) {
-      toggleSignupConfirmPassword.addEventListener('click', () => {
-        togglePasswordVisibility('signupConfirmPassword', toggleSignupConfirmPassword);
-      });
-    }
-
-    // Form validation functions
-    function showError(elementId, message) {
-      const errorElement = document.getElementById(elementId);
-      if (errorElement) {
-        errorElement.textContent = message;
-        errorElement.classList.add('show');
-      }
-    }
-
-    function hideError(elementId) {
-      const errorElement = document.getElementById(elementId);
-      if (errorElement) {
-        errorElement.textContent = '';
-        errorElement.classList.remove('show');
-      }
-    }
-
+    // Validation functions (unchanged)
     function validateSignupForm() {
-      let isValid = true;
-      
-      // First name validation
-      const firstName = document.getElementById('signupFirstName').value.trim();
-      if (!firstName) {
-        showError('firstNameError', 'First name is required');
-        isValid = false;
-      } else {
-        hideError('firstNameError');
-      }
-      
-      // Last name validation
-      const lastName = document.getElementById('signupLastName').value.trim();
-      if (!lastName) {
-        showError('lastNameError', 'Last name is required');
-        isValid = false;
-      } else {
-        hideError('lastNameError');
-      }
-      
-      // Email validation
-      const email = document.getElementById('signupEmail').value.trim();
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!email) {
-        showError('emailError', 'Email is required');
-        isValid = false;
-      } else if (!emailPattern.test(email)) {
-        showError('emailError', 'Please enter a valid email');
-        isValid = false;
-      } else {
-        hideError('emailError');
-      }
-      
-      // Phone validation
-      const phone = document.getElementById('signupPhone').value.trim();
-      const phonePattern = /^[0-9]{10}$/;
-      if (!phone) {
-        showError('phoneError', 'Phone number is required');
-        isValid = false;
-      } else if (!phonePattern.test(phone)) {
-        showError('phoneError', 'Please enter a valid 10-digit phone number');
-        isValid = false;
-      } else {
-        hideError('phoneError');
-      }
-      
-      // Password validation
-      const password = document.getElementById('signupPassword').value;
-      if (!password) {
-        showError('passwordError', 'Password is required');
-        isValid = false;
-      } else if (password.length < 6) {
-        showError('passwordError', 'Password must be at least 6 characters');
-        isValid = false;
-      } else {
-        hideError('passwordError');
-      }
-      
-      // Confirm password validation
-      const confirmPassword = document.getElementById('signupConfirmPassword').value;
-      if (!confirmPassword) {
-        showError('confirmPasswordError', 'Please confirm your password');
-        isValid = false;
-      } else if (password !== confirmPassword) {
-        showError('confirmPasswordError', 'Passwords do not match');
-        isValid = false;
-      } else {
-        hideError('confirmPasswordError');
-      }
-      
-      // Address fields validation
-      const landmark = document.getElementById('addressLandmark').value.trim();
-      if (!landmark) {
-        showError('landmarkError', 'Landmark is required');
-        isValid = false;
-      } else {
-        hideError('landmarkError');
-      }
-      
-      const area = document.getElementById('addressArea').value.trim();
-      if (!area) {
-        showError('areaError', 'Area is required');
-        isValid = false;
-      } else {
-        hideError('areaError');
-      }
-      
-      const city = document.getElementById('addressCity').value.trim();
-      if (!city) {
-        showError('cityError', 'City is required');
-        isValid = false;
-      } else {
-        hideError('cityError');
-      }
-      
-      const pincode = document.getElementById('addressPincode').value.trim();
-      const pincodePattern = /^[0-9]{6}$/;
-      if (!pincode) {
-        showError('pincodeError', 'Pincode is required');
-        isValid = false;
-      } else if (!pincodePattern.test(pincode)) {
-        showError('pincodeError', 'Please enter a valid 6-digit pincode');
-        isValid = false;
-      } else {
-        hideError('pincodeError');
-      }
-      
-      const addressType = document.getElementById('addressType').value;
-      if (!addressType) {
-        showError('addressTypeError', 'Please select an address type');
-        isValid = false;
-      } else {
-        hideError('addressTypeError');
-      }
-      
-      // Terms acceptance validation
-      const acceptTerms = document.getElementById('acceptTerms').checked;
-      if (!acceptTerms) {
-        showError('termsError', 'You must accept the terms and conditions');
-        isValid = false;
-      } else {
-        hideError('termsError');
-      }
-      
-      return isValid;
+        let valid = true;
+        const firstName = document.getElementById('signupFirstName').value.trim();
+        if (!firstName) { showError('firstNameError', 'First name is required'); valid = false; } else hideError('firstNameError');
+
+        const lastName = document.getElementById('signupLastName').value.trim();
+        if (!lastName) { showError('lastNameError', 'Last name is required'); valid = false; } else hideError('lastNameError');
+
+        const email = document.getElementById('signupEmail').value.trim();
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) { showError('emailError', 'Email is required'); valid = false; }
+        else if (!emailPattern.test(email)) { showError('emailError', 'Invalid email'); valid = false; }
+        else hideError('emailError');
+
+        const phone = document.getElementById('signupPhone').value.trim();
+        const phonePattern = /^[0-9]{10}$/;
+        if (!phone) { showError('phoneError', 'Phone is required'); valid = false; }
+        else if (!phonePattern.test(phone)) { showError('phoneError', 'Invalid 10-digit phone'); valid = false; }
+        else hideError('phoneError');
+
+        const password = document.getElementById('signupPassword').value;
+        if (!password) { showError('passwordError', 'Password required'); valid = false; }
+        else if (password.length < 6) { showError('passwordError', 'Min 6 characters'); valid = false; }
+        else hideError('passwordError');
+
+        const confirm = document.getElementById('signupConfirmPassword').value;
+        if (!confirm) { showError('confirmPasswordError', 'Confirm password'); valid = false; }
+        else if (password !== confirm) { showError('confirmPasswordError', 'Passwords do not match'); valid = false; }
+        else hideError('confirmPasswordError');
+
+        const landmark = document.getElementById('addressLandmark').value.trim();
+        if (!landmark) { showError('landmarkError', 'Landmark required'); valid = false; } else hideError('landmarkError');
+        const area = document.getElementById('addressArea').value.trim();
+        if (!area) { showError('areaError', 'Area required'); valid = false; } else hideError('areaError');
+        const city = document.getElementById('addressCity').value.trim();
+        if (!city) { showError('cityError', 'City required'); valid = false; } else hideError('cityError');
+        const pincode = document.getElementById('addressPincode').value.trim();
+        const pinPattern = /^[0-9]{6}$/;
+        if (!pincode) { showError('pincodeError', 'Pincode required'); valid = false; }
+        else if (!pinPattern.test(pincode)) { showError('pincodeError', 'Invalid pincode'); valid = false; }
+        else hideError('pincodeError');
+
+        const addrType = document.getElementById('addressType').value;
+        if (!addrType) { showError('addressTypeError', 'Select address type'); valid = false; } else hideError('addressTypeError');
+
+        if (!document.getElementById('acceptTerms').checked) {
+            showError('termsError', 'Accept terms'); valid = false;
+        } else hideError('termsError');
+
+        return valid;
     }
 
     function validateSigninForm() {
-      let isValid = true;
-      
-      // Phone validation
-      const phone = document.getElementById('loginPhone').value.trim();
-      const phonePattern = /^[0-9]{10}$/;
-      if (!phone) {
-        showError('loginPhoneError', 'Phone number is required');
-        isValid = false;
-      } else if (!phonePattern.test(phone)) {
-        showError('loginPhoneError', 'Please enter a valid 10-digit phone number');
-        isValid = false;
-      } else {
-        hideError('loginPhoneError');
-      }
-      
-      // Password validation
-      const password = document.getElementById('loginPassword').value;
-      if (!password) {
-        showError('loginPasswordError', 'Password is required');
-        isValid = false;
-      } else {
-        hideError('loginPasswordError');
-      }
-      
-      return isValid;
+        let valid = true;
+        const phone = document.getElementById('loginPhone').value.trim();
+        const phonePattern = /^[0-9]{10}$/;
+        if (!phone) { showError('loginPhoneError', 'Phone required'); valid = false; }
+        else if (!phonePattern.test(phone)) { showError('loginPhoneError', 'Invalid phone'); valid = false; }
+        else hideError('loginPhoneError');
+
+        const pass = document.getElementById('loginPassword').value;
+        if (!pass) { showError('loginPasswordError', 'Password required'); valid = false; }
+        else hideError('loginPasswordError');
+
+        return valid;
     }
 
-    // Form submission handlers
-    signupForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      if (validateSignupForm()) {
-        // Show success message
-        const submitBtn = this.querySelector('.auth-btn');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Creating Account...';
-        submitBtn.disabled = true;
-        
-        // Simulate API call
-        setTimeout(() => {
-          alert('Account created successfully! You can now sign in.');
-          
-          // Reset form
-          signupForm.reset();
-          submitBtn.textContent = originalText;
-          submitBtn.disabled = false;
-          
-          // Switch to sign in
-          container.classList.remove("right-panel-active");
-        }, 1500);
-      }
-    });
+    // ==================== SIGN UP - UNCHANGED ====================
+    signupForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (!validateSignupForm()) return;
 
-    signinForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      
-      if (validateSigninForm()) {
-        // Show loading state
-        const submitBtn = this.querySelector('.auth-btn');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Signing In...';
-        submitBtn.disabled = true;
-        
-        // Simulate API call
-        setTimeout(() => {
-          alert('Sign in successful! Welcome back.');
-          
-          // Reset form (except if remember me is checked)
-          const rememberMe = document.getElementById('rememberMe').checked;
-          if (!rememberMe) {
-            signinForm.reset();
-          }
-          
-          submitBtn.textContent = originalText;
-          submitBtn.disabled = false;
-        }, 1500);
-      }
-    });
+        const btn = this.querySelector('.auth-btn');
+        const orig = btn.textContent;
+        btn.textContent = 'Creating Account...';
+        btn.disabled = true;
 
-    // Forgot password link
-    forgotPasswordLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      const phone = document.getElementById('loginPhone').value.trim();
-      
-      if (phone && /^[0-9]{10}$/.test(phone)) {
-        alert(`Password reset link will be sent to phone ending with ${phone.slice(-4)}. (Demo)`);
-      } else {
-        alert('Please enter your phone number first to reset password.');
-        document.getElementById('loginPhone').focus();
-      }
-    });
+        const payload = {
+            firstName: document.getElementById('signupFirstName').value.trim(),
+            lastName: document.getElementById('signupLastName').value.trim(),
+            email: document.getElementById('signupEmail').value.trim(),
+            phone: document.getElementById('signupPhone').value.trim(),
+            password: document.getElementById('signupPassword').value,
+            addressLandmark: document.getElementById('addressLandmark').value.trim(),
+            addressArea: document.getElementById('addressArea').value.trim(),
+            addressCity: document.getElementById('addressCity').value.trim(),
+            addressPincode: document.getElementById('addressPincode').value.trim(),
+            addressState: "Maharashtra",
+            addressType: document.getElementById('addressType').value
+        };
 
-    // Initialize form with some demo values for testing
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add some placeholder values for testing
-      document.getElementById('loginPhone').value = '9876543210';
-      document.getElementById('loginPassword').value = 'demo123';
-      
-      // Set remember me as checked by default for demo
-      document.getElementById('rememberMe').checked = true;
-      
-      // Hide back arrows when in center position (overlay visible)
-      const updateArrowVisibility = () => {
-        const isCentered = !container.classList.contains("right-panel-active");
-        if (backFromSignin) {
-          backFromSignin.style.display = isCentered ? 'none' : 'flex';
+        try {
+            const res = await fetch(`${API_BASE_URL}/create-user`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert('Account created successfully! You can now sign in.');
+                signupForm.reset();
+                container.classList.remove("right-panel-active");
+            } else {
+                const txt = await res.text();
+                if (res.status === 409) {
+                    showError('emailError', txt.includes('Email') ? txt : 'Email already exists');
+                } else {
+                    alert('Signup failed: ' + txt);
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Network error - Is backend running on port 8083?');
+        } finally {
+            btn.textContent = orig;
+            btn.disabled = false;
         }
-        if (backFromSignup) {
-          backFromSignup.style.display = 'none'; // Hide on signup form since overlay is hidden
-        }
-      };
-      
-      // Initial update
-      updateArrowVisibility();
-      
-      // Update on panel switch
-      const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-            updateArrowVisibility();
-          }
-        });
-      });
-      
-      observer.observe(container, { attributes: true });
     });
-  </script>
+
+    // ==================== LOGIN - WITH 2-SECOND REDIRECT TO index.html ====================
+    signinForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        if (!validateSigninForm()) return;
+
+        const btn = this.querySelector('.auth-btn');
+        const orig = btn.textContent;
+        btn.textContent = 'Signing In...';
+        btn.disabled = true;
+
+        const phone = document.getElementById('loginPhone').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        const formData = new URLSearchParams();
+        formData.append('mobile', phone);  // Keep 'mobile' — your backend expects this exact name
+        formData.append('password', password);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            });
+
+          if (response.ok) {
+    const user = await response.json();
+    alert(`Welcome back, ${user.firstName || 'User'}!`);
+
+    sessionStorage.setItem('userId', user.userId);
+    sessionStorage.setItem('currentUser', JSON.stringify(user));
+
+    setTimeout(() => {
+        window.location.href = '../index.html';
+    }, 2000);
+} else {
+                const err = await response.json();
+                const msg = err.error || 'Invalid phone or password';
+                showError('loginPasswordError', msg);
+                alert(msg);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Connection failed. Check if backend is running on port 8083');
+        } finally {
+            btn.textContent = orig;
+            btn.disabled = false;
+        }
+    });
+
+    // Forgot password
+    forgotPasswordLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const phone = document.getElementById('loginPhone').value.trim();
+        if (phone && /^[0-9]{10}$/.test(phone)) {
+            alert(`Password reset link will be sent to ...${phone.slice(-4)}`);
+        } else {
+            alert('Please enter your registered phone number');
+        }
+    });
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('loginPhone').value = '9876543210';
+        document.getElementById('loginPassword').value = 'demo123';
+        document.getElementById('rememberMe').checked = true;
+
+        const updateArrows = () => {
+            const centered = !container.classList.contains("right-panel-active");
+            if (backFromSignin) backFromSignin.style.display = centered ? 'none' : 'flex';
+            if (backFromSignup) backFromSignup.style.display = 'none';
+        };
+        updateArrows();
+        new MutationObserver(updateArrows).observe(container, { attributes: true, attributeFilter: ['class'] });
+    });
+</script>
+
 </body>
 </html>

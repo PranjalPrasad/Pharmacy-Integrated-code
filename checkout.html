@@ -7,11 +7,13 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./Footer/footer.css">
+  <link rel="stylesheet" href="../Footer/footer.css">
   <style>
     body { font-family: 'Inter', sans-serif; background: #f8fafc; }
     #address-modal { display: none; }
+    #order-success-modal { display: none; }
     #address-modal.show { display: flex !important; }
+    #order-success-modal.show { display: flex !important; }
     
     /* Custom scrollbar for items container */
     #order-items-container {
@@ -150,32 +152,148 @@
       border-color: #70B2B2;
       background-color: #f0f9f9;
     }
+    
+    /* Order success modal styles */
+    .confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9998;
+    }
+    
+    .success-checkmark {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    .success-checkmark .check-icon {
+      width: 80px;
+      height: 80px;
+      position: relative;
+      border-radius: 50%;
+      box-sizing: content-box;
+      border: 4px solid #4CAF50;
+    }
+    
+    .success-checkmark .check-icon::before {
+      top: 3px;
+      left: -2px;
+      width: 30px;
+      transform-origin: 100% 50%;
+      border-radius: 100px 0 0 100px;
+    }
+    
+    .success-checkmark .check-icon::after {
+      top: 0;
+      left: 30px;
+      width: 60px;
+      transform-origin: 0 50%;
+      border-radius: 0 100px 100px 0;
+      animation: rotate-circle 4.25s ease-in;
+    }
+    
+    .success-checkmark .check-icon .icon-line {
+      height: 5px;
+      background-color: #4CAF50;
+      display: block;
+      border-radius: 2px;
+      position: absolute;
+      z-index: 10;
+    }
+    
+    .success-checkmark .check-icon .icon-line.line-tip {
+      top: 46px;
+      left: 14px;
+      width: 25px;
+      transform: rotate(45deg);
+      animation: icon-line-tip 0.75s;
+    }
+    
+    .success-checkmark .check-icon .icon-line.line-long {
+      top: 38px;
+      right: 8px;
+      width: 47px;
+      transform: rotate(-45deg);
+      animation: icon-line-long 0.75s;
+    }
+    
+    .success-checkmark .icon-circle {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 10;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      box-sizing: content-box;
+      border: 4px solid rgba(76, 175, 80, 0.5);
+    }
+    
+    @keyframes rotate-circle {
+      0% { transform: rotate(-45deg); }
+      5% { transform: rotate(-45deg); }
+      12% { transform: rotate(-405deg); }
+      100% { transform: rotate(-405deg); }
+    }
+    
+    @keyframes icon-line-tip {
+      0% { width: 0; left: 1px; top: 19px; }
+      54% { width: 0; left: 1px; top: 19px; }
+      70% { width: 50px; left: -8px; top: 37px; }
+      84% { width: 17px; left: 21px; top: 48px; }
+      100% { width: 25px; left: 14px; top: 45px; }
+    }
+    
+    @keyframes icon-line-long {
+      0% { width: 0; right: 46px; top: 54px; }
+      65% { width: 0; right: 46px; top: 54px; }
+      84% { width: 55px; right: 0px; top: 35px; }
+      100% { width: 47px; right: 8px; top: 38px; }
+    }
+    
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
   </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-[#F0F0F0]">
 
   <div id="header-placeholder"></div>
 
-  <main class="container mx-auto px-4 py-6 max-w-6xl">
-    <h1 class="text-2xl font-semibold text-gray-800 text-center lg:block hidden mt-8">Checkout</h1>
+  <main class="container mx-auto px-4 py-6 mt-16 max-w-6xl">
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
 
-    <div class="grid lg:grid-cols-3 gap-6 mt-6">
+    <div class="grid lg:grid-cols-3 gap-6 mt-24">
 
       <!-- Left Column -->
-      <div class="lg:col-span-2 space-y-6 mt-12">
+      <div class="lg:col-span-2 space-y-6">
 
-        <!-- Mobile Savings -->
-        <div class="lg:hidden bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm font-medium mt-4">
-          You're saving <span id="mobile-savings">₹0</span> on this order
+        <!-- Mobile Savings Banner -->
+        <div class="lg:hidden bg-gradient-to-r from-pink-50 to-purple-50 border border-pink-200 px-4 py-3 rounded-lg text-sm font-medium">
+          <div class="flex items-center">
+            <i class="fas fa-gift text-pink-600 mr-2"></i>
+            <span class="font-semibold">You're saving <span id="mobile-savings">₹0</span> on this order!</span>
+          </div>
         </div>
 
-        <!-- Items -->
+        <!-- Items Section -->
         <div class="bg-white rounded-xl shadow-sm border">
           <div class="p-5 flex justify-between items-center border-b">
             <h3 class="font-semibold text-gray-800 flex items-center text-lg">
               <i class="fas fa-shopping-bag mr-3 text-pink-600"></i>
-              <span class="lg:hidden"><span id="mobile-item-count">0</span> ITEMS • ₹<span id="mobile-total">0</span></span>
-              <span class="hidden lg:block">Your Items (<span id="item-count">0</span>)</span>
+              Your Items (<span id="item-count">0</span>)
             </h3>
             <span class="text-xs text-gray-500 hidden lg:block">
               <i class="fas fa-info-circle mr-1"></i> Scroll to see more items
@@ -186,14 +304,14 @@
           </div>
         </div>
 
-         <!-- Delivery Address Section -->
-        <div class="bg-white rounded-xl shadow-sm border p-5 mt-12">
+        <!-- Delivery Address Section -->
+        <div class="bg-white rounded-xl shadow-sm border p-5">
           <div class="flex justify-between items-center mb-3">
             <h3 class="font-semibold text-gray-800 flex items-center text-lg">
               <i class="fas fa-map-marker-alt text-pink-600 mr-2"></i> Delivery Address
             </h3>
-            <button id="add-address-btn" class="text-pink-600 text-sm font-medium hover:underline">
-              + Add New
+            <button id="add-address-btn" class="text-pink-600 text-sm font-medium hover:underline flex items-center">
+              <i class="fas fa-plus mr-1"></i> Add New
             </button>
           </div>
 
@@ -206,13 +324,13 @@
         </div>
       </div>
 
-      <!-- Right Column -->
-      <div class="space-y-6">
+      <!-- Right Column - DESKTOP ONLY -->
+      <div class="hidden lg:block space-y-6 mt-6">
 
         <!-- Desktop Order Summary -->
-        <div class="bg-white rounded-xl shadow-sm border mt-20">
+        <div class="bg-white rounded-xl shadow-sm border">
           <div class="p-5 border-b">
-            <h3 class="font-semibold flex items-center">
+            <h3 class="font-semibold flex items-center text-gray-800">
               <i class="fas fa-receipt mr-3 text-[#1581BF]"></i> Order Summary
             </h3>
           </div>
@@ -227,7 +345,7 @@
           </div>
         </div>
 
-        <!-- Payment Options Section -->
+        <!-- Desktop Payment Options -->
         <div class="bg-white rounded-xl shadow-sm border p-5">
           <div class="flex items-center mb-4">
             <div class="flex-shrink-0 w-10 h-10 rounded-full bg-[#1581BF] flex items-center justify-center mr-3">
@@ -274,66 +392,9 @@
           </div>
         </div>
 
-        <!-- Mobile Order Summary -->
-        <div class="lg:hidden bg-white rounded-xl shadow-sm border p-5 space-y-4 mt-4">
-          <h3 class="font-semibold text-gray-800 flex items-center text-lg">
-            <i class="fas fa-receipt mr-3 text-green-600"></i> Order Summary
-          </h3>
-          <div class="space-y-3 text-sm">
-            <div class="flex justify-between"><span>Subtotal</span><span id="mobile-subtotal">₹0</span></div>
-            <div class="flex justify-between"><span>Shipping</span><span id="mobile-shipping">₹49</span></div>
-            <div class="flex justify-between text-green-600 font-medium"><span>Discount</span><span id="mobile-discount">-₹0</span></div>
-            <hr class="my-3">
-            <div class="flex justify-between text-lg font-bold">
-              <span>Total</span>
-              <span class="text-pink-600 text-xl" id="mobile-total-amount">₹0</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mobile Payment -->
-        <div class="lg:hidden bg-white rounded-xl shadow-sm border p-6 space-y-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center">
-              <span class="w-8 h-8 rounded-full border-2 border-pink-600 text-pink-600 flex items-center justify-center text-sm font-bold">3</span>
-              <h3 class="ml-3 font-semibold">Payment Options</h3>
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <h4 class="text-xs font-medium text-gray-600 uppercase tracking-wider">Select Payment Method</h4>
-
-            <label class="flex items-center p-5 border-2 rounded-xl cursor-pointer hover:border-pink-600 transition-all border-gray-300">
-              <input type="radio" name="payment_method" value="cod" class="mr-4">
-              <div class="flex-1">
-                <div class="font-semibold flex items-center"><i class="fas fa-rupee-sign mr-2"></i> Cash on Delivery (COD)</div>
-                <p class="text-xs text-gray-600 mt-1">Pay when you receive the order</p>
-              </div>
-              <i class="fas fa-truck text-pink-600 text-xl"></i>
-            </label>
-
-            <label class="flex items-center p-5 border-2 rounded-xl cursor-pointer hover:border-pink-600 transition-all border-pink-600 bg-pink-50">
-              <input type="radio" name="payment_method" value="qr" class="mr-4" checked>
-              <div class="flex-1">
-                <div class="font-semibold flex items-center"><i class="fas fa-qrcode mr-2"></i> Scan & Pay (UPI QR)</div>
-                <p class="text-xs text-gray-600 mt-1">Fastest • Recommended</p>
-              </div>
-              <img src="https://via.placeholder.com/50x50/6366F1/FFFFFF?text=QR" class="w-12 h-12 rounded-lg">
-            </label>
-          </div>
-
-          <button id="mobile-place-order-btn" class="w-full bg-pink-600 text-white font-bold py-4 rounded-lg text-lg opacity-60 cursor-not-allowed" disabled>
-            PLACE ORDER • ₹<span id="mobile-pay-amount">0</span>
-          </button>
-
-          <div id="no-address-warning" class="text-center text-sm text-red-600 font-medium">
-            Please select a delivery address first
-          </div>
-        </div>
-
-        <!-- Desktop Place Order -->
-        <div class="hidden lg:block bg-white rounded-xl shadow-sm border p-6">
-          <button id="desktop-place-order-btn" class="w-full bg-pink-600 text-white font-bold py-4 rounded-lg text-lg hover:bg-pink-700 transition opacity-60 cursor-not-allowed" disabled>
+        <!-- Desktop Place Order Button -->
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+          <button id="desktop-place-order-btn" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-4 rounded-lg text-lg hover:from-pink-700 hover:to-purple-700 transition opacity-60 cursor-not-allowed" disabled>
             PLACE ORDER • ₹<span id="desktop-pay-amount">0</span>
           </button>
           <div id="desktop-address-warning" class="text-center text-sm text-red-600 font-medium mt-3">
@@ -342,6 +403,95 @@
         </div>
 
       </div>
+
+      <!-- Mobile Right Column - Combined Order Summary & Payment -->
+      <div class="lg:hidden space-y-6 mt-6">
+
+        <!-- Mobile Order Summary & Payment Combined Card -->
+        <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+          
+          <!-- Order Summary Section -->
+          <div class="p-5 border-b">
+            <h3 class="font-semibold text-gray-800 flex items-center text-lg">
+              <i class="fas fa-receipt mr-3 text-[#1581BF]"></i> Order Summary
+            </h3>
+          </div>
+          
+          <div class="p-5 space-y-3 text-sm">
+            <div class="flex justify-between"><span>Subtotal</span><span id="mobile-subtotal">₹0</span></div>
+            <div class="flex justify-between"><span>Shipping</span><span id="mobile-shipping">₹49</span></div>
+            <div class="flex justify-between text-green-600 font-medium"><span>Discount</span><span id="mobile-discount">-₹0</span></div>
+            <hr class="my-3">
+            <div class="flex justify-between text-lg font-bold">
+              <span>Total</span>
+              <span class="text-pink-600" id="mobile-total-amount">₹0</span>
+            </div>
+          </div>
+          
+          <!-- Payment Section Divider -->
+          <div class="border-t">
+            <div class="p-5">
+              <div class="flex items-center mb-4">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 flex items-center justify-center mr-3">
+                  <i class="fas fa-credit-card text-white text-lg"></i>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-gray-800">Payment Method</h3>
+                  <p class="text-xs text-gray-600">Select how you want to pay</p>
+                </div>
+              </div>
+              
+              <div class="space-y-3">
+                <!-- UPI QR Option -->
+                <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer hover:border-pink-600 transition-all border-pink-600 bg-pink-50">
+                  <input type="radio" name="payment_method" value="qr" class="mr-4" checked>
+                  <div class="flex-1">
+                    <div class="font-semibold flex items-center text-gray-800">
+                      <i class="fas fa-qrcode mr-2 text-pink-600"></i> Scan & Pay (UPI QR)
+                    </div>
+                    <p class="text-xs text-gray-600 mt-1">Fastest • Recommended</p>
+                  </div>
+                  <div class="w-10 h-10 bg-gradient-to-r from-pink-100 to-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-qrcode text-pink-600"></i>
+                  </div>
+                </label>
+                
+                <!-- COD Option -->
+                <label class="flex items-center p-4 border-2 rounded-xl cursor-pointer hover:border-green-600 transition-all border-gray-300">
+                  <input type="radio" name="payment_method" value="cod" class="mr-4">
+                  <div class="flex-1">
+                    <div class="font-semibold flex items-center text-gray-800">
+                      <i class="fas fa-rupee-sign mr-2 text-green-600"></i> Cash on Delivery
+                    </div>
+                    <p class="text-xs text-gray-600 mt-1">Pay when you receive</p>
+                  </div>
+                  <div class="w-10 h-10 bg-gradient-to-r from-green-100 to-emerald-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-money-bill-wave text-green-600"></i>
+                  </div>
+                </label>
+              </div>
+              
+              <div class="mt-4 text-xs text-gray-500 flex items-center">
+                <i class="fas fa-shield-alt mr-2 text-green-500"></i>
+                <span>Secure payment with 256-bit encryption</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Place Order Button -->
+          <div class="border-t p-5 bg-gray-50">
+            <button id="mobile-place-order-btn" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold py-4 rounded-lg text-lg opacity-60 cursor-not-allowed" disabled>
+              PLACE ORDER • ₹<span id="mobile-pay-amount">0</span>
+            </button>
+            <div id="no-address-warning" class="text-center text-sm text-red-600 font-medium mt-3">
+              Please select a delivery address first
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+
     </div>
   </main>
 
@@ -373,6 +523,39 @@
     </div>
   </div>
 
+  <!-- Order Success Modal -->
+  <div id="order-success-modal" class="fixed items-center justify-center inset-0 bg-black bg-opacity-70 z-[10000] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all">
+      <div class="p-8 text-center">
+        <!-- Success Animation -->
+        <div class="success-checkmark mb-6">
+          <div class="check-icon">
+            <span class="icon-line line-tip"></span>
+            <span class="icon-line line-long"></span>
+            <div class="icon-circle"></div>
+            <div class="icon-fix"></div>
+          </div>
+        </div>
+        
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">Yay! Order Placed Successfully!</h2>
+        <p class="text-gray-600 mb-6">Your order will be delivered soon. You'll receive a confirmation email shortly.</p>
+        
+        <div class="space-y-4">
+          <button id="success-ok-btn" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-4 rounded-lg text-lg hover:from-green-600 hover:to-emerald-700 transition-all pulse">
+            <i class="fas fa-check-circle mr-2"></i> OK
+          </button>
+          
+          <div class="text-xs text-gray-500">
+            <i class="fas fa-info-circle mr-1"></i>
+            You will be redirected to home page
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="footer-placeholder"></div>
+
   <script>
     function loadHeader() {
         fetch('../Header/header.html')
@@ -399,12 +582,15 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadHeader();
         loadFooter();
-        // ... rest of your code
     });
   </script>
 
+  <!-- Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+
   <!-- JavaScript -->
   <script>
+    // USE THE SAME KEY AS CART.HTML
     const STORAGE = { CART: 'cart', ADDRESSES: 'user_addresses', SELECTED: 'selected_address_index' };
 
     class CheckoutApp {
@@ -423,11 +609,13 @@
 
       loadFromStorage() {
         try {
+          // Use the same key as cart.html
           this.cart = JSON.parse(localStorage.getItem(STORAGE.CART)) || [];
           this.addresses = JSON.parse(localStorage.getItem(STORAGE.ADDRESSES)) || [];
           this.selectedIdx = parseInt(localStorage.getItem(STORAGE.SELECTED), 10) || -1;
           if (isNaN(this.selectedIdx)) this.selectedIdx = -1;
         } catch (e) { 
+          console.error('Error loading from storage:', e);
           this.cart = []; 
           this.addresses = []; 
           this.selectedIdx = -1; 
@@ -437,6 +625,23 @@
       saveCart() {
         localStorage.setItem(STORAGE.CART, JSON.stringify(this.cart));
         this.renderCart();
+        // Update cart count in header
+        this.updateCartCount();
+      }
+
+      updateCartCount() {
+        const totalItems = this.cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        
+        // Update cart count in header if elements exist
+        document.querySelectorAll('#desktop-cart-count, #mobile-cart-count, #cart-count, #cartItemsCount, .cart-count').forEach(el => {
+          if (el) {
+            el.textContent = totalItems;
+            el.style.display = totalItems > 0 ? 'inline-flex' : 'none';
+          }
+        });
+        
+        // Dispatch storage event to sync across tabs
+        window.dispatchEvent(new Event('storage'));
       }
 
       saveAddresses() { localStorage.setItem(STORAGE.ADDRESSES, JSON.stringify(this.addresses)); }
@@ -535,24 +740,25 @@
 
         this.cart.forEach((item, i) => {
           const qty = item.quantity || 1;
-          const total = item.price * qty;
+          const price = item.price || 0;
+          const total = price * qty;
           subtotal += total; 
           totalItems += qty;
-          const original = Math.round(item.price * 2.5);
-          totalSavings += (original - item.price) * qty;
+          const original = item.originalPrice || Math.round(price * 1.2);
+          totalSavings += (original - price) * qty;
 
           const div = document.createElement('div');
           div.className = "flex gap-4 p-4 bg-gray-50 rounded-lg transition-all hover:bg-gray-100 relative";
           div.innerHTML = `
-            <img src="${item.mainImageUrl || 'https://via.placeholder.com/80'}" class="w-20 h-20 rounded-lg object-cover border border-gray-200">
+            <img src="${item.image || 'https://via.placeholder.com/80'}" class="w-20 h-20 rounded-lg object-cover border border-gray-200">
             
             <div class="flex-1">
-              <p class="font-medium text-sm text-gray-800">${item.title}</p>
+              <p class="font-medium text-sm text-gray-800">${item.name || 'Product'}</p>
               <p class="text-xs text-gray-600 mt-1">Size: ${item.size || 'M'}</p>
               <div class="flex items-center gap-3 mt-2">
-                <span class="font-bold text-pink-600">₹${item.price}</span>
-                <span class="text-xs text-gray-500 line-through">₹${item.originalPrice}</span>
-                <span class="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">${item.discount}% OFF</span>
+                <span class="font-bold text-pink-600">₹${price}</span>
+                <span class="text-xs text-gray-500 line-through">₹${original}</span>
+                <span class="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">${item.discount || 20}% OFF</span>
               </div>
               
               <div class="mt-4 flex items-center justify-between">
@@ -572,7 +778,7 @@
                 
                 <div class="text-right">
                   <div class="text-sm text-gray-500 mb-1">
-                    <span class="font-medium">${qty} × ₹${item.price}</span>
+                    <span class="font-medium">${qty} × ₹${price}</span>
                   </div>
                   <div>
                     <span class="text-lg font-bold text-gray-900">₹${total}</span>
@@ -596,20 +802,23 @@
       }
 
       updateTotals(items, subtotal, savings, total, shipping) {
+        // Update all elements
         document.getElementById('item-count').textContent = items;
-        document.getElementById('mobile-item-count').textContent = items;
-        document.getElementById('mobile-total').textContent = total;
-        document.getElementById('mobile-pay-amount').textContent = total;
-        document.getElementById('desktop-pay-amount').textContent = total;
+        document.getElementById('mobile-savings').textContent = `₹${savings}`;
+        
+        // Desktop values
         document.getElementById('subtotal').textContent = `₹${subtotal}`;
         document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : `₹${shipping}`;
         document.getElementById('discount').textContent = `-₹${savings}`;
         document.getElementById('total').textContent = `₹${total}`;
-        document.getElementById('mobile-savings').textContent = `₹${savings}`;
+        document.getElementById('desktop-pay-amount').textContent = total;
+        
+        // Mobile values
         document.getElementById('mobile-subtotal').textContent = `₹${subtotal}`;
         document.getElementById('mobile-shipping').textContent = shipping === 0 ? 'FREE' : `₹${shipping}`;
         document.getElementById('mobile-discount').textContent = `-₹${savings}`;
         document.getElementById('mobile-total-amount').textContent = `₹${total}`;
+        document.getElementById('mobile-pay-amount').textContent = total;
       }
 
       renderAddresses() {
@@ -630,7 +839,7 @@
           const isSelected = this.selectedIdx === i;
 
           const card = document.createElement('div');
-          card.className = `address-card border-2 rounded-xl p-4 mt-10 cursor-pointer transition-all duration-200 
+          card.className = `address-card border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 
             ${isSelected ? 'border-pink-600 bg-pink-50 shadow-lg' : 'border-gray-200 hover:border-pink-300'}`;
 
           card.innerHTML = `
@@ -751,6 +960,18 @@
 
         document.getElementById('mobile-place-order-btn').addEventListener('click', () => this.placeOrder());
         document.getElementById('desktop-place-order-btn').addEventListener('click', () => this.placeOrder());
+        
+        // Order success OK button
+        document.getElementById('success-ok-btn').addEventListener('click', () => {
+          // Clear cart and redirect to home
+          localStorage.removeItem(STORAGE.CART);
+          // Clear addresses too if you want
+          // localStorage.removeItem(STORAGE.ADDRESSES);
+          // localStorage.removeItem(STORAGE.SELECTED);
+          
+          // Redirect to home page
+          window.location.href = '../home.html';
+        });
 
         // Quantity and delete buttons event delegation
         document.getElementById('order-items').addEventListener('click', e => {
@@ -852,23 +1073,94 @@
 
       placeOrder() {
         if (this.selectedIdx === -1) return alert('Please select a delivery address!');
-        const method = document.querySelector('input[name="payment_method"]:checked').value;
-        alert(`Order Placed Successfully!\nPayment: ${method === 'cod' ? 'Cash on Delivery' : 'UPI QR'}`);
-        localStorage.removeItem(STORAGE.CART);
-        window.location.href = 'order-success.html';
+        
+        // Show order success modal
+        this.showOrderSuccess();
+      }
+
+      showOrderSuccess() {
+        // Launch confetti
+        this.launchConfetti();
+        
+        // Show modal after a short delay
+        setTimeout(() => {
+          document.getElementById('order-success-modal').classList.add('show');
+        }, 500);
+      }
+
+      launchConfetti() {
+        const canvas = document.getElementById('confetti-canvas');
+        
+        // Check if confetti is available
+        if (typeof confetti === 'undefined') {
+          console.warn('Confetti library not loaded, using fallback animation');
+          this.fallbackConfetti();
+          return;
+        }
+        
+        const myConfetti = confetti.create(canvas, {
+          resize: true,
+          useWorker: true
+        });
+        
+        // Multiple confetti effects
+        const end = Date.now() + 3000; // 3 seconds
+        
+        (function frame() {
+          myConfetti({
+            particleCount: 5,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ['#F875AA', '#70B2B2', '#1581BF', '#3B9797', '#FFD166']
+          });
+          
+          myConfetti({
+            particleCount: 5,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ['#F875AA', '#70B2B2', '#1581BF', '#3B9797', '#FFD166']
+          });
+          
+          if (Date.now() < end) {
+            requestAnimationFrame(frame);
+          }
+        }());
+        
+        // Center explosion
+        setTimeout(() => {
+          myConfetti({
+            particleCount: 150,
+            spread: 100,
+            origin: { y: 0.6 }
+          });
+        }, 250);
+        
+        // More effects
+        setTimeout(() => {
+          myConfetti({
+            particleCount: 100,
+            angle: 90,
+            spread: 70,
+            origin: { x: 0.5, y: 0.8 }
+          });
+        }, 1000);
+      }
+
+      fallbackConfetti() {
+        // Simple fallback animation if confetti library fails
+        const modal = document.getElementById('order-success-modal');
+        modal.style.animation = 'none';
+        setTimeout(() => {
+          modal.style.animation = 'pulse 0.5s 3';
+        }, 10);
       }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      if (!localStorage.getItem(STORAGE.CART)) {
-        localStorage.setItem(STORAGE.CART, JSON.stringify([
-          { name: 'Paracetamol 500mg', price: 60, quantity: 2, size: '1 strip', image: 'https://via.placeholder.com/80' },
-          { name: 'Vitamin C 1000mg', price: 250, quantity: 1, size: '1 bottle', image: 'https://via.placeholder.com/80' },
-          { name: 'Bandages 10pc', price: 120, quantity: 1, size: '10 pack', image: 'https://via.placeholder.com/80' },
-          { name: 'Hand Sanitizer', price: 180, quantity: 1, size: '500ml', image: 'https://via.placeholder.com/80' }
-        ]));
-      }
-
+      // Don't add default items if cart already exists
+      // Let it use whatever is in localStorage
       new CheckoutApp();
     });
   </script>

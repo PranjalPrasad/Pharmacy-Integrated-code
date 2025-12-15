@@ -6,15 +6,13 @@
   <title>GoodiNeewz - Header</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-  
   <style>
     body { padding-top: 0 !important; }
-    .fixed-header { 
-      position: fixed; top: 0; left: 0; right: 0; 
-      z-index: 50; background: white; 
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+    .fixed-header {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 50; background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-
     /* ACTIVE STATE STYLES */
     .nav-link.active, .mobile-nav-link.active {
       background-color: #ec4899 !important;
@@ -22,21 +20,18 @@
       font-weight: bold !important;
       border-radius: 0.5rem;
     }
-
     .nav-link[href*="mother.html"].active,
     .nav-link[href*="MotherCare"].active {
       background-color: #fdb8d9 !important;
       color: #be185d !important;
       border: 2px solid #f472b6 !important;
     }
-
     .nav-link[href*="baby.html"].active,
     .nav-link[href*="BabyCare"].active {
       background-color: #bfdbfe !important;
       color: #1e40af !important;
       border: 2px solid #93c5fd !important;
     }
-
     /* Mobile Menu Improvements */
     #mobile-menu {
       max-height: calc(100vh - 140px);
@@ -44,12 +39,10 @@
       scrollbar-width: none;
     }
     #mobile-menu::-webkit-scrollbar { display: none; }
-
     .mobile-dropdown {
       transition: all 0.3s ease;
       overflow: hidden;
     }
-
     .mobile-dropdown-content {
       background-color: #f8fafc;
       padding-left: 2rem;
@@ -57,21 +50,17 @@
   </style>
 </head>
 <body>
-
 <!-- SINGLE FIXED HEADER -->
 <div class="fixed-header">
-
   <!-- MAIN HEADER -->
   <header class="border-b bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-4 lg:px-8">
       <div class="flex justify-between items-center py-5">
-
         <!-- Logo + Pincode (Desktop) -->
         <div class="flex items-center space-x-4">
           <a href="/index.html" class="flex-shrink-0">
             <img src="/Images/IMG/LOGO-removebg-preview.png" alt="GoodiNeewz" class="h-10 sm:h-12">
           </a>
-
           <!-- Desktop Pincode -->
           <div class="hidden md:flex flex-col">
             <div class="flex items-center space-x-2">
@@ -88,7 +77,6 @@
             </div>
           </div>
         </div>
-
         <!-- Desktop Right Icons -->
         <div class="hidden lg:flex items-center space-x-6 text-gray-700">
           <select id="language-selector" class="text-md border border-gray-300 rounded px-3 py-2">
@@ -99,19 +87,16 @@
           <a href="/contact.html" class="hover:text-blue-700 flex items-center gap-2" data-i18n="contact">
             <i class="fas fa-phone"></i> Contact Us
           </a>
-
           <!-- Wishlist -->
           <a href="/Wishlist/wishlist.html" class="relative hover:text-red-600">
             <i class="fas fa-heart text-xl"></i>
             <span id="desktop-wishlist-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">0</span>
           </a>
-
           <!-- Cart -->
           <a href="/cart.html" class="relative">
             <i class="fas fa-shopping-cart text-xl"></i>
             <span id="desktop-cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold hidden">0</span>
           </a>
-
           <div class="relative">
             <button id="profile-btn" data-i18n="profile" class="flex items-center space-x-2 hover:bg-gray-100 px-4 py-2 rounded-md transition">
               <i class="fas fa-user-circle text-2xl"></i>
@@ -125,16 +110,13 @@
             </div>
           </div>
         </div>
-
         <!-- MOBILE TOP BAR -->
         <div class="flex top-0 lg:hidden items-center gap-4 text-gray-700">
-          
-
+       
           <!-- Centered Logo in Mobile -->
           <!-- <a href="../index.html" class="absolute left-1/2 -translate-x-1/2 flex-shrink-0">
             <img src="/Images/IMG/LOGO-removebg-preview.png" alt="GoodiNeewz" class="h-9">
           </a> -->
-
           <div class="flex items-center gap-4">
             <select id="language-selector" class="text-sm border border-gray-300 rounded px-1 py-1">
             <option value="english">En</option>
@@ -159,7 +141,6 @@
       </div>
     </div>
   </header>
-
   <!-- DESKTOP NAV (unchanged) -->
   <nav class="bg-white border-t">
     <div class="max-w-7xl mx-auto px-4">
@@ -167,22 +148,18 @@
         <ul class="flex space-x-8 text-lg font-bold">
           <li><a href="/MotherCare/mother.html" data-i18n="motherCare" class="nav-link px-5 py-2 rounded-lg border-2 border-pink-100 text-pink-700 hover:bg-pink-50 transition">Mother Care</a></li>
           <li><a href="/BabyCare/baby.html" data-i18n="babyCare" class="nav-link px-5 py-2 rounded-lg border-2 border-blue-100 text-blue-700 hover:bg-blue-50 transition">Baby Care</a></li>
-
           <li class="relative group">
             <a href="javascript:void(0)" data-i18n="medicineHealthcare" class="nav-link px-5 py-2 hover:bg-gray-100 rounded flex items-center transition">
               Medicine & HealthCare <i class="ml-1 fas fa-chevron-down text-xs"></i>
             </a>
             <div class="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-64 bg-white shadow-xl rounded-lg border opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-40">
-   
               <a href="/Medical and HealthCare/Prescription/prescription.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="prescriptionMedicines">Prescription Medicines</a>
               <a href="/Medical and HealthCare/OTC/otc.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="otc">OTC</a>
-              
+           
               <a href="/Medical and HealthCare/LifeStyle/lifestyle.html" class="block px-4 py-3 hover:bg-gray-50">LifeStyle Disorder</a>
               <a href="/Medical and HealthCare/Fertility/firtility.html" class="block px-4 py-3 hover:bg-gray-50">Fertility Essentials</a>
-
             </div>
           </li>
-
           <li class="relative group">
             <a href="javascript:void(0)" class="nav-link px-5 py-2 hover:bg-gray-100 rounded flex items-center transition" data-i18n="wellness">
               Wellness <i class="ml-1 fas fa-chevron-down text-xs"></i>
@@ -197,7 +174,6 @@
               <a href="/Wellness/wellness.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="immunity">Immunity Booster</a>
             </div>
           </li>
-
           <li class="relative group">
             <a href="javascript:void(0)" class="nav-link px-5 py-2 hover:bg-gray-100 rounded flex items-center transition" data-i18n="devices">
               Devices <i class="ml-1 fas fa-chevron-down text-xs"></i>
@@ -208,7 +184,6 @@
               <a href="/DEVICES/RESPIRATORY CARE/respiratory.html" class="block px-4 py-3 hover:bg-gray-50" data-i18n="respiratory">Respiratory Care</a>
             </div>
           </li>
-
          <li class="relative group">
             <a href="javascript:void(0)" data-i18n="surgical" class="nav-link px-5 py-2 hover:bg-gray-100 rounded flex items-center transition">
               Surgical <i class="ml-1 fas fa-chevron-down text-xs"></i>
@@ -220,21 +195,18 @@
               <a href="/Surgical/Surgical.html" data-i18n="catheters" class="block px-4 py-1 hover:bg-gray-50">Catheters & Tubes</a>
               <a href="/Surgical/Surgical.html" data-i18n="wound" class="block px-4 py-1 hover:bg-gray-50">Wound Care</a>
               <a href="/Surgical/Surgical.html" data-i18n="orthopedic" class="block px-4 py-1 hover:bg-gray-50">Orthopedic Support</a>
-              <a href="/Surgical/Surgical.html"  data-i18n="injectables" class="block px-4 py-1 hover:bg-gray-50">IV Fluids & Injectables</a>
+              <a href="/Surgical/Surgical.html" data-i18n="injectables" class="block px-4 py-1 hover:bg-gray-50">IV Fluids & Injectables</a>
               <a href="/Surgical/Surgical.html" data-i18n="kits" class="block px-4 py-1 hover:bg-gray-50">Surgical Kits</a>
             </div>
           </li>
-
           <li><a href="/about.html" data-i18n="about" class="nav-link px-5 py-2 hover:bg-gray-100 rounded transition">About Us</a></li>
         </ul>
       </div>
-
       <!-- MOBILE FULL MENU (Now with dropdowns!) -->
       <div id="mobile-menu" class="lg:hidden hidden bg-white shadow-lg">
         <div class="py-2">
           <a href="/MotherCare/mother.html" class="mobile-nav-link block px-6 py-4 font-semibold text-pink-700 hover:bg-pink-50">Mother Care</a>
           <a href="/BabyCare/baby.html" class="mobile-nav-link block px-6 py-4 font-semibold text-blue-700 hover:bg-blue-50">Baby Care</a>
-
           <!-- Medicine & Healthcare Dropdown -->
           <div class="mobile-dropdown">
             <button class="w-full text-left px-6 py-4 font-semibold flex justify-between items-center hover:bg-gray-100" onclick="this.parentElement.querySelector('.mobile-dropdown-content').classList.toggle('hidden')">
@@ -243,13 +215,12 @@
             <div class="mobile-dropdown-content hidden">
               <a href="/Medical and HealthCare/Prescription/prescription.html" class="block px-10 py-3 text-gray-700 hover:bg-gray-200">Prescription Medicines</a>
               <a href="/Medical and HealthCare/OTC/otc.html" class="block px-10 py-3 text-gray-700 hover:bg-gray-200">OTC Medicines</a>
-             
+          
               <a href="/Medical and HealthCare/LifeStyle/lifestyle.html" class="block px-10 py-3 text-gray-700 hover:bg-gray-200">Lifestyle disorder</a>
               <a href="/Medical and HealthCare/Fertility/firtility.html" class="block px-10 py-3 text-gray-700 hover:bg-gray-200">Fertility Essentials</a>
-              
+           
             </div>
           </div>
-
           <!-- Wellness Dropdown -->
           <div class="mobile-dropdown">
             <button class="w-full text-left px-6 py-4 font-semibold flex justify-between items-center hover:bg-gray-100" onclick="this.parentElement.querySelector('.mobile-dropdown-content').classList.toggle('hidden')">
@@ -265,7 +236,6 @@
               <a href="/Wellness/IMMUNITY BOOSTER/immunity.html" class="block px-10 py-3 text-gray-700 hover:bg-gray-200">Immunity Booster</a>
             </div>
           </div>
-
           <!-- Devices Dropdown -->
           <div class="mobile-dropdown">
             <button class="w-full text-left px-6 py-4 font-semibold flex justify-between items-center hover:bg-gray-100" onclick="this.parentElement.querySelector('.mobile-dropdown-content').classList.toggle('hidden')">
@@ -299,7 +269,6 @@
     </div>
   </nav>
 </div>
-
 <!-- Mobile Profile Menu -->
 <div id="mobile-profile-menu" class="fixed inset-0 bg-black/50 z-50 hidden" onclick="this.classList.add('hidden')">
   <div class="absolute right-4 top-20 w-56 bg-white shadow-lg rounded-lg border" onclick="event.stopPropagation()">
@@ -309,7 +278,6 @@
     <a href="/index.html" class="flex items-center px-4 py-3 hover:bg-gray-50 text-red-600"><i class="fas fa-sign-out-alt mr-3"></i>Logout</a>
   </div>
 </div>
-
 <script src="header.js"></script>
 </body>
 </html>

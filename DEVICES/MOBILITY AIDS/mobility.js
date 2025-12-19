@@ -1,599 +1,574 @@
-// mobility.js
-// Full app script: products, rendering, filters, cart, product details, and Upload Prescription modal integration.
+// =============== MOBILITY AIDS PRODUCTS ===============
+const fakeProducts = [
+  { id: 1, name: "Foldable Wheelchair", brand: "Karma", price: 4500, originalPrice: 6000, discount: 25, category: "wheelchair", image: "https://images.unsplash.com/photo-1512299286776-52f85c5c3c6a?w=400&h=400&fit=crop", prescription: false, description: "Lightweight foldable wheelchair with adjustable armrests", quantity: 8, rating: 4.5 },
+  { id: 2, name: "Aluminum Walking Stick", brand: "Nilkamal", price: 850, originalPrice: 1200, discount: 29, category: "walker", image: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400&h=400&fit=crop", prescription: false, description: "Adjustable height aluminum walking stick with comfortable grip", quantity: 15, rating: 4.2 },
+  { id: 3, name: "Underarm Crutches Pair", brand: "Arogya", price: 1200, originalPrice: 1800, discount: 33, category: "crutches", image: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=400&h=400&fit=crop", prescription: false, description: "Pair of underarm crutches with adjustable height", quantity: 0, rating: 4.7 },
+  { id: 4, name: "Lumbar Support Belt", brand: "Medline", price: 950, originalPrice: 1300, discount: 27, category: "support", image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&h=400&fit=crop", prescription: false, description: "Adjustable lumbar support belt for back pain relief", quantity: 12, rating: 4.3 },
+  { id: 5, name: "Rollator Walker with Seat", brand: "Drive", price: 3800, originalPrice: 5000, discount: 24, category: "walker", image: "https://images.unsplash.com/photo-1586773860418-dc22f8b874bc?w=400&h=400&fit=crop", prescription: false, description: "4-wheel rollator walker with comfortable seat and basket", quantity: 5, rating: 4.6 },
+  { id: 6, name: "Folding Transport Chair", brand: "Karma", price: 5200, originalPrice: 7000, discount: 26, category: "wheelchair", image: "https://images.unsplash.com/photo-1512299286776-52f85c5c3c6a?w=400&h=400&fit=crop", prescription: false, description: "Lightweight transport wheelchair for caregivers", quantity: 0, rating: 4.4 },
+  { id: 7, name: "Forearm Crutches", brand: "Arogya", price: 1800, originalPrice: 2500, discount: 28, category: "crutches", image: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=400&h=400&fit=crop", prescription: false, description: "Ergonomic forearm crutches with comfortable cuffs", quantity: 10, rating: 4.1 },
+  { id: 8, name: "Knee Support Brace", brand: "Medline", price: 650, originalPrice: 900, discount: 28, category: "support", image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&h=400&fit=crop", prescription: false, description: "Adjustable knee support for stability and pain relief", quantity: 25, rating: 4.5 },
+  { id: 9, name: "Electric Wheelchair", brand: "Drive", price: 12500, originalPrice: 16500, discount: 24, category: "wheelchair", image: "https://images.unsplash.com/photo-1512299286776-52f85c5c3c6a?w=400&h=400&fit=crop", prescription: false, description: "Battery operated electric wheelchair with joystick control", quantity: 3, rating: 4.8 },
+  { id: 10, name: "Quad Cane Walking Stick", brand: "Nilkamal", price: 750, originalPrice: 1100, discount: 32, category: "walker", image: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400&h=400&fit=crop", prescription: false, description: "Quad base cane for extra stability while walking", quantity: 18, rating: 4.3 },
+  { id: 11, name: "Adjustable Elbow Crutches", brand: "Arogya", price: 1500, originalPrice: 2200, discount: 32, category: "crutches", image: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=400&h=400&fit=crop", prescription: false, description: "Adjustable elbow crutches with ergonomic handles", quantity: 0, rating: 4.0 },
+  { id: 12, name: "Ankle Support Brace", brand: "Medline", price: 480, originalPrice: 700, discount: 31, category: "support", image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&h=400&fit=crop", prescription: false, description: "Ankle support brace for sprains and stability", quantity: 22, rating: 4.4 },
+  { id: 13, name: "Commode Wheelchair", brand: "Karma", price: 6800, originalPrice: 9000, discount: 24, category: "wheelchair", image: "https://images.unsplash.com/photo-1512299286776-52f85c5c3c6a?w=400&h=400&fit=crop", prescription: false, description: "Wheelchair with commode facility for easy hygiene", quantity: 6, rating: 4.6 },
+  { id: 14, name: "Folding Walking Frame", brand: "Drive", price: 2200, originalPrice: 3000, discount: 27, category: "walker", image: "https://images.unsplash.com/photo-1586773860418-dc22f8b874bc?w=400&h=400&fit=crop", prescription: false, description: "Lightweight folding walking frame with adjustable height", quantity: 0, rating: 4.2 },
+  { id: 15, name: "Shoulder Support Brace", brand: "Medline", price: 850, originalPrice: 1200, discount: 29, category: "support", image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&h=400&fit=crop", prescription: false, description: "Adjustable shoulder support for injury recovery", quantity: 14, rating: 4.3 },
+  { id: 16, name: "Heavy Duty Wheelchair", brand: "Karma", price: 7500, originalPrice: 10000, discount: 25, category: "wheelchair", image: "https://images.unsplash.com/photo-1512299286776-52f85c5c3c6a?w=400&h=400&fit=crop", prescription: false, description: "Heavy duty wheelchair for higher weight capacity", quantity: 9, rating: 4.7 },
+  { id: 17, name: "Telescopic Walking Stick", brand: "Nilkamal", price: 600, originalPrice: 850, discount: 29, category: "walker", image: "https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=400&h=400&fit=crop", prescription: false, description: "Compact telescopic walking stick for travel", quantity: 20, rating: 4.1 },
+  { id: 18, name: "Wrist Support Brace", brand: "Medline", price: 380, originalPrice: 550, discount: 31, category: "support", image: "https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&h=400&fit=crop", prescription: false, description: "Wrist support brace for carpal tunnel relief", quantity: 30, rating: 4.5 },
+  { id: 19, name: "Pediatric Wheelchair", brand: "Drive", price: 4200, originalPrice: 5800, discount: 28, category: "wheelchair", image: "https://images.unsplash.com/photo-1512299286776-52f85c5c3c6a?w=400&h=400&fit=crop", prescription: false, description: "Small size wheelchair designed for children", quantity: 4, rating: 4.8 },
+  { id: 20, name: "Folding Crutches", brand: "Arogya", price: 1350, originalPrice: 1900, discount: 29, category: "crutches", image: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf?w=400&h=400&fit=crop", prescription: false, description: "Compact folding crutches for easy storage", quantity: 12, rating: 4.2 }
+];
+
+let products = [...fakeProducts];
+let filteredProducts = [...fakeProducts];
+let productGrid, sortSelect, showMoreBtn;
+
+let currentFilters = {
+  category: 'all',
+  brand: 'all',
+  discount: 'all',
+  minPrice: 0,
+  maxPrice: 15000
+};
+
+let visibleProductsCount = 8;
+let allFilteredProducts = [];
+
+// ======================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // ================
-  // Data & Configuration
-  // ================
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  let products = []; // Will be populated from backend
-  const API_BASE_URL = 'http://localhost:8083/api/products'; // Update with your backend URL
-  let allBrands = new Set();
+  productGrid = document.getElementById('productGrid');
+  sortSelect = document.getElementById('sortSelect');
+  showMoreBtn = document.getElementById('showMoreBtn');
 
-  // ================
-  // DOM Elements
-  // ================
-  const productGrid = document.getElementById('productGrid');
-  const categoryList = document.getElementById('categoryList');
-  const brandList = document.getElementById('brandList');
-  const brandToggle = (brandList && brandList.previousElementSibling) ? brandList.previousElementSibling.querySelector('span') : null;
-  const sortSelect = document.getElementById('sortSelect');
-  const uploadModal = document.getElementById('uploadModal');
-  const validPrescriptionModal = document.getElementById('validPrescriptionModal');
-  const validPrescriptionBtn = document.getElementById('validPrescriptionBtn');
-  const cartCountElement = document.getElementById('cart-count');
-  // Keep track of active filters
-  let activeCategory = null; // null = all
-  let activeSort = null;
+  // Initialize with all products
+  allFilteredProducts = [...products];
+  applySorting();
+  renderInitialProducts();
+  updateResultsCount();
+  
+  initSlider();
+  initSorting();
+  initMobileSheets();
+  initFilters();
+  initShowMore();
 
-  // ================
-  // API Functions
-  // ================
-  async function fetchProducts() {
-    try {
-      showLoadingState();
-      // Fetch products by subcategory "Mobility Aids"
-      const encodedSubCategory = encodeURIComponent('Mobility Aids');
-      const response = await fetch(`${API_BASE_URL}/get-by-sub-category/${encodedSubCategory}`);
+  sessionStorage.setItem('currentPageProducts', JSON.stringify(fakeProducts));
 
-      if (!response.ok) throw new Error('Failed to fetch products by subcategory');
+  // ONE single delegated listener for the whole grid – solves the duplicate-heart bug
+  productGrid.addEventListener('click', (e) => {
+    const btn = e.target.closest('.wishlist-btn');
+    if (!btn) return;
 
-      const data = await response.json();
-      products = Array.isArray(data) ? data : []; // Handle array response
+    e.preventDefault();
+    e.stopPropagation();
 
-      // Transform backend data to frontend format
-      products = products.map(product => transformProductData(product));
-
-      // Extract unique brands for filtering
-      allBrands = new Set(products.map(p => p.brand).filter(Boolean));
-      updateBrandFilters();
-
-      displayProducts(products);
-      updateCategoryList();
-
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      showErrorState('Failed to load Mobility Aids products. Please try again later.');
-      products = [];
-    }
-  }
-
-  // Transform backend product data to frontend format
-  function transformProductData(backendProduct) {
-    return {
-      id: backendProduct.productId,
-      productId: backendProduct.productId,
-      name: backendProduct.productName,
-      productName: backendProduct.productName,
-      price: backendProduct.productPrice || backendProduct.price,
-      originalPrice: backendProduct.productOldPrice || backendProduct.mrp,
-      mrp: backendProduct.productOldPrice || backendProduct.mrp,
-      discount: calculateDiscount(backendProduct.productPrice, backendProduct.productOldPrice || backendProduct.mrp),
-      category: backendProduct.productCategory,
-      subCategory: backendProduct.productSubCategory,
-      brand: backendProduct.brandName || backendProduct.brand,
-      image: backendProduct.productMainImage || backendProduct.image,
-      productMainImage: backendProduct.productMainImage,
-      prescriptionRequired: backendProduct.prescriptionRequired || false,
-      description: backendProduct.productDescription,
-      stock: backendProduct.productStock,
-      status: backendProduct.productStatus,
-      ...backendProduct
-    };
-  }
-
-  function calculateDiscount(currentPrice, originalPrice) {
-    if (!originalPrice || originalPrice <= currentPrice) return '';
-    const discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
-    return `${discountPercent}% off`;
-  }
-
-  async function fetchProductsByCategory(category) {
-    try {
-      showLoadingState();
-      const encodedCategory = encodeURIComponent(category);
-      const response = await fetch(`${API_BASE_URL}/get-by-category/${encodedCategory}`);
-
-      if (!response.ok) throw new Error('Failed to fetch products by category');
-
-      const categoryProducts = await response.json();
-      // Transform the category products
-      const transformedProducts = categoryProducts.map(product => transformProductData(product));
-
-      // Filter for Mobility Aids products only
-      return transformedProducts.filter(product =>
-        product.subCategory === 'Mobility Aids' ||
-        (product.productSubCategory && product.productSubCategory.toLowerCase().includes('mobility aids'))
-      );
-
-    } catch (error) {
-      console.error('Error fetching products by category:', error);
-      return [];
-    }
-  }
-
-  async function fetchProductDetails(productId) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/get-product/${productId}`);
-      if (!response.ok) throw new Error('Failed to fetch product details');
-      const product = await response.json();
-      return transformProductData(product);
-    } catch (error) {
-      console.error('Error fetching product details:', error);
-      return null;
-    }
-  }
-
-  // ================
-  // UI Helpers
-  // ================
-  function showLoadingState() {
-    if (!productGrid) return;
-    productGrid.innerHTML = `
-      <div class="col-span-full flex justify-center items-center py-8">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <span class="ml-3 text-gray-600">Loading Mobility Aids products...</span>
-      </div>
-    `;
-  }
-
-  function showErrorState(message) {
-    if (!productGrid) return;
-    productGrid.innerHTML = `
-      <div class="col-span-full text-center py-8">
-        <p class="text-red-600 mb-4">${message}</p>
-        <button onclick="fetchProducts()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-          Retry
-        </button>
-      </div>
-    `;
-  }
-
-  function updateBrandFilters() {
-    if (!brandList) return;
-
-    const brandFilterContainer = brandList.querySelector('.space-y-2');
-    if (brandFilterContainer) {
-      brandFilterContainer.innerHTML = '';
-
-      allBrands.forEach(brand => {
-        if (brand) {
-          const label = document.createElement('label');
-          label.className = 'flex items-center space-x-2';
-          label.innerHTML = `
-            <input type="checkbox" class="brand-filter rounded text-blue-600" value="${escapeHtml(brand)}">
-            <span class="text-sm text-gray-700">${escapeHtml(brand)}</span>
-          `;
-          brandFilterContainer.appendChild(label);
-        }
-      });
-
-      // Reattach event listeners to new brand filters
-      const newBrandFilters = brandFilterContainer.querySelectorAll('.brand-filter');
-      newBrandFilters.forEach(filter => {
-        filter.addEventListener('change', () => {
-          applyFilters(products);
-        });
-      });
-    }
-  }
-
-  function updateCategoryList() {
-    if (!categoryList) return;
-
-    const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-
-    const categoryLinks = categoryList.querySelectorAll('.category-link');
-    categoryLinks.forEach(link => {
-      const categoryText = link.textContent.trim();
-      if (!categories.includes(categoryText)) {
-        link.parentElement.style.display = 'none';
-      } else {
-        link.parentElement.style.display = 'block';
-      }
-    });
-  }
-
-  function updateCartCount() {
-    if (!cartCountElement) return;
-    const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-    cartCountElement.textContent = totalItems;
-    localStorage.setItem('cartCount', totalItems);
-  }
-
-  // Initialize cart from localStorage
-  (function loadCart() {
-    const stored = JSON.parse(localStorage.getItem('cart') || 'null');
-    if (Array.isArray(stored)) cart = stored;
-    updateCartCount();
-  })();
-
-  // ================
-  // Product Rendering
-  // ================
-  function createProductCard(product) {
-    const productDiv = document.createElement('div');
-    productDiv.className = 'product-card bg-white p-4 shadow rounded-lg flex flex-col justify-between relative cursor-pointer hover:shadow-lg transition-shadow';
-    const prescriptionBadge = product.prescriptionRequired
-      ? '<div class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">Rx Required</div>'
-      : '';
-    const imageUrl = product.productMainImage && !product.productMainImage.startsWith('http')
-      ? `${API_BASE_URL}/${product.productId}/image`
-      : product.image || product.productMainImage || 'https://via.placeholder.com/150?text=No+Image';
-    const originalPrice = product.originalPrice || product.mrp || product.productOldPrice;
-    const currentPrice = product.price || product.productPrice;
-    const discount = product.discount || calculateDiscount(currentPrice, originalPrice);
-    const formattedPrice = currentPrice ? currentPrice.toFixed(2) : '0.00';
-    const formattedOriginalPrice = originalPrice ? originalPrice.toFixed(2) : null;
-    const actionButton = product.prescriptionRequired
-      ? `<button
-            class="mt-3 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition flex items-center justify-center gap-2 upload-pres-btn"
-            data-product='${escapeHtml(JSON.stringify(product))}'>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Upload Prescription
-          </button>`
-      : `<button
-            class="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition flex items-center justify-center gap-2 add-to-cart-btn"
-            data-id="${product.id}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            View Details
-          </button>`;
-    productDiv.innerHTML = `
-      ${prescriptionBadge}
-      <img src="${imageUrl}" alt="${escapeHtml(product.name)}" class="product-image w-full h-32 object-cover rounded-lg mb-3" onerror="this.src='https://via.placeholder.com/150?text=Image+Error'">
-      <p class="text-sm text-gray-600 font-medium">${escapeHtml(product.name)}</p>
-      <p class="text-xs text-gray-500">${escapeHtml(product.brand)}</p>
-      ${product.prescriptionRequired ? '<p class="text-red-600 text-xs mt-1 font-semibold">⚠️ Prescription needed</p>' : ''}
-      <p class="text-green-600 font-bold mt-2">₹${formattedPrice}
-        ${formattedOriginalPrice ? `<span class="text-gray-500 line-through text-sm">₹${formattedOriginalPrice}</span> <span class="text-green-600 text-sm">${discount}</span>` : ''}</p>
-      ${actionButton}
-    `;
-    productDiv.addEventListener('click', (event) => {
-      if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
-      if (product.prescriptionRequired) {
-        openUploadModalForProduct(product);
-      } else {
-        openProductDetails(product);
-      }
-    });
-    return productDiv;
-  }
-
-  function displayProducts(list) {
-    if (!productGrid) return;
-    productGrid.innerHTML = '';
-
-    if (list.length === 0) {
-      productGrid.innerHTML = `
-        <div class="col-span-full text-center py-8">
-          <p class="text-gray-500">No Mobility Aids products found.</p>
-          <p class="text-sm text-gray-400 mt-2">Try checking back later or browse other categories</p>
-        </div>
-      `;
-      return;
-    }
-
-    list.forEach(product => productGrid.appendChild(createProductCard(product)));
-  }
-
-  // ================
-  // Product Interactions
-  // ================
-  function openProductDetails(product) {
-    const productDetailsUrl = `/productdetails.html?id=${product.id}`;
-    window.location.href = productDetailsUrl;
-  }
-  window.openProductDetails = openProductDetails;
-
-  function addToCartById(productId) {
-    const product = products.find(p => p.id == productId);
-    if (!product) return;
-    const existing = cart.find(item => item.id === productId);
-    if (existing) existing.quantity = (existing.quantity || 1) + 1;
-    else cart.push({ ...product, quantity: 1 });
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-  }
-  window.addToCart = addToCartById;
-
-  // ================
-  // Category & Brand Filters
-  // ================
-  categoryList?.addEventListener('click', async (e) => {
-    if (e.target.classList.contains('expand-toggle')) {
-      const li = e.target.parentElement;
-      const subcategory = li.querySelector('.subcategory');
-      if (subcategory) {
-        subcategory.classList.toggle('hidden');
-      } else {
-        const category = li.querySelector('.category-link')?.textContent?.trim();
-        if (category) {
-          const categoryProducts = await fetchProductsByCategory(category);
-          const subItems = [...new Set(categoryProducts.map(p => p.name))];
-          if (subItems.length) {
-            const ul = document.createElement('ul');
-            ul.className = 'subcategory hidden ml-4 space-y-2';
-            subItems.forEach(item => {
-              const li2 = document.createElement('li');
-              li2.innerHTML = `<a href="#" class="subcategory-link text-sm text-gray-600 hover:text-primary">${escapeHtml(item)}</a>`;
-              ul.appendChild(li2);
-            });
-            li.appendChild(ul);
-            ul.classList.toggle('hidden');
-          }
-        }
-      }
-      e.target.textContent = e.target.textContent === '+' ? '-' : '+';
-      return;
-    }
-
-    if (e.target.classList.contains('category-link') || e.target.classList.contains('subcategory-link')) {
-      e.preventDefault();
-      const text = e.target.textContent.trim();
-
-      if (e.target.classList.contains('subcategory-link')) {
-        const filtered = products.filter(p => p.name === text);
-        activeCategory = text;
-        applyFilters(filtered);
-      } else {
-        activeCategory = text;
-        showLoadingState();
-        const categoryProducts = await fetchProductsByCategory(text);
-        applyFilters(categoryProducts);
-      }
-    }
+    const productId = Number(btn.dataset.id);
+    toggleWishlist(productId, btn);
   });
-
-  if (brandToggle) {
-    brandToggle.addEventListener('click', () => {
-      brandList.classList.toggle('hidden');
-      brandToggle.textContent = brandToggle.textContent === '+' ? '-' : '+';
-    });
-  }
-
-  sortSelect?.addEventListener('change', () => {
-    activeSort = sortSelect.value;
-    applyFilters(products);
-  });
-
-  function applyFilters(startList) {
-    let list = Array.isArray(startList) ? [...startList] : [...products];
-    const selectedBrands = Array.from(document.querySelectorAll('.brand-filter:checked')).map(f => f.value);
-    if (selectedBrands.length > 0) {
-      list = list.filter(p => selectedBrands.includes(p.brand));
-    }
-    if (activeSort === 'Price: Low to High') {
-      list.sort((a, b) => (a.price || 0) - (b.price || 0));
-    } else if (activeSort === 'Price: High to Low') {
-      list.sort((a, b) => (b.price || 0) - (a.price || 0));
-    } else if (activeSort === 'Discount') {
-      list.sort((a, b) => {
-        const discountA = a.mrp ? ((a.mrp - a.price) / a.mrp) * 100 : 0;
-        const discountB = b.mrp ? ((b.mrp - b.price) / b.mrp) * 100 : 0;
-        return discountB - discountA;
-      });
-    }
-    displayProducts(list);
-  }
-
-  // ================
-  // Upload Prescription Modal Integration
-  // ================
-  function openUploadModalForProduct(product) {
-    if (!uploadModal) {
-      window.location.href = `/prescribed.html?id=${product.id}`;
-      return;
-    }
-    uploadModal.dataset.productId = product.id;
-    const modalProductName = uploadModal.querySelector('#modalProductName') || document.getElementById('modalProductName');
-    if (modalProductName) modalProductName.textContent = `Upload Prescription for: ${product.name}`;
-    const modalProductImage = uploadModal.querySelector('.modal-product-image');
-    if (modalProductImage) {
-      const imageUrl = product.productMainImage && !product.productMainImage.startsWith('http')
-        ? `${API_BASE_URL}/${product.id}/image`
-        : product.image || product.productMainImage || 'https://via.placeholder.com/150?text=No+Image';
-      modalProductImage.src = imageUrl;
-    }
-    let fileInput = uploadModal.querySelector('#prescriptionFile');
-    if (!fileInput) {
-      fileInput = uploadModal.querySelector('input[type="file"]');
-    }
-    if (!fileInput) {
-      fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = 'image/*,.pdf';
-      fileInput.id = 'prescriptionFile';
-      fileInput.className = 'hidden';
-      uploadModal.querySelector('label')?.appendChild(fileInput) || uploadModal.appendChild(fileInput);
-    }
-    const fileNameDisplay = uploadModal.querySelector('#fileNameDisplay') || document.getElementById('fileNameDisplay');
-    const newFileInput = fileInput.cloneNode();
-    newFileInput.id = fileInput.id;
-    newFileInput.accept = fileInput.accept;
-    newFileInput.className = fileInput.className;
-    fileInput.parentNode.replaceChild(newFileInput, fileInput);
-    fileInput = newFileInput;
-    fileInput.addEventListener('change', function () {
-      const file = fileInput.files[0];
-      if (!file) {
-        if (fileNameDisplay) fileNameDisplay.textContent = '';
-        return;
-      }
-      if (fileNameDisplay) fileNameDisplay.textContent = file.name;
-      if (file.type.startsWith('image/')) {
-        const previewImg = uploadModal.querySelector('#prescriptionPreviewImg');
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          if (previewImg) {
-            previewImg.src = evt.target.result;
-            previewImg.classList.remove('hidden');
-          }
-          uploadModal.dataset.tempDataURL = evt.target.result;
-          uploadModal.dataset.tempFileName = file.name;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        uploadModal.dataset.tempDataURL = '';
-        uploadModal.dataset.tempFileName = file.name;
-      }
-    });
-    const label = uploadModal.querySelector('label');
-    if (label) {
-      label.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        const fi = uploadModal.querySelector('#prescriptionFile');
-        if (fi) fi.click();
-      }, { once: true });
-    }
-    const submitBtn = uploadModal.querySelector('#submitPrescription') || document.getElementById('submitPrescription');
-    if (submitBtn) {
-      const newBtn = submitBtn.cloneNode(true);
-      submitBtn.parentNode.replaceChild(newBtn, submitBtn);
-      newBtn.addEventListener('click', () => {
-        const prodId = uploadModal.dataset.productId;
-        const tmpName = uploadModal.dataset.tempFileName;
-        const tmpData = uploadModal.dataset.tempDataURL || null;
-
-        const fi = uploadModal.querySelector('#prescriptionFile');
-        if (!tmpName && fi && fi.files[0]) {
-          const file = fi.files[0];
-          const reader = new FileReader();
-          reader.onload = function (evt) {
-            savePrescription(prodId, file.name, evt.target.result);
-            uploadModal.classList.add('hidden');
-            clearModalTempState();
-          };
-          reader.readAsDataURL(file);
-          return;
-        }
-        if (!tmpName) {
-          alert('Please choose a prescription file before submitting.');
-          return;
-        }
-        savePrescription(prodId, tmpName, tmpData);
-        uploadModal.classList.add('hidden');
-        clearModalTempState();
-        alert('Prescription uploaded successfully.');
-      });
-    }
-    uploadModal.classList.remove('hidden');
-  }
-
-  function savePrescription(productId, fileName, dataURL) {
-    if (!productId) return;
-    const prescriptions = JSON.parse(localStorage.getItem('prescriptions') || '{}');
-    prescriptions[productId] = {
-      fileName,
-      dataURL: dataURL || null,
-      uploadedAt: new Date().toISOString()
-    };
-    localStorage.setItem('prescriptions', JSON.stringify(prescriptions));
-  }
-
-  function clearModalTempState() {
-    if (!uploadModal) return;
-    delete uploadModal.dataset.tempFileName;
-    delete uploadModal.dataset.tempDataURL;
-    const previewImg = uploadModal.querySelector('#prescriptionPreviewImg');
-    if (previewImg) {
-      previewImg.src = '';
-      previewImg.classList.add('hidden');
-    }
-    const fileNameDisplay = uploadModal.querySelector('#fileNameDisplay');
-    if (fileNameDisplay) fileNameDisplay.textContent = '';
-    const fi = uploadModal.querySelector('#prescriptionFile');
-    if (fi) fi.value = '';
-  }
-
-  // Event delegation for dynamic buttons
-  document.body.addEventListener('click', (e) => {
-    const up = e.target.closest('.upload-pres-btn');
-    if (up) {
-      e.stopPropagation();
-      const productData = up.getAttribute('data-product');
-      if (productData) {
-        try {
-          const product = JSON.parse(unescapeHtml(productData));
-          openUploadModalForProduct(product);
-        } catch (err) {
-          window.location.href = `/prescribed.html`;
-        }
-      }
-      return;
-    }
-    const atc = e.target.closest('.add-to-cart-btn');
-    if (atc) {
-      e.stopPropagation();
-      const pid = atc.getAttribute('data-id');
-      if (pid) {
-        const product = products.find(p => p.id == pid);
-        if (product) openProductDetails(product);
-      }
-      return;
-    }
-  });
-
-  // Modal close handlers
-  if (uploadModal) {
-    uploadModal.addEventListener('click', (e) => {
-      if (e.target === uploadModal) {
-        uploadModal.classList.add('hidden');
-        clearModalTempState();
-      }
-    });
-    const closeUploadModalBtn = document.getElementById('closeUploadModal');
-    if (closeUploadModalBtn) {
-      closeUploadModalBtn.addEventListener('click', () => {
-        uploadModal.classList.add('hidden');
-        clearModalTempState();
-      });
-    }
-  }
-
-  if (validPrescriptionBtn && validPrescriptionModal) {
-    validPrescriptionBtn.addEventListener('click', () => validPrescriptionModal.classList.remove('hidden'));
-    validPrescriptionModal.addEventListener('click', (e) => { if (e.target === validPrescriptionModal) validPrescriptionModal.classList.add('hidden'); });
-    const validClose = validPrescriptionModal.querySelector('#closeValidPrescriptionModal') || validPrescriptionModal.querySelector('button');
-    if (validClose) validClose.addEventListener('click', () => validPrescriptionModal.classList.add('hidden'));
-  }
-
-  // ================
-  // Utility Functions
-  // ================
-  function escapeHtml(str) {
-    if (typeof str !== 'string') return str;
-    return str.replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&#039;');
-  }
-
-  function unescapeHtml(encoded) {
-    if (!encoded) return encoded;
-    return encoded.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
-  }
-
-  // ================
-  // Initialize App
-  // ================
-  window.uploadPrescription = function (productObjOrId) {
-    if (typeof productObjOrId === 'number' || typeof productObjOrId === 'string') {
-      const p = products.find(x => x.id == productObjOrId);
-      if (p) openUploadModalForProduct(p);
-      else window.location.href = `/prescribed.html?id=${productObjOrId}`;
-    } else if (typeof productObjOrId === 'object' && productObjOrId !== null) {
-      openUploadModalForProduct(productObjOrId);
-    } else {
-      window.location.href = '/prescribed.html';
-    }
-  };
-  window.addToCart = addToCartById;
-
-  // Start the application
-  fetchProducts();
 });
+
+// =============== CARD CREATION ===============
+function createCard(p) {
+  const div = document.createElement('div');
+  
+  // Check if product is out of stock
+  const isOutOfStock = p.quantity <= 0;
+  const stockStatus = isOutOfStock ? 'Out of Stock' : 'In Stock';
+  const stockClass = isOutOfStock ? 'out-of-stock' : 'in-stock';
+  const cardClass = isOutOfStock ? 'out-of-stock-card' : '';
+  
+  // Calculate accurate discount if not provided
+  let discount = p.discount;
+  if (!discount && p.originalPrice && p.price) {
+    discount = Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100);
+  }
+  
+  // Calculate price if only originalPrice and discount are provided
+  let displayPrice = p.price;
+  let displayOriginalPrice = p.originalPrice;
+  let displayDiscount = discount;
+  
+  if (!p.price && p.originalPrice && discount) {
+    displayPrice = Math.round(p.originalPrice * (1 - discount/100));
+    displayOriginalPrice = p.originalPrice;
+    displayDiscount = discount;
+  } else if (!p.originalPrice && p.price && discount) {
+    displayPrice = p.price;
+    displayOriginalPrice = Math.round(p.price / (1 - discount/100));
+    displayDiscount = discount;
+  }
+  
+  const priceLine = displayOriginalPrice
+    ? `₹${displayPrice} <s class="text-gray-400 text-sm">₹${displayOriginalPrice}</s> <span class="text-green-600 text-sm font-bold">${displayDiscount}% off</span>`
+    : `₹${displayPrice}`;
+
+  // check current wishlist state
+  const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+  const isWishlisted = wishlist.some(item => item.id === p.id);
+
+  div.className = `bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition cursor-pointer relative ${cardClass}`;
+  
+  div.innerHTML = `
+    <div class="relative">
+      <img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">
+      
+      <!-- Stock Status Badge -->
+      <div class="stock-badge ${stockClass}">${stockStatus}</div>
+      
+      <!-- Wishlist button – data-id is the only thing we need -->
+      <button class="wishlist-btn ${isWishlisted ? 'active' : ''}" data-id="${p.id}">
+        <i class="fa-${isWishlisted ? 'solid' : 'regular'} fa-heart"></i>
+      </button>
+    </div>
+    <div class="p-2">
+      <h3 class="font-semibold text-sm">${p.name}</h3>
+      <p class="text-xs text-gray-500 mt-1">${p.brand}</p>
+      <div class="mt-2 font-bold text-lg text-green-600">${priceLine}</div>
+      <button onclick="${isOutOfStock ? 'void(0)' : `navigateToProductDetails(${p.id})`}" 
+              class="mt-4 w-full ${isOutOfStock ? 'out-of-stock-btn bg-gray-400' : 'bg-[#4A70A9] hover:bg-[#16476A]'} text-white py-2 rounded-lg font-bold transition"
+              ${isOutOfStock ? 'disabled' : ''}>
+        ${isOutOfStock ? 'Out of Stock' : 'View Details'}
+      </button>
+    </div>
+  `;
+  return div;
+}
+
+// =============== RENDER INITIAL PRODUCTS (8 products) ===============
+function renderInitialProducts() {
+  if (!productGrid) return;
+  
+  productGrid.innerHTML = ''; // clear
+  
+  if (allFilteredProducts.length === 0) {
+    productGrid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-500 text-xl">No products found</div>';
+    if (showMoreBtn) showMoreBtn.classList.add('hidden');
+    return;
+  }
+  
+  // Show only first 8 products
+  const productsToShow = allFilteredProducts.slice(0, visibleProductsCount);
+  
+  productsToShow.forEach(p => productGrid.appendChild(createCard(p)));
+  
+  // Show or hide "Show More" button
+  if (showMoreBtn) {
+    if (allFilteredProducts.length > visibleProductsCount) {
+      showMoreBtn.classList.remove('hidden');
+    } else {
+      showMoreBtn.classList.add('hidden');
+    }
+  }
+}
+
+// =============== SHOW MORE FUNCTIONALITY ===============
+function initShowMore() {
+  if (!showMoreBtn) return;
+  
+  showMoreBtn.addEventListener('click', () => {
+    // Increase visible products count by 8
+    visibleProductsCount += 8;
+    
+    // Clear and re-render with new count
+    renderInitialProducts();
+    
+    // Hide button if all products are shown
+    if (visibleProductsCount >= allFilteredProducts.length && showMoreBtn) {
+      showMoreBtn.classList.add('hidden');
+    }
+    
+    // Update results count
+    updateResultsCount();
+  });
+}
+
+// =============== WISHLIST TOGGLE ===============
+function toggleWishlist(productId, buttonElement) {
+  let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+  const product = products.find(p => p.id === productId);
+
+  const index = wishlist.findIndex(item => item.id === productId);
+
+  if (index === -1) {
+    // add
+    wishlist.push(product);
+    buttonElement.classList.add('active');
+    buttonElement.innerHTML = '<i class="fa-solid fa-heart"></i>';
+  } else {
+    // remove
+    wishlist.splice(index, 1);
+    buttonElement.classList.remove('active');
+    buttonElement.innerHTML = '<i class="fa-regular fa-heart"></i>';
+  }
+
+  localStorage.setItem('wishlist', JSON.stringify(wishlist));
+
+  // let header badge know that wishlist changed
+  window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+}
+
+function updateResultsCount() {
+  const countEl = document.getElementById('resultsCount');
+  if (countEl) {
+    const showingCount = Math.min(visibleProductsCount, allFilteredProducts.length);
+    countEl.textContent = `Showing ${showingCount} of ${allFilteredProducts.length} products`;
+  }
+  updateTitle();
+}
+
+function updateTitle() {
+  const titleEl = document.querySelector('h2.text-2xl');
+  if (!titleEl) return;
+
+  const categoryNames = {
+    'all': 'Mobility Aids Products',
+    'wheelchair': 'Wheelchairs',
+    'walker': 'Walkers & Walking Sticks',
+    'crutches': 'Crutches',
+    'support': 'Support Belts & Braces'
+  };
+
+  let title = categoryNames[currentFilters.category] || 'Mobility Aids Products';
+
+  // Add brand to title if selected
+  if (currentFilters.brand !== 'all') {
+    title += ` - ${currentFilters.brand}`;
+  }
+
+  titleEl.textContent = title;
+}
+
+// Apply Filters Function
+function applyFilters() {
+  allFilteredProducts = products.filter(product => {
+    // Category filter
+    if (currentFilters.category !== 'all' && product.category !== currentFilters.category) {
+      return false;
+    }
+
+    // Brand filter
+    if (currentFilters.brand !== 'all' && product.brand !== currentFilters.brand) {
+      return false;
+    }
+
+    // Price filter
+    if (product.price < currentFilters.minPrice || product.price > currentFilters.maxPrice) {
+      return false;
+    }
+
+    // Discount filter
+    if (currentFilters.discount !== 'all') {
+      const requiredDiscount = parseInt(currentFilters.discount);
+      // Calculate discount if not available
+      let productDiscount = product.discount;
+      if (!productDiscount && product.originalPrice && product.price) {
+        productDiscount = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+      }
+      if (productDiscount < requiredDiscount) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  // Reset visible products count when filters change
+  visibleProductsCount = 8;
+  
+  // Apply sorting if any
+  applySorting();
+  
+  renderInitialProducts();
+  updateResultsCount();
+}
+
+// Apply Sorting Function
+function applySorting() {
+  if (!sortSelect) return;
+  
+  const val = sortSelect.value;
+  if (val === 'price-low') {
+    allFilteredProducts.sort((a,b) => a.price - b.price);
+  } else if (val === 'price-high') {
+    allFilteredProducts.sort((a,b) => b.price - a.price);
+  } else if (val === 'rating') {
+    allFilteredProducts.sort((a,b) => (b.rating || 0) - (a.rating || 0));
+  } else if (val === 'newest') {
+    allFilteredProducts.sort((a,b) => b.id - a.id);
+  }
+}
+
+// Initialize Desktop Filters
+function initFilters() {
+  // Desktop form submit
+  const desktopForm = document.getElementById('filterForm');
+  if (desktopForm) {
+    desktopForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      currentFilters.category = document.querySelector('input[name="category"]:checked')?.value || 'all';
+      currentFilters.brand = document.querySelector('input[name="brand"]:checked')?.value || 'all';
+      currentFilters.discount = document.querySelector('input[name="discount"]:checked')?.value || 'all';
+      
+      applyFilters();
+    });
+
+    // Live filter on radio change
+    desktopForm.querySelectorAll('input[type="radio"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        currentFilters.category = document.querySelector('input[name="category"]:checked')?.value || 'all';
+        currentFilters.brand = document.querySelector('input[name="brand"]:checked')?.value || 'all';
+        currentFilters.discount = document.querySelector('input[name="discount"]:checked')?.value || 'all';
+        applyFilters();
+      });
+    });
+  }
+
+  // Mobile filters apply button
+  const applyMobileBtn = document.getElementById('applyMobileFilters');
+  if (applyMobileBtn) {
+    applyMobileBtn.addEventListener('click', () => {
+      currentFilters.category = document.querySelector('input[name="mobileCategory"]:checked')?.value || 'all';
+      currentFilters.brand = document.querySelector('input[name="mobileBrand"]:checked')?.value || 'all';
+      currentFilters.discount = document.querySelector('input[name="mobileDiscount"]:checked')?.value || 'all';
+      
+      applyFilters();
+      closeFilterSheet();
+    });
+  }
+
+  // Mobile clear filters
+  const clearMobileBtn = document.getElementById('clearMobileFilters');
+  if (clearMobileBtn) {
+    clearMobileBtn.addEventListener('click', () => {
+      document.querySelectorAll('input[name="mobileCategory"], input[name="mobileBrand"], input[name="mobileDiscount"]').forEach(radio => {
+        if (radio.value === 'all') radio.checked = true;
+      });
+      
+      // Reset desktop filters too
+      document.querySelectorAll('input[name="category"], input[name="brand"], input[name="discount"]').forEach(radio => {
+        if (radio.value === 'all') radio.checked = true;
+      });
+
+      currentFilters = {
+        category: 'all',
+        brand: 'all',
+        discount: 'all',
+        minPrice: 0,
+        maxPrice: 15000
+      };
+
+      // Reset price sliders
+      if (document.getElementById('minThumb')) document.getElementById('minThumb').value = 0;
+      if (document.getElementById('maxThumb')) document.getElementById('maxThumb').value = 15000;
+      if (document.getElementById('mobileMinThumb')) document.getElementById('mobileMinThumb').value = 0;
+      if (document.getElementById('mobileMaxThumb')) document.getElementById('mobileMaxThumb').value = 15000;
+      
+      if (typeof updateDesktopSlider === 'function') updateDesktopSlider();
+      if (typeof updateMobileSlider === 'function') updateMobileSlider();
+
+      applyFilters();
+    });
+  }
+}
+
+// Navigate to Product Details Page with URL parameters
+window.navigateToProductDetails = function(id) {
+  const product = products.find(p => p.id === id);
+  if (!product) {
+    console.error('Product not found with id:', id);
+    return;
+  }
+
+  // Store current page name/category for reference
+  const currentPageName = document.title || 'Mobility Aids';
+  
+  sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+  sessionStorage.setItem('currentPageProducts', JSON.stringify(products));
+  sessionStorage.setItem('currentPageName', currentPageName);
+
+  const params = new URLSearchParams({
+    id: product.id,
+    name: product.name,
+    brand: product.brand,
+    price: product.price,
+    originalPrice: product.originalPrice || '',
+    discount: product.discount || '',
+    image: product.image,
+    description: product.description || '',
+    prescription: product.prescription,
+    category: product.category || '',
+    sourcePage: currentPageName,
+    quantity: product.quantity || 0
+  });
+
+  window.location.href = `/productdetails.html?${params.toString()}`;
+}
+
+function initSorting() {
+  if (!sortSelect) return;
+  
+  sortSelect.addEventListener('change', () => {
+    applySorting();
+    visibleProductsCount = 8; // Reset to initial view
+    renderInitialProducts();
+    updateResultsCount();
+  });
+
+  // Mobile sort apply
+  const applySortBtn = document.getElementById('applySortBtn');
+  if (applySortBtn) {
+    applySortBtn.addEventListener('click', () => {
+      const selectedSort = document.querySelector('input[name="mobileSort"]:checked')?.value || 'default';
+      if (sortSelect) {
+        sortSelect.value = selectedSort;
+        sortSelect.dispatchEvent(new Event('change'));
+      }
+      closeSortSheet();
+    });
+  }
+}
+
+// Desktop Price Slider
+function initSlider() {
+  const minThumb = document.getElementById('minThumb');
+  const maxThumb = document.getElementById('maxThumb');
+  const mobileMinThumb = document.getElementById('mobileMinThumb');
+  const mobileMaxThumb = document.getElementById('mobileMaxThumb');
+
+  const updateDesktopSlider = () => {
+    const minVal = parseInt(minThumb.value);
+    const maxVal = parseInt(maxThumb.value);
+    
+    if (minVal > maxVal - 500) {
+      minThumb.value = maxVal - 500;
+    }
+    
+    const fill = document.getElementById('desktopFill');
+    if (fill) {
+      fill.style.left = (minVal / 15000) * 100 + '%';
+      fill.style.width = ((maxVal - minVal) / 15000) * 100 + '%';
+    }
+    
+    const minValue = document.getElementById('minValue');
+    const maxValue = document.getElementById('maxValue');
+    if (minValue) minValue.textContent = '₹' + minVal;
+    if (maxValue) maxValue.textContent = '₹' + maxVal;
+    
+    currentFilters.minPrice = minVal;
+    currentFilters.maxPrice = maxVal;
+  };
+
+  const updateMobileSlider = () => {
+    const minVal = parseInt(mobileMinThumb.value);
+    const maxVal = parseInt(mobileMaxThumb.value);
+    
+    if (minVal > maxVal - 500) {
+      mobileMinThumb.value = maxVal - 500;
+    }
+    
+    const fill = document.getElementById('mobileFill');
+    if (fill) {
+      fill.style.left = (minVal / 15000) * 100 + '%';
+      fill.style.width = ((maxVal - minVal) / 15000) * 100 + '%';
+    }
+    
+    const minValue = document.getElementById('mobileMinValue');
+    const maxValue = document.getElementById('mobileMaxValue');
+    if (minValue) minValue.textContent = '₹' + minVal;
+    if (maxValue) maxValue.textContent = '₹' + maxVal;
+    
+    currentFilters.minPrice = minVal;
+    currentFilters.maxPrice = maxVal;
+  };
+
+  if (minThumb && maxThumb) {
+    minThumb.oninput = () => {
+      updateDesktopSlider();
+      applyFilters();
+    };
+    maxThumb.oninput = () => {
+      updateDesktopSlider();
+      applyFilters();
+    };
+    updateDesktopSlider();
+  }
+
+  if (mobileMinThumb && mobileMaxThumb) {
+    mobileMinThumb.oninput = updateMobileSlider;
+    mobileMaxThumb.oninput = updateMobileSlider;
+    updateMobileSlider();
+  }
+
+  window.updateDesktopSlider = updateDesktopSlider;
+  window.updateMobileSlider = updateMobileSlider;
+}
+
+// Mobile Sheets
+function initMobileSheets() {
+  const backdrop = document.getElementById('mobileSheetBackdrop');
+  const filterSheet = document.getElementById('filterSheet');
+  const sortSheet = document.getElementById('sortSheet');
+  
+  // Open Filter Sheet
+  const openFilterSheetBtn = document.getElementById('openFilterSheet');
+  if (openFilterSheetBtn) {
+    openFilterSheetBtn.addEventListener('click', () => {
+      if (backdrop) backdrop.classList.remove('hidden');
+      if (filterSheet) filterSheet.classList.remove('translate-y-full');
+    });
+  }
+
+  // Close Filter Sheet
+  const closeFilterSheet = () => {
+    if (backdrop) backdrop.classList.add('hidden');
+    if (filterSheet) filterSheet.classList.add('translate-y-full');
+  };
+
+  const closeFilterSheetBtn = document.getElementById('closeFilterSheet');
+  if (closeFilterSheetBtn) {
+    closeFilterSheetBtn.addEventListener('click', closeFilterSheet);
+  }
+  window.closeFilterSheet = closeFilterSheet;
+
+  // Open Sort Sheet
+  const openSortSheetBtn = document.getElementById('openSortSheet');
+  if (openSortSheetBtn) {
+    openSortSheetBtn.addEventListener('click', () => {
+      if (backdrop) backdrop.classList.remove('hidden');
+      if (sortSheet) sortSheet.classList.remove('translate-y-full');
+    });
+  }
+
+  // Close Sort Sheet
+  const closeSortSheet = () => {
+    if (backdrop) backdrop.classList.add('hidden');
+    if (sortSheet) sortSheet.classList.add('translate-y-full');
+  };
+
+  const closeSortSheetBtn = document.getElementById('closeSortSheet');
+  if (closeSortSheetBtn) {
+    closeSortSheetBtn.addEventListener('click', closeSortSheet);
+  }
+  window.closeSortSheet = closeSortSheet;
+
+  // Click backdrop to close
+  if (backdrop) {
+    backdrop.addEventListener('click', () => {
+      closeFilterSheet();
+      closeSortSheet();
+    });
+  }
+}
+
+window.sortProducts = function(type) {
+  if (!sortSelect) return;
+  
+  sortSelect.value = type;
+  sortSelect.dispatchEvent(new Event('change'));
+  const backdrop = document.getElementById('mobileSheetBackdrop');
+  if (backdrop) backdrop.click();
+};

@@ -1,8 +1,11 @@
-// ==================== CART.JS - COMPLETE WORKING VERSION ====================
+// ==================== CART.JS - FINAL FIXED VERSION ====================
 
 // Base URL for your backend API
 const BASE_URL = 'http://localhost:8083';
 const CART_API_URL = `${BASE_URL}/api/cart`;
+
+// Global variable to store cart items for button handlers
+let currentCartItems = [];
 
 // Function to get current user ID
 function getUserId() {
@@ -39,28 +42,34 @@ function showToast(message, type = 'success') {
 
 // Function to get cart from localStorage
 function getLocalCart() {
-    const cart = JSON.parse(localStorage.getItem('medcare_cart') || '[]');
-    console.log('[DEBUG] getLocalCart() - Cart from localStorage:', cart);
-    console.log('[DEBUG] getLocalCart() - Cart items IDs:', cart.map(item => ({
-        id: item.id,
-        cartItemId: item.cartItemId,
-        productId: item.productId,
-        mbpId: item.mbpId,
-        title: item.title
-    })));
-    return cart;
+    try {
+        const cart = JSON.parse(localStorage.getItem('medcare_cart') || '[]');
+        console.log('[DEBUG] getLocalCart() - Cart from localStorage:', cart);
+        return cart;
+    } catch (error) {
+        console.error('[DEBUG] getLocalCart() - Error parsing localStorage:', error);
+        return [];
+    }
 }
 
 // Function to save cart to localStorage
 function saveCart(data) {
     console.log('[DEBUG] saveCart() - Saving to localStorage:', data);
-    localStorage.setItem('medcare_cart', JSON.stringify(data));
+    try {
+        localStorage.setItem('medcare_cart', JSON.stringify(data));
+        // Also update the global variable
+        currentCartItems = [...data];
+        console.log('[DEBUG] saveCart() - Updated global cart items:', currentCartItems);
+    } catch (error) {
+        console.error('[DEBUG] saveCart() - Error saving to localStorage:', error);
+    }
 }
 
 // Function to clear local cart
 function clearLocalCart() {
     console.log('[DEBUG] clearLocalCart() - Clearing localStorage cart');
     localStorage.removeItem('medcare_cart');
+    currentCartItems = [];
 }
 
 // Cart UI elements
@@ -73,15 +82,6 @@ const cartWithItems = document.getElementById('cart-with-items');
 const shippingText = document.getElementById('shipping-text');
 const shippingStriked = document.getElementById('shipping-striked');
 
-console.log('[DEBUG] Cart UI elements:', {
-    cartItemsContainer: !!cartItemsContainer,
-    mrpTotalEl: !!mrpTotalEl,
-    discountAmountEl: !!discountAmountEl,
-    totalEl: !!totalEl,
-    emptyCartScreen: !!emptyCartScreen,
-    cartWithItems: !!cartWithItems
-});
-
 // Function to show empty cart UI with login message
 function showLoginRequiredCart() {
     console.log('[DEBUG] showLoginRequiredCart() - Showing login required message');
@@ -90,16 +90,13 @@ function showLoginRequiredCart() {
         return;
     }
     
-    // Show empty cart screen
     emptyCartScreen.classList.remove('hidden');
     cartWithItems.classList.add('hidden');
     
-    // Clear cart items container
     if (cartItemsContainer) {
         cartItemsContainer.innerHTML = '';
     }
     
-    // Reset totals
     if (mrpTotalEl) mrpTotalEl.textContent = '₹0';
     if (discountAmountEl) discountAmountEl.textContent = '-₹0';
     if (totalEl) totalEl.textContent = '₹0';
@@ -126,8 +123,7 @@ function updateCartCount() {
         return;
     }
 
-    // For logged-in users, show count from local storage
-    const cart = getLocalCart();
+    const cart = currentCartItems.length > 0 ? currentCartItems : getLocalCart();
     const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     console.log('[DEBUG] updateCartCount() - Total items:', totalItems);
 
@@ -168,15 +164,10 @@ async function fetchCartFromBackend() {
         const backendCart = await response.json();
         console.log('[DEBUG] fetchCartFromBackend() - Backend response:', backendCart);
         
-        // Transform backend data to match frontend format
+        // Transform backend data
         const transformedCart = backendCart.map(item => {
-            console.log('[DEBUG] fetchCartFromBackend() - Processing item:', item);
-            
-            // CRITICAL FIX: Ensure we have the correct ID structure
             const cartItem = {
-                // Use cartItemId as the primary ID for backend operations
                 id: item.cartItemId || item.id,
-                // Store all possible IDs for debugging
                 cartItemId: item.cartItemId,
                 itemId: item.itemId,
                 productId: item.type === 'PRODUCT' ? item.itemId : null,
@@ -258,13 +249,10 @@ async function addToCart(itemData) {
             productType: itemData.productType || "MEDICINE"
         };
 
-        // Add productId or mbpId based on type
         if (itemData.type === 'PRODUCT' && itemData.productId) {
             requestData.productId = itemData.productId;
-            console.log('[DEBUG] addToCart() - Adding PRODUCT with ID:', itemData.productId);
         } else if (itemData.type === 'MBP' && itemData.mbpId) {
             requestData.mbpId = itemData.mbpId;
-            console.log('[DEBUG] addToCart() - Adding MBP with ID:', itemData.mbpId);
         }
 
         console.log('[DEBUG] addToCart() - Sending request:', requestData);
@@ -281,9 +269,7 @@ async function addToCart(itemData) {
             const result = await response.json();
             console.log('[DEBUG] addToCart() - Backend response:', result);
             
-            // Reload cart after adding
             await loadCart();
-            
             showToast('Added to cart successfully', 'success');
             return result;
         } else {
@@ -299,9 +285,9 @@ async function addToCart(itemData) {
     }
 }
 
-// Function to update quantity - SIMPLIFIED AND FIXED
+// Function to update quantity - FIXED: Uses global currentCartItems
 async function updateQuantity(cartItemId, newQty) {
-    console.log('[DEBUG] updateQuantity() - Called with:', { cartItemId, newQty, type: typeof cartItemId });
+    console.log('[DEBUG] updateQuantity() - Called with:', { cartItemId, newQty });
     
     const userId = getUserId();
     if (!userId) {
@@ -310,7 +296,6 @@ async function updateQuantity(cartItemId, newQty) {
         return;
     }
 
-    // Ensure cartItemId is treated as a number
     const itemIdNum = parseInt(cartItemId);
     console.log('[DEBUG] updateQuantity() - Parsed item ID:', itemIdNum);
 
@@ -321,30 +306,35 @@ async function updateQuantity(cartItemId, newQty) {
     }
 
     try {
-        // Get current cart
-        const cart = getLocalCart();
-        console.log('[DEBUG] updateQuantity() - Current cart items:', cart.map(item => ({
-            id: item.id,
-            cartItemId: item.cartItemId,
-            title: item.title
-        })));
-        
-        // Find item by ID - try multiple fields
-        let item = cart.find(item => item.id == itemIdNum);
+        // FIRST: Try to get item from global currentCartItems
+        let item = currentCartItems.find(item => item.id == itemIdNum);
         if (!item) {
-            item = cart.find(item => item.cartItemId == itemIdNum);
+            item = currentCartItems.find(item => item.cartItemId == itemIdNum);
+        }
+        
+        // SECOND: If not in global, try localStorage
+        if (!item) {
+            console.log('[DEBUG] updateQuantity() - Not in global, checking localStorage');
+            const localCart = getLocalCart();
+            item = localCart.find(item => item.id == itemIdNum || item.cartItemId == itemIdNum);
+        }
+        
+        // THIRD: If still not found, reload cart from backend
+        if (!item) {
+            console.log('[DEBUG] updateQuantity() - Not found anywhere, reloading cart');
+            await loadCart();
+            // Try to find again after reload
+            item = currentCartItems.find(item => item.id == itemIdNum || item.cartItemId == itemIdNum);
         }
         
         if (!item) {
-            console.error('[DEBUG] updateQuantity() - Item not found. Searching for ID:', itemIdNum);
-            console.error('[DEBUG] updateQuantity() - Available items:', cart);
+            console.error('[DEBUG] updateQuantity() - Item not found after all attempts:', itemIdNum);
             showToast('Item not found in cart', 'error');
             return;
         }
 
         console.log('[DEBUG] updateQuantity() - Found item:', item);
         
-        // Prepare request data
         const requestData = {
             userId: userId,
             type: item.type,
@@ -353,13 +343,10 @@ async function updateQuantity(cartItemId, newQty) {
             productType: item.productType || "MEDICINE"
         };
 
-        // Add the correct ID based on type
         if (item.type === 'PRODUCT' && item.productId) {
             requestData.productId = item.productId;
-            console.log('[DEBUG] updateQuantity() - Updating PRODUCT with productId:', item.productId);
         } else if (item.type === 'MBP' && item.mbpId) {
             requestData.mbpId = item.mbpId;
-            console.log('[DEBUG] updateQuantity() - Updating MBP with mbpId:', item.mbpId);
         }
 
         console.log('[DEBUG] updateQuantity() - Sending update request:', requestData);
@@ -379,9 +366,7 @@ async function updateQuantity(cartItemId, newQty) {
         }
         
         console.log('[DEBUG] updateQuantity() - Success, reloading cart');
-        // Reload cart from backend
         await loadCart();
-        
         showToast('Quantity updated', 'success');
     } catch (error) {
         console.error('[DEBUG] updateQuantity() - Error:', error);
@@ -389,9 +374,9 @@ async function updateQuantity(cartItemId, newQty) {
     }
 }
 
-// Function to remove item from cart - SIMPLIFIED AND FIXED
+// Function to remove item from cart - FIXED: Uses global currentCartItems
 async function removeFromCartById(cartItemId) {
-    console.log('[DEBUG] removeFromCartById() - Called with:', { cartItemId, type: typeof cartItemId });
+    console.log('[DEBUG] removeFromCartById() - Called with:', { cartItemId });
     
     const userId = getUserId();
     if (!userId) {
@@ -400,48 +385,48 @@ async function removeFromCartById(cartItemId) {
         return;
     }
 
-    // Ensure cartItemId is treated as a number
     const itemIdNum = parseInt(cartItemId);
     console.log('[DEBUG] removeFromCartById() - Parsed item ID:', itemIdNum);
 
     try {
-        // Get current cart
-        const cart = getLocalCart();
-        console.log('[DEBUG] removeFromCartById() - Current cart items:', cart.map(item => ({
-            id: item.id,
-            cartItemId: item.cartItemId,
-            title: item.title
-        })));
-        
-        // Find item by ID - try multiple fields
-        let item = cart.find(item => item.id == itemIdNum);
+        // Try to get item from global currentCartItems
+        let item = currentCartItems.find(item => item.id == itemIdNum);
         if (!item) {
-            item = cart.find(item => item.cartItemId == itemIdNum);
+            item = currentCartItems.find(item => item.cartItemId == itemIdNum);
         }
         
+        // If not in global, try localStorage
         if (!item) {
-            console.error('[DEBUG] removeFromCartById() - Item not found. Searching for ID:', itemIdNum);
-            console.error('[DEBUG] removeFromCartById() - Available items:', cart);
-            showToast('Item not found in cart', 'error');
-            return;
+            console.log('[DEBUG] removeFromCartById() - Not in global, checking localStorage');
+            const localCart = getLocalCart();
+            item = localCart.find(item => item.id == itemIdNum || item.cartItemId == itemIdNum);
+        }
+        
+        // If still not found, fetch from backend
+        if (!item) {
+            console.log('[DEBUG] removeFromCartById() - Not found, fetching from backend');
+            const backendCart = await fetchCartFromBackend();
+            item = backendCart.find(item => item.id == itemIdNum || item.cartItemId == itemIdNum);
+            
+            if (!item) {
+                console.error('[DEBUG] removeFromCartById() - Item not found anywhere:', itemIdNum);
+                showToast('Item not found in cart', 'error');
+                return;
+            }
         }
 
         console.log('[DEBUG] removeFromCartById() - Found item:', item);
         
-        // Prepare request data
         const requestData = {
             userId: userId,
             type: item.type,
             selectedSize: item.size || ""
         };
 
-        // Add the correct ID based on type
         if (item.type === 'PRODUCT' && item.productId) {
             requestData.productId = item.productId;
-            console.log('[DEBUG] removeFromCartById() - Removing PRODUCT with productId:', item.productId);
         } else if (item.type === 'MBP' && item.mbpId) {
             requestData.mbpId = item.mbpId;
-            console.log('[DEBUG] removeFromCartById() - Removing MBP with mbpId:', item.mbpId);
         }
 
         console.log('[DEBUG] removeFromCartById() - Sending remove request:', requestData);
@@ -455,15 +440,11 @@ async function removeFromCartById(cartItemId) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
-            console.error('[DEBUG] removeFromCartById() - Backend error:', errorData);
             throw new Error('Failed to remove item');
         }
         
         console.log('[DEBUG] removeFromCartById() - Success, reloading cart');
-        // Reload cart from backend
         await loadCart();
-        
         showToast('Item removed from cart', 'success');
     } catch (error) {
         console.error('[DEBUG] removeFromCartById() - Error:', error);
@@ -493,14 +474,11 @@ async function clearCart() {
             });
 
             if (!response.ok) {
-                console.error('[DEBUG] clearCart() - Backend error');
                 throw new Error('Failed to clear cart');
             }
             
-            // Clear local cart and reload
             clearLocalCart();
             await loadCart();
-            
             showToast('Cart cleared successfully', 'success');
         } catch (error) {
             console.error('[DEBUG] clearCart() - Error:', error);
@@ -509,7 +487,7 @@ async function clearCart() {
     }
 }
 
-// Function to update cart UI - SIMPLIFIED VERSION
+// Function to update cart UI
 function updateCartUI(cartData = null) {
     console.log('[DEBUG] updateCartUI() - Called');
     
@@ -520,6 +498,10 @@ function updateCartUI(cartData = null) {
     
     const cart = cartData || getLocalCart();
     console.log('[DEBUG] updateCartUI() - Cart data:', cart);
+    
+    // Update global variable
+    currentCartItems = [...cart];
+    console.log('[DEBUG] updateCartUI() - Updated global cart items:', currentCartItems);
     
     const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     console.log('[DEBUG] updateCartUI() - Total items:', totalItems);
@@ -554,7 +536,7 @@ function updateCartUI(cartData = null) {
     let totalPrice = 0;
 
     // Generate cart items HTML
-    const cartItemsHTML = cart.map((item, index) => {
+    const cartItemsHTML = cart.map((item) => {
         const itemMRP = Number(item.mrp || item.originalPrice || item.price * 1.2);
         const itemPrice = Number(item.price);
         const itemDiscount = itemMRP - itemPrice;
@@ -563,18 +545,15 @@ function updateCartUI(cartData = null) {
         totalMRP += itemMRP * item.quantity;
         totalPrice += itemPrice * item.quantity;
         
-        // Use the item's ID (should be cartItemId from backend)
         const itemId = item.id || item.cartItemId;
-        console.log(`[DEBUG] updateCartUI() - Generating HTML for item ${index}:`, {
+        console.log(`[DEBUG] updateCartUI() - Generating HTML for item:`, {
             title: item.title,
             itemId: itemId,
-            id: item.id,
-            cartItemId: item.cartItemId,
             quantity: item.quantity
         });
 
         return `
-        <div class="cart-item bg-white border-b p-5 flex gap-4 items-start" data-item-id="${itemId}">
+        <div class="cart-item bg-white border-b p-5 flex gap-4 items-start">
             <div class="flex-shrink-0">
                 <img src="${item.mainImageUrl || 'https://via.placeholder.com/150'}" 
                      alt="${item.title || 'Unknown Product'}" 
@@ -596,7 +575,7 @@ function updateCartUI(cartData = null) {
                         <div class="flex items-center gap-6">
                             <div class="flex items-center border rounded">
                                 <button class="decrease-btn w-8 h-8 hover:bg-gray-100 text-gray-600 font-bold transition" data-item-id="${itemId}">-</button>
-                                <span class="w-12 text-center font-semibold text-gray-800 border-x">${item.quantity}</span>
+                                <span class="quantity-display w-12 text-center font-semibold text-gray-800 border-x">${item.quantity}</span>
                                 <button class="increase-btn w-8 h-8 hover:bg-gray-100 text-gray-600 font-bold transition" data-item-id="${itemId}">+</button>
                             </div>
                         </div>
@@ -645,103 +624,80 @@ function updateCartUI(cartData = null) {
 function attachEventListenersToCart() {
     console.log('[DEBUG] attachEventListenersToCart() - Attaching listeners');
     
-    // Decrease buttons
-    const decreaseButtons = document.querySelectorAll('.decrease-btn');
-    console.log('[DEBUG] attachEventListenersToCart() - Found decrease buttons:', decreaseButtons.length);
+    if (!cartItemsContainer) {
+        console.error('[DEBUG] attachEventListenersToCart() - Container not found');
+        return;
+    }
     
-    decreaseButtons.forEach(button => {
-        // Remove existing listeners
-        const newButton = button.cloneNode(true);
-        button.parentNode.replaceChild(newButton, button);
+    // Use event delegation
+    cartItemsContainer.addEventListener('click', async function(e) {
+        const target = e.target;
+        console.log('[DEBUG] Container click - Target:', target);
         
-        newButton.addEventListener('click', async function(e) {
+        // Handle decrease button
+        if (target.classList.contains('decrease-btn')) {
             e.preventDefault();
-            e.stopPropagation();
-            
-            const itemId = this.getAttribute('data-item-id');
+            const itemId = target.getAttribute('data-item-id');
             console.log('[DEBUG] Decrease button clicked - Item ID:', itemId);
             
-            // Get current quantity from the displayed span
-            const quantitySpan = this.nextElementSibling;
-            if (quantitySpan) {
+            const quantitySpan = target.nextElementSibling;
+            if (quantitySpan && quantitySpan.classList.contains('quantity-display')) {
                 const currentQty = parseInt(quantitySpan.textContent) || 1;
                 const newQty = currentQty - 1;
                 console.log('[DEBUG] Decreasing quantity from', currentQty, 'to', newQty);
                 await updateQuantity(itemId, newQty);
             }
-        });
-    });
-    
-    // Increase buttons
-    const increaseButtons = document.querySelectorAll('.increase-btn');
-    console.log('[DEBUG] attachEventListenersToCart() - Found increase buttons:', increaseButtons.length);
-    
-    increaseButtons.forEach(button => {
-        // Remove existing listeners
-        const newButton = button.cloneNode(true);
-        button.parentNode.replaceChild(newButton, button);
+        }
         
-        newButton.addEventListener('click', async function(e) {
+        // Handle increase button
+        else if (target.classList.contains('increase-btn')) {
             e.preventDefault();
-            e.stopPropagation();
-            
-            const itemId = this.getAttribute('data-item-id');
+            const itemId = target.getAttribute('data-item-id');
             console.log('[DEBUG] Increase button clicked - Item ID:', itemId);
             
-            // Get current quantity from the displayed span
-            const quantitySpan = this.previousElementSibling;
-            if (quantitySpan) {
+            const quantitySpan = target.previousElementSibling;
+            if (quantitySpan && quantitySpan.classList.contains('quantity-display')) {
                 const currentQty = parseInt(quantitySpan.textContent) || 1;
                 const newQty = currentQty + 1;
                 console.log('[DEBUG] Increasing quantity from', currentQty, 'to', newQty);
                 await updateQuantity(itemId, newQty);
             }
-        });
-    });
-    
-    // Delete buttons
-    const deleteButtons = document.querySelectorAll('.delete-btn');
-    console.log('[DEBUG] attachEventListenersToCart() - Found delete buttons:', deleteButtons.length);
-    
-    deleteButtons.forEach(button => {
-        // Remove existing listeners
-        const newButton = button.cloneNode(true);
-        button.parentNode.replaceChild(newButton, button);
+        }
         
-        newButton.addEventListener('click', async function(e) {
+        // Handle delete button
+        else if (target.classList.contains('delete-btn') || target.classList.contains('fa-trash-alt')) {
             e.preventDefault();
-            e.stopPropagation();
-            
-            const itemId = this.getAttribute('data-item-id');
-            console.log('[DEBUG] Delete button clicked - Item ID:', itemId);
-            
-            if (confirm('Remove this item from cart?')) {
-                await removeFromCartById(itemId);
+            const button = target.classList.contains('delete-btn') ? target : target.closest('.delete-btn');
+            if (button) {
+                const itemId = button.getAttribute('data-item-id');
+                console.log('[DEBUG] Delete button clicked - Item ID:', itemId);
+                
+                if (confirm('Remove this item from cart?')) {
+                    await removeFromCartById(itemId);
+                }
             }
-        });
+        }
     });
     
-    console.log('[DEBUG] attachEventListenersToCart() - Event listeners attached');
+    console.log('[DEBUG] Event listeners attached');
 }
 
 // Global functions for backward compatibility
 window.updateQty = async function(index, newQty) {
     console.log('[DEBUG] updateQty() - Deprecated function called');
-    const cart = getLocalCart();
-    if (index >= cart.length) return;
-    
-    const item = cart[index];
-    await updateQuantity(item.id, newQty);
+    if (currentCartItems[index]) {
+        const item = currentCartItems[index];
+        await updateQuantity(item.id, newQty);
+    }
 };
 
 window.removeItem = async function(index) {
     console.log('[DEBUG] removeItem() - Deprecated function called');
     if (confirm('Remove this item from cart?')) {
-        const cart = getLocalCart();
-        if (index >= cart.length) return;
-        
-        const item = cart[index];
-        await removeFromCartById(item.id);
+        if (currentCartItems[index]) {
+            const item = currentCartItems[index];
+            await removeFromCartById(item.id);
+        }
     }
 };
 
@@ -754,7 +710,7 @@ window.proceedToCheckout = function() {
         return;
     }
 
-    if (getLocalCart().length === 0) {
+    if (currentCartItems.length === 0) {
         console.log('[DEBUG] proceedToCheckout() - Cart is empty');
         alert('Your cart is empty!');
         return;
@@ -797,7 +753,6 @@ window.addEventListener('storage', (e) => {
         updateCartCount();
     }
     
-    // Listen for login/logout events
     if (e.key === 'userId' || e.key === 'currentUserId') {
         console.log('[DEBUG] storage event - User ID changed, reloading cart');
         setTimeout(() => {
@@ -817,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Export functions for use in other files
 window.cartFunctions = {
-    getCart: getLocalCart,
+    getCart: () => currentCartItems.length > 0 ? currentCartItems : getLocalCart(),
     addToCart,
     updateQuantity,
     removeFromCart: removeFromCartById,

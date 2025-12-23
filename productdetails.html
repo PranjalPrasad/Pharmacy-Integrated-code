@@ -17,7 +17,8 @@
                         'pharmeasy-red': '#d9363e',
                         'pharmeasy-light-green': '#e8f5e8',
                         'pharmeasy-gray': '#f8f9fa',
-                        'pharmeasy-teal': '#0d924f'
+                        'pharmeasy-teal': '#0d924f',
+                        'pharmeasy-blue': '#3b82f6'
                     }
                 }
             }
@@ -25,7 +26,6 @@
     </script>
   
   <style>
-  /* Hide footer only on mobile & tablet (≤1024px) */
   @media (max-width: 1024px) {
     #footer-placeholder {
       display: none !important;
@@ -40,206 +40,382 @@
     }
 </style>
     <style>
-       
         .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: loading 1.8s infinite; }
         @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        
+        /* Tab Styling */
+        .tab-button {
+            position: relative;
+            padding: 12px 24px;
+            font-weight: 500;
+            color: #6b7280;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: #3b82f6;
+            border-radius: 3px 3px 0 0;
+        }
+        
+        /* Specifications Table Styling */
+        .specs-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .specs-table th {
+            text-align: left;
+            padding: 20px;
+            background-color: #f9fafb;
+            font-weight: 700;
+            color: #111827;
+            border-bottom: 2px solid #e5e7eb;
+            font-size: 1.25rem;
+        }
+
+        .specs-table .section-header {
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 16px 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+                
+        .specs-table td {
+            padding: 16px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: top;
+        }
+
+        .specs-table tr:last-child td {
+            border-bottom: none;
+        }
+                
+        .specs-table .spec-label {
+            font-weight: 600;
+            color: #374151;
+            width: 35%;
+            background-color: #f9fafb;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        .specs-table .spec-value {
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        
+        .specs-table ul {
+            margin: 0;
+            padding-left: 1.25rem;
+        }
+
+        .specs-table li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .specs-table li:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Alternate row colors for better readability */
+        .specs-table tbody tr:nth-child(odd):not(.section-header) {
+            background-color: #ffffff;
+        }
+
+        .specs-table tbody tr:nth-child(even):not(.section-header) {
+            background-color: #f8fafc;
+        }
+        
+        /* Spacing between sections */
+        .specs-table .section-spacer {
+            height: 24px;
+            background-color: transparent;
+        }
+
+        /* Badge styling for status */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .status-in-stock {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .status-out-of-stock {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        /* Date styling */
+        .date-value {
+            font-family: 'Courier New', monospace;
+            background-color: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+        }
+    
+        /* Tab Content Animation */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Benefits list styling */
+        .benefits-list li {
+            transition: all 0.3s ease;
+        }
+        
+        .benefits-list li:hover {
+            transform: translateX(5px);
+        }
+        
+        /* Ingredients list styling */
+        .ingredients-list li {
+            transition: all 0.3s ease;
+        }
+        
+        .ingredients-list li:hover {
+            background-color: #f0f9ff;
+        }
+        
+        /* Directions list styling */
+        .directions-list li {
+            transition: all 0.3s ease;
+        }
+        
+        .directions-list li:hover {
+            background-color: #fff7ed;
+        }
     </style>
 </head>
-<body class="bg-[#F7F1DE] top-0">
+<body class="bg-[#F9F8F6] top-0">
 
     <div id="header-placeholder"></div>
 
     <!-- MAIN CONTAINER -->
-    <div class="max-w-7xl mx-auto bg-[#F7F1DE] px-1 sm:px-4 lg:px-6 pt-20 lg:pt-44 pb-24">
+    <div class="max-w-6xl mx-auto px-1 sm:px-4 lg:px-6 pt-20 mt-8 lg:pt-44 pb-24">
         <div class="flex gap-8">
 
             <!-- LEFT + CENTER: Product Details -->
             <div class="flex-1">
-                <div class="bg-[#F0F0F0] rounded-lg shadow-sm border overflow-hidden">
+                <div class="rounded-lg shadow-sm border overflow-hidden">
                     <div class="flex flex-col lg:flex-row">
 
-                       <!-- Image Section - REDUCED HEIGHT & BETTER PROPORTIONS -->
-<div class="lg:w-10/8 p-2 lg:p-1 lg:mr-12 bg-[#F7F1DE] mb-6">
-    <div class="relative">
-        <!-- Share Button (Bottom-Right) -->
-        <button id="share-btn" 
-                class="absolute bottom-3 right-3 w-11 h-11 bg-white rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all duration-300 border border-gray-300 hover:border-pharmeasy-green group z-10">
-            <i class="fas fa-share-alt text-xl text-gray-600 group-hover:text-pharmeasy-green transition"></i>
-        </button>
+                       <!-- Image Section -->
+                       <div class="lg:w-10/8 p-2 lg:p-1 lg:mr-12 mb-6">
+                            <div class="relative">
+                                <!-- Share Button -->
+                                <button id="share-btn" 
+                                        class="absolute bottom-3 right-3 w-11 h-11 bg-blue-100 rounded-full shadow-lg flex items-center justify-center hover:shadow-xl transition-all duration-300 border border-gray-300 hover:border-pharmeasy-green group z-10">
+                                    <i class="fas fa-share-alt text-xl text-gray-600 group-hover:text-pharmeasy-green transition"></i>
+                                </button>
 
+                                <!-- Main Product Image -->
+                                <img id="main-product-image" 
+                                     src="https://i.pinimg.com/1200x/d3/0f/4c/d30f4c670beb8884b309c0068c11afcf.jpg" 
+                                     alt="Product" 
+                                     class="w-full h-64 lg:h-80 object-contain rounded-lg shadow-sm skeleton">
+                            </div>
 
-       
-
-        <!-- Main Product Image - Reduced Height -->
-        <img id="main-product-image" 
-             src="https://via.placeholder.com/600x600" 
-             alt="Product" 
-             class="w-full h-64 lg:h-80 object-contain rounded-lg shadow-sm skeleton">
-
-        <!-- Visit Store Badge -->
-        <!-- <div class="absolute cursor-pointer top-1 left-3 bg-white px-6 py-1.5 rounded-full shadow-md text-xs lg:text-sm font-semibold text-pharmeasy-green border border-gray-200">
-            <a href="./index.html">
-            Visit GOODNEEWS
-            </a>
-        </div> -->
-    </div>
-
-    <!-- Thumbnails -->
-    <div class="flex gap-3 mt-6 justify-center" id="thumbnail-container">
-        <div class="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-lg skeleton">
-            <img src="" alt="">
-        </div>
-        <div class="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-lg skeleton"></div>
-        <div class="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-lg skeleton"></div>
-    </div>
-</div>
+                            <!-- Thumbnails -->
+                            <div class="flex gap-3 mt-6 justify-center" id="thumbnail-container">
+                                <div class="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-lg skeleton">
+                                    <img src="" alt="">
+                                </div>
+                                <div class="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-lg skeleton"></div>
+                                <div class="w-16 h-16 lg:w-20 lg:h-20 bg-gray-200 rounded-lg skeleton"></div>
+                            </div>
+                        </div>
 
                         <!-- Product Info -->
-                        <div class="lg:w-3/5 p-8 border-t lg:border-t-0 lg:border-l bg-[#F0F0F0]">
-                            <h1 id="product-name" class="text-2xl lg:text-2xl font-bold text-gray-900 leading-snug skeleton h-14 w-35 rounded mt-4">
-                                Loading Product...
-                            </h1>
-                            
-                            <!-- WISHLIST HEART BUTTON (RIGHT SIDE OF TITLE) -->
-                            
-                            <div class="flex items-baseline gap-4 mb-4">
-                                <span id="selling-price" class="text-2xl font-bold text-pharmeasy-green skeleton h-12  rounded">₹0</span>
-                                <span class="text-md text-gray-500 line-through">MRP <span id="mrp-price">₹0</span></span>
-                                <span id="discount-badge" class="bg-pharmeasy-red text-white px-2 py-2 rounded-full text-md font-semibold">55% OFF</span>
+                        <div class="lg:w-3/5 pl-4 mt-1 border-t lg:border-t-0 lg:border-l">
+                            <div class="flex justify-between items-start">
+                                <h1 id="product-name" class="text-2xl lg:text-2xl font-bold text-gray-900leading-snug skeleton h-14 w-35 rounded mt-2">
+                                    Loading Product...
+                                </h1>
+                                <!-- Wishlist Button -->
+                                <button id="wishlist-btn" class="w-12 h-12 bg-white rounded-full shadow-md flex items-center mt-2 justify-center hover:shadow-lg transition">
+                                    <i class="far fa-heart text-2xl text-gray-600"></i>
+                                </button>
                             </div>
                             
+                            <!-- SKU -->
+                            <!-- <div class="mb-4">
+                                <p id="product-sku" class="text-sm text-gray-600 skeleton w-26 h-4 rounded"></p>
+                            </div> -->
+                            
+                            <!-- Rating -->
+                            <!-- <div class="flex items-center mt-2 mb-4" id="product-rating">
+                                <div class="skeleton w-24 h-5 rounded"></div>
+                            </div> -->
 
-                            <!-- <p class="text-sm text-gray-600 mb-6">Inclusive of all taxes</p> -->
+                            <!-- Pricing -->
+                            <div class="flex items-baseline gap-4 mt-2">
+                                <span id="selling-price" class="text-xl font-bold text-pharmeasy-green skeleton h-12 rounded">₹0</span>
+                                <span class="text-sm text-gray-500 line-through hidden">MRP <span id="mrp-price">₹0</span></span>
+                                <span id="discount-badge" class="bg-pharmeasy-red text-white px-2 py-2 rounded-full text-sm font-semibold">55% OFF</span>
+                            </div>
 
-                            <div class="bg-pharmeasy-light-green border border-green-300 rounded-lg p-5 mb-8">
-                                <p class="text-pharmeasy-green font-bold text-md">
+                            <div class="border border-pink-300 rounded-lg p-4 mt-2 mb-2">
+                                <p class="text-green-600 font-bold text-md">
                                     Delivery by <span class="font-bold">Tomorrow, before 10:00 pm</span>
                                 </p>
                                 <p class="text-xs text-gray-600 mt-2">*Offer applicable on order above ₹1000</p>
                             </div>
 
-                            <div class="flex items-center gap-6 mb-8 ">
-                                <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:border-pharmeasy-green">
-                                    <option>Qty 1</option>
-                                    <option>Qty 2</option>
-                                    <option>Qty 3</option>
-                                </select>
-
-                                <button class="flex-1 px-2 bg-pharmeasy-green hover:bg-green-700 text-white font-bold py-2 rounded-lg text-md shadow-lg transition flex items-center justify-center  transition">
-                                    Add
-                                </button>
-                                <button class="px-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 rounded-lg text-md shadow-lg transition">
-                                    Buy Now
-                                </button>
+                            <!-- Quantity Selector -->
+                            <div class="mb-6">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Quantity:</label>
+                                <div class="flex items-center">
+                                    <button id="decrease-qty" class="w-10 h-10 bg-gray-200 rounded-l-lg flex items-center justify-center text-xl hover:bg-gray-300 transition">-</button>
+                                    <input id="quantity-input" type="number" value="1" min="1" max="10" 
+                                           class="w-16 h-10 text-center border-t border-b border-gray-300 focus:outline-none focus:ring-2 focus:ring-pharmeasy-blue">
+                                    <button id="increase-qty" class="w-10 h-10 bg-gray-200 rounded-r-lg flex items-center justify-center text-xl hover:bg-gray-300 transition">+</button>
+                                    <span class="ml-4 text-sm text-gray-600" id="product-unit">Unit</span>
+                                </div>
                             </div>
 
-                            <div class="flex items-center gap-3 text-sm text-gray-600">
-                                <span class="text-pharmeasy-red font-medium">Non Returnable</span>
-                                <a href="#" class="text-pharmeasy-green underline font-medium">Read More</a>
+                            <!-- Action Buttons -->
+                            <div class="flex items-center gap-4 mb-8">
+                                <button id="add-to-cart-btn"
+                                    class="flex-1 px-2 bg-[#295F98] hover:bg-[#5C7285] text-white font-bold py-3 rounded-lg text-md shadow-lg transition flex items-center justify-center transition">
+                                    <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
+                                </button>
+                                <button id="buy-now-btn" class="px-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg text-md shadow-lg transition">
+                                    <i class="fas fa-bolt mr-2"></i> Buy Now
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                
-               <!-- Frequently Bought Together Section -->
-<div class="mt-8">
-  <h3 class="text-2xl font-bold mb-4">Frequently Bought Together</h3>
-  <div id="frequently-bought-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-    <!-- Products will be inserted here by JavaScript -->
-  </div>
-</div>
-            </div>
+                <!-- Tabs Section -->
+                <div class="mt-8 rounded-xl shadow-sm border overflow-hidden">
+                    <!-- Tab Headers -->
+                    <div class="border-b border-gray-200">
+                        <div class="flex space-x-8 px-6">
+                            <button class="tab-button active" data-tab="specifications">
+                                Product Details
+                            </button>
+                            <button class="tab-button" data-tab="benefits">
+                                Benefits
+                            </button>
+                            <button class="tab-button" data-tab="ingredients">
+                                Ingredients
+                            </button>
+                            <button class="tab-button" data-tab="directions">
+                                Directions for Use
+                            </button>
+                        </div>
+                    </div>
 
-            
-            <!-- RIGHT-MOST CART PANEL – LIVE CART COUNT -->
-<div class="hidden lg:block w-96 ">
-    <div class="top-0 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden mt-4">
-       
-        <!-- DYNAMIC CART HEADER -->
-<div class=" text-white py-2 text-center">
-    <h3 class="text-lg font-bold text-gray-500 mt-3" id="cart-item-count-display">
-        <span id="cart-items-number">0</span> Item<span id="cart-items-text">s</span> in Cart
-    </h3>
-</div>
+                    <!-- Tab Contents -->
+                    <div class="p-6">
+                        <!-- Product Details Tab -->
+                        <div id="specifications-content" class="tab-content active">
+                            <table class="specs-table">
+                                <tbody id="specifications-table-body">
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
 
-        <div class="p-4">
-            
+                        <!-- Benefits Tab -->
+                        <div id="benefits-content" class="tab-content">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
 
-            
+                        <!-- Ingredients Tab -->
+                        <div id="ingredients-content" class="tab-content">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
 
-            <button onclick="window.location.href='cart.html'" 
-                    class="w-full mt-2 bg-pharmeasy-green hover:bg-green-700 text-white font-bold py-1 rounded-lg text-xl shadow-lg transition">
-                View Cart
-            </button>
-
-            
-        </div>
-    </div>
-
-    <!-- Offers Section -->
-    <div class="mt-4 top-0 bg-white rounded-xl shadow-lg border p-4">
-        <h3 class="font-bold text-lg mb-4 text-pharmeasy-green">Offers Just for you</h3>
-        <div class="space-y-4">
-            <div class="flex items-center justify-between bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <div class="bg-orange-500 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl">27%</div>
-                <div class="ml-4 flex-1">
-                    <p class="font-semibold text-sm">Get 27% off on medicine with Everherb's Karela Jamun Juice</p>
+                        <!-- Directions Tab -->
+                        <div id="directions-content" class="tab-content">
+                            <!-- Will be populated by JavaScript -->
+                        </div>
+                    </div>
                 </div>
-                <span class="text-pharmeasy-green text-2xl font-bold">></span>
-            </div>
-            <div class="flex items-center justify-between bg-green-50 border border-green-200 rounded-lg p-4">
-                <div class="bg-green-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl">10%</div>
-                <div class="ml-4 flex-1">
-                    <p class="font-semibold text-sm">Get extra 12% off on Everherb, Liveasy or PharmEasy products</p>
+
+               <!-- Related Products Section -->
+                <div class="mt-8">
+                    <h3 class="text-2xl font-bold mb-4">Related Products</h3>
+                    <div id="related-products-container" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <!-- Related products will be inserted here by JavaScript -->
+                    </div>
                 </div>
-                <span class="text-pharmeasy-green text-2xl font-bold">></span>
             </div>
         </div>
-        <a href="#" class="block text-center mt-4 text-pharmeasy-green font-medium hover:underline">View All</a>
-    </div>
-</div>
-        </div>
     </div>
 
+     <!-- Share Overlay -->
+    <div id="share-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center" onclick="this.classList.add('hidden')">
+        <div class="bg-gray-200 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between mb-5">
+                <h3 class="text-xl font-bold text-gray-800">Share this product</h3>
+                <button onclick="document.getElementById('share-overlay').classList.add('hidden')" class="text-gray-500 hover:text-gray-800">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
 
+            <div class="grid grid-cols-3 gap-4 text-center">
+                <!-- WhatsApp -->
+                <button onclick="shareViaWhatsApp()" class="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition">
+                    <i class="fab fa-whatsapp text-4xl text-green-500 mb-2"></i>
+                    <span class="text-sm font-medium">WhatsApp</span>
+                </button>
 
-     <!-- share overlay -->
+                <!-- Email -->
+                <button onclick="shareViaEmail()" class="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition">
+                    <i class="fas fa-envelope text-4xl text-blue-600 mb-2"></i>
+                    <span class="text-sm font-medium">Email</span>
+                </button>
 
-        <div id="share-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center" onclick="this.classList.add('hidden')">
-    <div class="bg-gray-200 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4 animate-in fade-in zoom-in duration-200" onclick="event.stopPropagation()">
-        <div class="flex items-center justify-between mb-5">
-            <h3 class="text-xl font-bold text-gray-800">Share this product</h3>
-            <button onclick="document.getElementById('share-overlay').classList.add('hidden')" class="text-gray-500 hover:text-gray-800">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
-        </div>
+                <!-- Copy Link -->
+                <button onclick="copyLink()" class="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition">
+                    <i class="fas fa-link text-4xl text-gray-700 mb-2"></i>
+                    <span class="text-sm font-medium">Copy Link</span>
+                </button>
+            </div>
 
-        <div class="grid grid-cols-3 gap-4 text-center">
-            <!-- WhatsApp -->
-            <button onclick="shareViaWhatsApp()" class="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition">
-                <i class="fab fa-whatsapp text-4xl text-green-500 mb-2"></i>
-                <span class="text-sm font-medium">WhatsApp</span>
-            </button>
-
-            <!-- Email -->
-            <button onclick="shareViaEmail()" class="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition">
-                <i class="fas fa-envelope text-4xl text-blue-600 mb-2"></i>
-                <span class="text-sm font-medium">Email</span>
-            </button>
-
-            <!-- Copy Link -->
-            <button onclick="copyLink()" class="flex flex-col items-center p-4 rounded-xl hover:bg-gray-50 transition">
-                <i class="fas fa-link text-4xl text-gray-700 mb-2"></i>
-                <span class="text-sm font-medium">Copy Link</span>
-            </button>
-        </div>
-
-        <div class="mt-5 text-center">
-            <span id="copy-feedback" class="text-green-600 font-medium text-sm hidden">Link copied!</span>
+            <div class="mt-5 text-center">
+                <span id="copy-feedback" class="text-green-600 font-medium text-sm hidden">Link copied!</span>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Footer Placeholder -->
     <div id="footer-placeholder"></div>
@@ -270,64 +446,62 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadHeader();
         loadFooter();
-        // ... rest of your code
     });
-</script>
+    </script>
 
-<script>
-    // Open overlay when share button is clicked
-   document.getElementById('share-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        document.getElementById('share-overlay').classList.remove('hidden');
-    });
-
-    // Close when clicking outside
-    document.getElementById('share-overlay').addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) {
-            e.currentTarget.classList.add('hidden');
-        }
-    });
-
-    // Share via WhatsApp
-    function shareViaWhatsApp() {
-        const productName = document.getElementById('product-name').textContent.trim();
-        const price = document.getElementById('selling-price').textContent.trim();
-        const url = window.location.href;
-
-        const message = `*${productName}*\n${price}\n\nCheck out this amazing deal!\n🔗 ${url}\n\nShared via GOODNEEWS`;
-
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
-    }
-
-    // Share via Email
-    function shareViaEmail() {
-        const productName = document.getElementById('product-name').textContent.trim();
-        const price = document.getElementById('selling-price').textContent.trim();
-        const url = window.location.href;
-
-        const subject = `${productName} - Only ${price} on GOODNEEWS!`;
-        const body = `Hi there,\n\nI found this great product for you:\n\n` +
-                     `Product: ${productName}\n` +
-                     `Price: ${price}\n\n` +
-                     `View it here: ${url}\n\n` +
-                     `Shared via GOODNEEWS`;
-
-        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    }
-
-    // Copy link to clipboard
-    function copyLink() {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-            const feedback = document.getElementById('copy-feedback');
-            feedback.classList.remove('hidden');
-            setTimeout(() => feedback.classList.add('hidden'), 2000);
+    <script>
+        // Open overlay when share button is clicked
+        document.getElementById('share-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('share-overlay').classList.remove('hidden');
         });
-    }
-</script>
 
+        // Close when clicking outside
+        document.getElementById('share-overlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                e.currentTarget.classList.add('hidden');
+            }
+        });
 
-<script src="../cart-wishlist-system.js" defer></script>
+        // Share via WhatsApp
+        function shareViaWhatsApp() {
+            const productName = document.getElementById('product-name').textContent.trim();
+            const price = document.getElementById('selling-price').textContent.trim();
+            const url = window.location.href;
+
+            const message = `*${productName}*\n${price}\n\nCheck out this amazing deal!\n🔗 ${url}\n\nShared via GOODNEEWS`;
+
+            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Share via Email
+        function shareViaEmail() {
+            const productName = document.getElementById('product-name').textContent.trim();
+            const price = document.getElementById('selling-price').textContent.trim();
+            const url = window.location.href;
+
+            const subject = `${productName} - Only ${price} on GOODNEEWS!`;
+            const body = `Hi there,\n\nI found this great product for you:\n\n` +
+                         `Product: ${productName}\n` +
+                         `Price: ${price}\n\n` +
+                         `View it here: ${url}\n\n` +
+                         `Shared via GOODNEEWS`;
+
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
+        // Copy link to clipboard
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const feedback = document.getElementById('copy-feedback');
+                feedback.classList.remove('hidden');
+                setTimeout(() => feedback.classList.add('hidden'), 2000);
+            });
+        }
+    </script>
+
+    <script src="../cart-wishlist-system.js" defer></script>
     <script src="./productdetails.js"></script>
 </body>
 </html>

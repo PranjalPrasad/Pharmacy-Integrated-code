@@ -1,229 +1,1347 @@
-// wellness.js – All Categories with Full 10+ Dummy Products
+// ==================== wellness.js – WELLNESS ESSENTIALS PAGE ====================
 
-const WELLNESS_DATA = {
-  "vitamins-supplements": {
-    title: "Vitamins and Supplements",
-    count: 12,
-    products: [
-      { id: 101, title: "Vitamin C 1000mg Effervescent", price: 399, image: "https://via.placeholder.com/400x400/10B981/white?text=Vitamin+C" },
-      { id: 102, title: "Vitamin D3 60,000 IU", price: 449, image: "https://via.placeholder.com/400x400/F59E0B/white?text=Vitamin+D3" },
-      { id: 103, title: "Multivitamin for Men", price: 599, image: "https://via.placeholder.com/400x400/3B82F6/white?text=Men+Multi" },
-      
-      { id: 104, title: "Omega-3 Fish Oil 1000mg", price: 749, image: "https://via.placeholder.com/400x400/8B5CF6/white?text=Omega-3" },
-      { id: 105, title: "Biotin 10,000mcg for Hair", price: 499, image: "https://via.placeholder.com/400x400/EC4899/white?text=Biotin" },
-      { id: 106, title: "Calcium + Vitamin D3", price: 379, image: "https://via.placeholder.com/400x400/6B7280/white?text=Calcium" },
-      { id: 107, title: "Zinc + Vitamin C", price: 299, image: "https://via.placeholder.com/400x400/E11D48/white?text=Zinc+C" },
-      { id: 108, title: "Magnesium Glycinate", price: 699, image: "https://via.placeholder.com/400x400/7C3AED/white?text=Magnesium" },
-      { id: 109, title: "Iron + Folic Acid", price: 249, image: "https://via.placeholder.com/400x400/F43F5E/white?text=Iron" },
-      { id: 110, title: "Probiotics 50 Billion CFU", price: 899, image: "https://via.placeholder.com/400x400/14B8A6/white?text=Probiotics" },
-      { id: 111, title: "Ashwagandha 500mg", price: 459, image: "https://via.placeholder.com/400x400/92400E/white?text=Ashwagandha" },
-      { id: 112, title: "Collagen Peptides Powder", price: 1299, image: "https://via.placeholder.com/400x400/FBBF24/white?text=Collagen" },
-    ]
+// Base API URL - Update this to your backend URL
+const API_BASE_URL = 'http://localhost:8083/api/products';
+const DEBUG_MODE = true;
+
+// ==================== WELLNESS CATEGORIES ====================
+const WELLNESS_CATEGORIES = [
+  { 
+    id: 'all', 
+    name: 'All Wellness Products', 
+    backendSubcategories: [] 
   },
-
-  "hair-skin-care": {
-    title: "Hair & Skin Care",
-    count: 15,
-    products: [
-      { id: 201, title: "Anti Hair Fall Shampoo 300ml", price: 399, image: "https://placehold.co/400x400/3B82F6/white?text=Shampoo" },
-      { id: 202, title: "Onion Hair Oil 200ml", price: 499, image: "https://placehold.co/400x400/7C2D12/white?text=Onion+Oil" },
-      { id: 203, title: "Vitamin C Glow Face Serum", price: 899, image: "https://placehold.co/400x400/EC4899/white?text=Face+Serum" },
-      { id: 204, title: "Hyaluronic Acid Moisturizer", price: 649, image: "https://placehold.co/400x400/06B6D4/white?text=Hyaluronic" },
-      { id: 205, title: "Retinol Night Cream", price: 799, image: "https://placehold.co/400x400/7C3AED/white?text=Retinol" },
-      { id: 206, title: "Aloe Vera Gel 99% Pure", price: 249, image: "https://placehold.co/400x400/22C55E/white?text=Aloe+Vera" },
-      { id: 207, title: "Hair Growth Serum", price: 1199, image: "https://placehold.co/400x400/1E293B/white?text=Growth+Serum" },
-      { id: 208, title: "Sunscreen SPF 50 PA++++", price: 549, image: "https://placehold.co/400x400/F59E0B/white?text=SPF+50" },
-    ]
+  { 
+    id: 'vitamins', 
+    name: 'Vitamins & Supplements', 
+    backendSubcategories: [
+      'Vitamin', 
+      'Supplement', 
+      'Multivitamin',
+      'Vitamin C',
+      'Vitamin D',
+      'Omega-3',
+      'Fish Oil',
+      'Calcium',
+      'Iron',
+      'Probiotic',
+      'Nutritional Supplement'
+    ] 
   },
-
-  "oral-care": {
-    title: "Oral Care",
-    count: 12,
-    products: [
-      { id: 301, title: "Herbal Toothpaste 150g", price: 119, image: "https://via.placeholder.com/400x400/16A34A/white?text=Toothpaste" },
-      { id: 302, title: "Sensitive Toothpaste", price: 149, image: "https://via.placeholder.com/400x400/60A5FA/white?text=Sensitive" },
-      { id: 303, title: "Charcoal Toothbrush (Pack of 4)", price: 199, image: "https://via.placeholder.com/400x400/1F2937/white?text=Brush" },
-      { id: 304, title: "Mouthwash Alcohol Free 500ml", price: 249, image: "https://via.placeholder.com/400x400/3B82F6/white?text=Mouthwash" },
-      { id: 305, title: "Teeth Whitening Powder", price: 399, image: "https://via.placeholder.com/400x400/FBBF24/white?text=Whitening" },
-      { id: 306, title: "Tongue Cleaner (Copper)", price: 149, image: "https://via.placeholder.com/400x400/F97316/white?text=Tongue+Cleaner" },
-      { id: 307, title: "Kids Strawberry Toothpaste", price: 89, image: "https://via.placeholder.com/400x400/EC4899/white?text=Kids+Paste" },
-      { id: 308, title: "Dental Floss 50m", price: 99, image: "https://via.placeholder.com/400x400/64748B/white?text=Floss" },
-    ]
+  { 
+    id: 'hairskin', 
+    name: 'Hair & Skin Care', 
+    backendSubcategories: [
+      'Hair Care',
+      'Skin Care',
+      'Hair Oil',
+      'Shampoo',
+      'Conditioner',
+      'Face Cream',
+      'Serum',
+      'Moisturizer',
+      'Sunscreen',
+      'Face Wash',
+      'Beauty',
+      'Cosmetic',
+      'Anti-aging'
+    ] 
   },
-
-  "menstrual-care": {
-    title: "Menstrual Care",
-    count: 14,
-    products: [
-      { id: 401, title: "Ultra Thin Sanitary Pads XL (40 pads)", price: 299, image: "https://via.placeholder.com/400x400/EC4899/white?text=Pads+XL" },
-      { id: 402, title: "Organic Cotton Tampons (32 pcs)", price: 399, image: "https://via.placeholder.com/400x400/F472B6/white?text=Tampons" },
-      { id: 403, title: "Reusable Menstrual Cup (Large)", price: 499, image: "https://via.placeholder.com/400x400/DB2777/white?text=Menstrual+Cup" },
-      { id: 404, title: "Period Pain Relief Patches (5 pcs)", price: 349, image: "https://via.placeholder.com/400x400/F97316/white?text=Pain+Patch" },
-      { id: 405, title: "Pantyliners Daily Use (60 pcs)", price: 199, image: "https://via.placeholder.com/400x400/FDA4AF/white?text=Pantyliners" },
-      { id: 406, title: "Cramps Relief Herbal Tea", price: 249, image: "https://via.placeholder.com/400x400/16A34A/white?text=Herbal+Tea" },
-      { id: 407, title: "Period Cramp Roll-On Oil", price: 299, image: "https://via.placeholder.com/400x400/7C3AED/white?text=Roll-On" },
-    ]
+  { 
+    id: 'fitness', 
+    name: 'Fitness & Weight Management', 
+    backendSubcategories: [
+      'Fitness',
+      'Weight',
+      'Protein',
+      'Whey',
+      'Weight Loss',
+      'Weight Gain',
+      'Fitness Supplement',
+      'Sports Nutrition',
+      'Energy',
+      'Workout',
+      'Muscle',
+      'Exercise'
+    ] 
   },
-
-  "fitness-weight": {
-    title: "Fitness & Weight Management",
-    count: 15,
-    products: [
-      { id: 501, title: "Whey Protein Isolate 1kg (Chocolate)", price: 2199, image: "https://via.placeholder.com/400x400/7C2D12/white?text=Whey+Protein" },
-      { id: 502, title: "Mass Gainer 3kg (Vanilla)", price: 2499, image: "https://via.placeholder.com/400x400/FBBF24/white?text=Mass+Gainer" },
-      { id: 503, title: "L-Carnitine Fat Burner", price: 899, image: "https://via.placeholder.com/400x400/E11D48/white?text=L-Carnitine" },
-      { id: 504, title: "BCAA 2:1:1 Powder (Cola)", price: 1299, image: "https://via.placeholder.com/400x400/1F2937/white?text=BCAA" },
-      { id: 505, title: "Green Coffee Bean Extract", price: 599, image: "https://via.placeholder.com/400x400/16A34A/white?text=Green+Coffee" },
-      { id: 506, title: "Protein Bars (Pack of 12)", price: 899, image: "https://via.placeholder.com/400x400/92400E/white?text=Protein+Bar" },
-      { id: 507, title: "Creatine Monohydrate 300g", price: 799, image: "https://via.placeholder.com/400x400/64748B/white?text=Creatine" },
-    ]
+  { 
+    id: 'immunity', 
+    name: 'Immunity Boosters', 
+    backendSubcategories: [
+      'Immunity',
+      'Immune',
+      'Chyawanprash',
+      'Giloy',
+      'Tulsi',
+      'Ashwagandha',
+      'Amritarishta',
+      'Ayurvedic Immunity',
+      'Herbal Immunity',
+      'Wellness Drink'
+    ] 
   },
-
-  "senior-care": {
-    title: "Senior Care",
-    count: 12,
-    products: [
-      { id: 601, title: "Adult Diapers Large (10 pcs)", price: 599, image: "https://via.placeholder.com/400x400/6B7280/white?text=Adult+Diapers" },
-      { id: 602, title: "Foldable Walking Stick", price: 899, image: "https://via.placeholder.com/400x400/92400E/white?text=Walking+Stick" },
-      { id: 603, title: "Joint Pain Relief Spray", price: 349, image: "https://via.placeholder.com/400x400/F97316/white?text=Joint+Spray" },
-      { id: 604, title: "Digital BP Monitor", price: 1799, image: "https://via.placeholder.com/400x400/1E293B/white?text=BP+Monitor" },
-      { id: 605, title: "Glucose Test Strips (50)", price: 799, image: "https://via.placeholder.com/400x400/E11D48/white?text=Glucose+Strips" },
-      { id: 606, title: "Memory Booster Capsules", price: 649, image: "https://via.placeholder.com/400x400/7C3AED/white?text=Memory" },
-      { id: 607, title: "Back Support Belt", price: 549, image: "https://via.placeholder.com/400x400/475569/white?text=Back+Belt" },
-    ]
+  { 
+    id: 'senior', 
+    name: 'Senior Care Products', 
+    backendSubcategories: [
+      'Senior Care',
+      'Elderly',
+      'Adult Diaper',
+      'BP Monitor',
+      'Glucose Monitor',
+      'Walking Aid',
+      'Joint Care',
+      'Bone Health',
+      'Memory',
+      'Geriatric'
+    ] 
   },
+  { 
+    id: 'oral', 
+    name: 'Oral Care Essentials', 
+    backendSubcategories: [
+      'Oral Care',
+      'Toothpaste',
+      'Toothbrush',
+      'Mouthwash',
+      'Dental',
+      'Oral Hygiene',
+      'Mouth Freshener',
+      'Tooth Powder',
+      'Dental Care'
+    ] 
+  },
+  { 
+    id: 'menstrual', 
+    name: 'Menstrual Care Products', 
+    backendSubcategories: [
+      'Menstrual',
+      'Sanitary',
+      'Pad',
+      'Tampon',
+      'Menstrual Cup',
+      'Period',
+      'Feminine Hygiene',
+      'Intimate Care',
+      'Women Care'
+    ] 
+  }
+];
 
-  "immunity-booster": {
-    title: "Immunity Booster",
-    count: 16,
-    products: [
-      { id: 701, title: "Chyawanprash 1kg", price: 399, image: "https://via.placeholder.com/400x400/92400E/white?text=Chyawanprash" },
-      { id: 702, title: "Giloy Tulsi Juice 1L", price: 299, image: "https://via.placeholder.com/400x400/16A34A/white?text=Giloy+Juice" },
-      { id: 703, title: "Vitamin C + Zinc Chewable", price: 249, image: "https://via.placeholder.com/400x400/F97316/white?text=Vitamin+C+Zinc" },
-      { id: 704, title: "Turmeric Milk Mix", price: 279, image: "https://via.placeholder.com/400x400/F59E0B/white?text=Turmeric+Milk" },
-      { id: 705, title: "Amla Candy 500g", price: 199, image: "https://via.placeholder.com/400x400/22C55E/white?text=Amla+Candy" },
-      { id: 706, title: "Kadha Mix (Immunity)", price: 179, image: "https://via.placeholder.com/400x400/7C2D12/white?text=Kadha" },
-      { id: 707, title: "Shilajit Resin 20g", price: 999, image: "https://via.placeholder.com/400x400/1F2937/white?text=Shilajit" },
-      { id: 708, title: "Herbal Immunity Tea", price: 229, image: "https://via.placeholder.com/400x400/14B8A6/white?text=Immunity+Tea" },
-    ]
+// Category Display Names
+const categoryNames = {
+  'all': {
+    title: 'All Wellness Products',
+    pageTitle: 'Wellness Essentials',
+    description: 'Complete range of health and wellness products'
+  },
+  'vitamins': {
+    title: 'Vitamins & Supplements',
+    pageTitle: 'Vitamins & Supplements',
+    description: 'Essential vitamins and supplements for daily health'
+  },
+  'hairskin': {
+    title: 'Hair & Skin Care',
+    pageTitle: 'Hair & Skin Care Essentials',
+    description: 'Natural products for beautiful hair and glowing skin'
+  },
+  'fitness': {
+    title: 'Fitness & Weight Management',
+    pageTitle: 'Fitness & Weight Products',
+    description: 'Supplements and gear for your fitness journey'
+  },
+  'immunity': {
+    title: 'Immunity Boosters',
+    pageTitle: 'Immunity Boosters',
+    description: 'Strengthen your natural defenses'
+  },
+  'senior': {
+    title: 'Senior Care Products',
+    pageTitle: 'Senior Care Essentials',
+    description: 'Specialized products for elderly wellness'
+  },
+  'oral': {
+    title: 'Oral Care Essentials',
+    pageTitle: 'Oral Care Products',
+    description: 'For a healthy and bright smile'
+  },
+  'menstrual': {
+    title: 'Menstrual Care Products',
+    pageTitle: 'Menstrual Care Essentials',
+    description: 'Comfort and care during menstrual cycle'
   }
 };
 
-let currentSub = "vitamins-supplements";
+// ==================== GLOBAL VARIABLES ====================
+let allProducts = [];
+let filteredProducts = [];
+let wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+let currentPage = 1;
+const pageSize = 12;
 
+// Persistent Filter State
+let filterState = {
+  category: 'all',
+  brand: 'all',
+  discount: 0,
+  minPrice: 0,
+  maxPrice: 5000,
+  sort: 'default'
+};
 
-// Price Slider
-function initPriceSlider() {
-  const min = document.getElementById('minThumb');
-  const max = document.getElementById('maxThumb');
-  const fill = document.getElementById('desktopFill');
-
-  const update = () => {
-    let mn = parseInt(min.value), mx = parseInt(max.value);
-    if (mn > mx) [mn, mx] = [mx, mn];
-    fill.style.left = (mn / 10000) * 100 + '%';
-    fill.style.width = ((mx - mn) / 10000) * 100 + '%';
-    document.getElementById('minValue').textContent = '₹' + mn.toLocaleString('en-IN');
-    document.getElementById('maxValue').textContent = '₹' + mx.toLocaleString('en-IN');
-  };
-  min.oninput = max.oninput = update;
-  update();
+// ==================== HELPER FUNCTIONS ====================
+function debugLog(...args) {
+  if (DEBUG_MODE) {
+    console.log('[WELLNESS DEBUG]', ...args);
+  }
 }
 
-function renderProducts(key = currentSub) {
-  const data = WELLNESS_DATA[key] || WELLNESS_DATA["vitamins-supplements"];
-  currentSub = key;
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
 
-  document.getElementById("categoryTitle").textContent = data.title;
-  document.getElementById("resultsCount").textContent = `Showing ${data.products.length} products`;
+function showToast(msg, type = "success") {
+  // Remove existing toast
+  const existing = document.querySelector('.custom-toast');
+  if (existing) existing.remove();
+  
+  const toast = document.createElement("div");
+  toast.className = `custom-toast fixed bottom-20 left-1/2 -translate-x-1/2 ${type === 'success' ? 'bg-green-500' : 'bg-blue-500'} text-white px-6 py-3 rounded-full z-50 shadow-lg`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
 
-  const grid = document.getElementById("productsGrid");
-  grid.innerHTML = data.products.map(p => `
-    <div onclick="goToProduct(${p.id})" 
-         class="product-card group cursor-pointer relative">
-      
-      <!-- Full card clickable ho gaya -->
-      <div class="relative overflow-hidden rounded-t-lg bg-gray-100">
-        <img loading="lazy" 
-             src="${p.image}" 
-             alt="${p.title}" 
-             class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105">
-      </div>
-      
-      <div class="p-5">
-        <h3 class="text-lg font-semibold text-gray-900 line-clamp-2">${p.title}</h3>
-        <div class="mt-4">
-          <span class="text-2xl font-bold text-pink-600">₹${p.price}</span>
+// ==================== PRODUCT FETCHING FROM BACKEND ====================
+async function fetchProducts() {
+  try {
+    debugLog('Fetching wellness products from backend...');
+    setText("resultsCount", "Loading products...");
+    
+    // Show loading state
+    const grid = document.getElementById("productsGrid");
+    if (grid) {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-16">
+          <div class="loading-spinner mx-auto"></div>
+          <p class="text-gray-500 mt-4">Loading wellness products from database...</p>
         </div>
+      `;
+    }
+    
+    allProducts = [];
+    filteredProducts = [];
+    
+    // Fetch ALL products from backend
+    const url = `${API_BASE_URL}/get-all-products?page=0&size=200`;
+    
+    debugLog('Fetching from URL:', url);
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    debugLog('Response status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    processProducts(data);
+    
+  } catch (error) {
+    console.error('Error in fetchProducts:', error);
+    showToast('Error loading products. Please check console for details.', 'error');
+    setText("resultsCount", "Failed to load products");
+    
+    // Show error state
+    const grid = document.getElementById("productsGrid");
+    if (grid) {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-10">
+          <div class="text-gray-400 mb-4">
+            <i class="fas fa-exclamation-triangle text-5xl"></i>
+          </div>
+          <p class="text-gray-500 mb-2">Failed to load products</p>
+          <p class="text-gray-400 text-sm">Error: ${error.message}</p>
+          <button onclick="fetchProducts()" class="mt-4 px-4 py-2 bg-[#36C2CE] text-white rounded-lg">
+            Retry
+          </button>
+        </div>
+      `;
+    }
+  }
+}
+
+function processProducts(data) {
+  debugLog('API Response data:', data);
+  
+  let productsArray = [];
+  
+  // Handle different response formats
+  if (Array.isArray(data)) {
+    productsArray = data;
+  } else if (data.content && Array.isArray(data.content)) {
+    productsArray = data.content;
+  } else if (data.products && Array.isArray(data.products)) {
+    productsArray = data.products;
+  } else if (typeof data === 'object' && data !== null) {
+    productsArray = [data];
+  }
+  
+  debugLog('Total products from API:', productsArray.length);
+  
+  const allTransformedProducts = transformBackendProducts(productsArray);
+  
+  // DEBUG: Check each product
+  debugLog('=== CHECKING WELLNESS PRODUCT SUB CATEGORIES ===');
+  allTransformedProducts.forEach(product => {
+    debugLog(`Product: "${product.title}" - Subcategory: "${product.subcategory}"`);
+  });
+  
+  const allSubcategories = [...new Set(allTransformedProducts.map(p => p.subcategory))];
+  debugLog('All subcategories in DB:', allSubcategories);
+  
+  // FILTER: Only keep products that match our Wellness categories
+  allProducts = allTransformedProducts.filter(product => {
+    const productSubcategory = product.subcategory || '';
+    
+    const isWellnessProduct = WELLNESS_CATEGORIES.some(category => {
+      if (category.id === 'all') return false;
+      
+      return category.backendSubcategories.some(backendSubcat => {
+        const productSubLower = productSubcategory.toLowerCase();
+        const backendSubLower = backendSubcat.toLowerCase();
         
-     
-        <div class="mt-5 w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-3 rounded-lg font-medium transition">
-          View Details
+        return productSubLower === backendSubLower || 
+               productSubLower.includes(backendSubLower) || 
+               backendSubLower.includes(productSubLower);
+      });
+    });
+    
+    if (!isWellnessProduct) {
+      debugLog(`Filtered out (non-Wellness): ${product.title} - ${product.subcategory}`);
+    }
+    
+    return isWellnessProduct;
+  });
+  
+  debugLog('Wellness products after filtering:', allProducts.length);
+  debugLog('Wellness product subcategories:', [...new Set(allProducts.map(p => p.subcategory))]);
+  
+  applyFilters();
+  updateUIWithProducts();
+}
+
+function transformBackendProducts(backendProducts) {
+  if (!Array.isArray(backendProducts) || backendProducts.length === 0) {
+    return [];
+  }
+  
+  debugLog('Transforming', backendProducts.length, 'products');
+  
+  return backendProducts.map((product, index) => {
+    try {
+      // Extract basic fields from backend
+      const id = product.productId || product.id || index + 1;
+      const title = product.productName || product.name || 'Wellness Product';
+      const price = Number(product.productPrice || product.price || 100);
+      const originalPrice = Number(product.productOldPrice || product.originalPrice || product.mrp || price * 1.2);
+      const discount = originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+      
+      // Get subcategory - this is critical for filtering
+      const subcategory = product.productSubCategory || 'Unknown';
+      
+      // Get brand
+      const brand = product.brandName || product.brand || product.manufacturer || 'Generic';
+      
+      const description = product.productDescription || product.description || 'No description available';
+      const stockQuantity = product.productQuantity || product.stockQuantity || product.quantity || 0;
+      const inStock = product.productStock === 'In-Stock' || stockQuantity > 0;
+      
+      // Get image URL
+      let imageUrl = 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop';
+      
+      if (product.productMainImage) {
+        // Check if it's a path starting with /api/
+        if (product.productMainImage.startsWith('/api/')) {
+          // It's a relative path, make it absolute
+          imageUrl = `http://localhost:8083${product.productMainImage}`;
+        } 
+        // Check if it's base64
+        else if (product.productMainImage.startsWith('data:image')) {
+          imageUrl = product.productMainImage;
+        }
+        // Check if it's a URL
+        else if (product.productMainImage.startsWith('http')) {
+          imageUrl = product.productMainImage;
+        }
+        // Otherwise assume it's base64
+        else {
+          imageUrl = `data:image/jpeg;base64,${product.productMainImage}`;
+        }
+      } else if (product.productId) {
+        imageUrl = `${API_BASE_URL}/${product.productId}/image`;
+      }
+      
+      // Generate SKU if not available
+      const sku = product.sku || `W${String(id).padStart(4, '0')}`;
+      
+      // Map backend category to our wellness categories
+      let category = 'all';
+      const productSubLower = subcategory.toLowerCase();
+      
+      // Determine which wellness category this product belongs to
+      for (const wellnessCat of WELLNESS_CATEGORIES) {
+        if (wellnessCat.id === 'all') continue;
+        
+        if (wellnessCat.backendSubcategories.some(backendSubcat => {
+          const backendSubLower = backendSubcat.toLowerCase();
+          return productSubLower.includes(backendSubLower) || backendSubLower.includes(productSubLower);
+        })) {
+          category = wellnessCat.id;
+          break;
+        }
+      }
+      
+      return {
+        id: id,
+        title: title,
+        price: price,
+        originalPrice: originalPrice,
+        discount: discount,
+        rating: product.rating || product.productRating || 4.0,
+        reviewCount: product.reviewCount || product.totalReviews || Math.floor(Math.random() * 1000),
+        subcategory: subcategory,
+        category: category,
+        brand: brand,
+        image: imageUrl,
+        description: description,
+        inStock: inStock,
+        stockQuantity: stockQuantity,
+        sku: sku
+      };
+    } catch (error) {
+      console.error('Error transforming product:', product, error);
+      return null;
+    }
+  }).filter(product => product !== null);
+}
+
+// ==================== FILTERING ====================
+function applyFilters() {
+  debugLog('Applying filters with', allProducts.length, 'products');
+  debugLog('Current filter state:', filterState);
+  
+  // Sync the UI with current filter state
+  syncFilterStates();
+  
+  filteredProducts = allProducts.filter(p => {
+    // Category filter - MOST IMPORTANT
+    let categoryMatch = false;
+    
+    if (filterState.category === 'all') {
+      categoryMatch = true;
+    } else {
+      const selectedCategory = WELLNESS_CATEGORIES.find(cat => cat.id === filterState.category);
+      if (!selectedCategory || selectedCategory.id === 'all') {
+        categoryMatch = true;
+      } else {
+        const productSubcategory = (p.subcategory || '').toLowerCase().trim();
+        
+        // Check if product matches any backend subcategory for this Wellness category
+        categoryMatch = selectedCategory.backendSubcategories.some(backendSubcat => {
+          const backendSubLower = backendSubcat.toLowerCase().trim();
+          
+          // DEBUG: Log what's being compared
+          if (DEBUG_MODE) {
+            debugLog(`Comparing: "${productSubcategory}" with "${backendSubLower}"`);
+          }
+          
+          // STRICT MATCHING
+          const exactMatch = productSubcategory === backendSubLower;
+          
+          // For partial matches
+          const wordMatch = productSubcategory.split(/\s+/).some(word => 
+            word === backendSubLower || backendSubLower.split(/\s+/).some(w => w === word)
+          );
+          
+          const containsAsWord = productSubcategory.includes(backendSubLower) && 
+                                (productSubcategory === backendSubLower || 
+                                 productSubcategory.startsWith(backendSubLower + ' ') ||
+                                 productSubcategory.endsWith(' ' + backendSubLower) ||
+                                 productSubcategory.includes(' ' + backendSubLower + ' '));
+          
+          const matches = exactMatch || wordMatch || containsAsWord;
+          
+          if (matches && DEBUG_MODE) {
+            debugLog(`✓ MATCH: Product "${p.title}" (${productSubcategory}) matches "${backendSubLower}" for category "${selectedCategory.name}"`);
+          }
+          
+          return matches;
+        });
+        
+        // If no match found with backend subcategories, try direct category mapping
+        if (!categoryMatch) {
+          // Check if we already assigned a category during transformation
+          if (p.category === filterState.category) {
+            categoryMatch = true;
+            if (DEBUG_MODE) {
+              debugLog(`✓ Pre-assigned category match: Product "${p.title}" has category "${p.category}"`);
+            }
+          }
+        }
+      }
+    }
+    
+    // Other filters
+    const brandMatch = filterState.brand === 'all' || p.brand === filterState.brand;
+    const discMatch = p.discount >= filterState.discount;
+    const priceMatch = p.price >= filterState.minPrice && p.price <= filterState.maxPrice;
+    
+    const matches = categoryMatch && brandMatch && discMatch && priceMatch;
+    
+    if (!matches && DEBUG_MODE) {
+      debugLog(`✗ Product "${p.title}" filtered out:`, {
+        categoryMatch, 
+        brandMatch, 
+        discMatch, 
+        priceMatch,
+        category: filterState.category,
+        brand: filterState.brand,
+        productBrand: p.brand,
+        productDiscount: p.discount,
+        requiredDiscount: filterState.discount
+      });
+    }
+    
+    return matches;
+  });
+
+  debugLog('After filtering:', filteredProducts.length, 'products');
+  
+  // Apply sorting
+  sortProducts(filterState.sort);
+  
+  // Reset to first page
+  currentPage = 1;
+  
+  // Render products
+  renderProducts();
+}
+
+function sortProducts(type) {
+  switch (type) {
+    case 'price-low': 
+      filteredProducts.sort((a, b) => a.price - b.price); 
+      break;
+    case 'price-high': 
+      filteredProducts.sort((a, b) => b.price - a.price); 
+      break;
+    case 'rating': 
+      filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0)); 
+      break;
+    case 'newest': 
+      filteredProducts.sort((a, b) => b.id - a.id); 
+      break;
+    default: 
+      // Keep original order
+      break;
+  }
+}
+
+function clearFilters() {
+  filterState = {
+    category: 'all',
+    brand: 'all',
+    discount: 0,
+    minPrice: 0,
+    maxPrice: 5000,
+    sort: 'default'
+  };
+  
+  // Reset UI
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) sortSelect.value = 'default';
+  
+  // Sync filter states
+  syncFilterStates();
+  
+  // Update category cards
+  updateCategoryCardsUI();
+  
+  // Fetch products with cleared filters
+  fetchProducts();
+}
+
+// ==================== UI UPDATES ====================
+function updateUIWithProducts() {
+  updateBrandsDropdown();
+  updateCategoriesDropdown();
+  updatePriceRange();
+  initFilterEventListeners();
+  syncFilterStates();
+  renderProducts();
+}
+
+function updateBrandsDropdown() {
+  const brands = [...new Set(allProducts.map(p => p.brand).filter(Boolean))];
+  brands.sort();
+  
+  debugLog('Available brands:', brands);
+  
+  // Update desktop brands dropdown
+  const desktopBrands = document.querySelector('#filterSidebar [name="brand"]')?.closest('.mt-2');
+  if (desktopBrands) {
+    let html = `
+      <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer">
+        <input type="radio" name="brand" value="all" ${filterState.brand === 'all' ? 'checked' : ''} class="w-4 h-4 text-blue-600">
+        <span class="text-sm">All Brands</span>
+      </label>
+    `;
+    
+    brands.forEach(brand => {
+      html += `
+        <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer">
+          <input type="radio" name="brand" value="${brand}" ${filterState.brand === brand ? 'checked' : ''} class="w-4 h-4 text-blue-600">
+          <span class="text-sm">${brand}</span>
+        </label>
+      `;
+    });
+    
+    desktopBrands.innerHTML = html;
+  }
+  
+  // Update mobile brands dropdown
+  const mobileBrands = document.getElementById('mobileBrandsContainer');
+  if (mobileBrands) {
+    let html = `
+      <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer">
+        <input type="radio" name="mobileBrand" value="all" ${filterState.brand === 'all' ? 'checked' : ''} class="w-4 h-4 text-blue-600">
+        <span class="text-sm">All Brands</span>
+      </label>
+    `;
+    
+    brands.forEach(brand => {
+      html += `
+        <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer">
+          <input type="radio" name="mobileBrand" value="${brand}" ${filterState.brand === brand ? 'checked' : ''} class="w-4 h-4 text-blue-600">
+          <span class="text-sm">${brand}</span>
+        </label>
+      `;
+    });
+    
+    mobileBrands.innerHTML = html;
+  }
+}
+
+function updateCategoriesDropdown() {
+  debugLog('Updating categories dropdown with:', WELLNESS_CATEGORIES);
+  
+  // Update desktop categories (already has static HTML, just add event listeners)
+  const desktopCategories = document.querySelector('#filterSidebar input[name="category"]')?.closest('.mt-3');
+  if (desktopCategories) {
+    // Add event listeners to existing radio buttons
+    desktopCategories.querySelectorAll('input[name="category"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        filterState.category = e.target.value;
+        debugLog('Desktop category changed to:', filterState.category);
+        updateCategoryCardsUI();
+        applyFilters();
+      });
+    });
+  }
+  
+  // Update mobile categories (in filter sheet)
+  const mobileCategories = document.querySelector('#filterSheet [name="mobileCategory"]')?.closest('.mt-3');
+  if (mobileCategories && mobileCategories.querySelectorAll('input').length > 0) {
+    // Just update the event listeners
+    mobileCategories.querySelectorAll('input[name="mobileCategory"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        filterState.category = e.target.value;
+        debugLog('Mobile category changed to:', filterState.category);
+        updateCategoryCardsUI();
+      });
+    });
+  }
+}
+
+function updatePriceRange() {
+  if (allProducts.length === 0) return;
+  
+  const prices = allProducts.map(p => p.price).filter(p => p > 0);
+  if (prices.length === 0) return;
+  
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  
+  // Update filter state with actual product prices
+  filterState.minPrice = minPrice;
+  filterState.maxPrice = Math.max(maxPrice, 5000); // Keep min 5000 as default max
+  
+  debugLog('Price range:', minPrice, 'to', filterState.maxPrice);
+  
+  // Update sliders if they exist
+  updatePriceSliders(minPrice, filterState.maxPrice);
+}
+
+function updatePriceSliders(minPrice, maxPrice) {
+  // Ensure min and max are valid numbers
+  minPrice = Math.max(0, Math.floor(minPrice));
+  maxPrice = Math.max(minPrice + 100, Math.ceil(maxPrice));
+  
+  // Update desktop sliders
+  const desktopMin = document.getElementById('minThumb');
+  const desktopMax = document.getElementById('maxThumb');
+  const desktopMinVal = document.getElementById('minValue');
+  const desktopMaxVal = document.getElementById('maxValue');
+  
+  if (desktopMin && desktopMax) {
+    desktopMin.min = minPrice;
+    desktopMin.max = maxPrice;
+    desktopMin.value = minPrice;
+    
+    desktopMax.min = minPrice;
+    desktopMax.max = maxPrice;
+    desktopMax.value = maxPrice;
+    
+    if (desktopMinVal) desktopMinVal.textContent = `₹${minPrice}`;
+    if (desktopMaxVal) desktopMaxVal.textContent = `₹${maxPrice}`;
+    
+    // Update filter state
+    filterState.minPrice = minPrice;
+    filterState.maxPrice = maxPrice;
+  }
+  
+  // Update mobile sliders
+  const mobileMin = document.getElementById('mobileMinThumb');
+  const mobileMax = document.getElementById('mobileMaxThumb');
+  const mobileMinVal = document.getElementById('mobileMinValue');
+  const mobileMaxVal = document.getElementById('mobileMaxValue');
+  
+  if (mobileMin && mobileMax) {
+    mobileMin.min = minPrice;
+    mobileMin.max = maxPrice;
+    mobileMin.value = minPrice;
+    
+    mobileMax.min = minPrice;
+    mobileMax.max = maxPrice;
+    mobileMax.value = maxPrice;
+    
+    if (mobileMinVal) mobileMinVal.textContent = `₹${minPrice}`;
+    if (mobileMaxVal) mobileMaxVal.textContent = `₹${maxPrice}`;
+  }
+}
+
+function syncFilterStates() {
+  debugLog('Syncing filter states...');
+  
+  // Sync desktop radios with filterState
+  const categoryRadio = document.querySelector(`#filterSidebar input[name="category"][value="${filterState.category}"]`);
+  if (categoryRadio) categoryRadio.checked = true;
+  
+  const brandRadio = document.querySelector(`#filterSidebar input[name="brand"][value="${filterState.brand}"]`);
+  if (brandRadio) brandRadio.checked = true;
+  
+  const discountRadio = document.querySelector(`#filterSidebar input[name="discount"][value="${filterState.discount}"]`);
+  if (discountRadio) discountRadio.checked = true;
+  
+  // Sync mobile radios with filterState
+  const mobileCategoryRadio = document.querySelector(`#filterSheet input[name="mobileCategory"][value="${filterState.category}"]`);
+  if (mobileCategoryRadio) mobileCategoryRadio.checked = true;
+  
+  const mobileBrandRadio = document.querySelector(`#filterSheet input[name="mobileBrand"][value="${filterState.brand}"]`);
+  if (mobileBrandRadio) mobileBrandRadio.checked = true;
+  
+  const mobileDiscountRadio = document.querySelector(`#filterSheet input[name="mobileDiscount"][value="${filterState.discount}"]`);
+  if (mobileDiscountRadio) mobileDiscountRadio.checked = true;
+  
+  // Update category title
+  const categoryTitle = document.getElementById('categoryTitle');
+  if (categoryTitle) {
+    if (filterState.category === 'all') {
+      categoryTitle.textContent = 'All Wellness Products';
+    } else {
+      const category = WELLNESS_CATEGORIES.find(cat => cat.id === filterState.category);
+      categoryTitle.textContent = category ? category.name : 'Wellness Products';
+    }
+  }
+  
+  // Update page title
+  const pageTitleEl = document.getElementById("pageTitle");
+  if (pageTitleEl) {
+    if (filterState.category === 'all') {
+      pageTitleEl.textContent = 'Wellness Essentials';
+    } else {
+      const category = WELLNESS_CATEGORIES.find(cat => cat.id === filterState.category);
+      pageTitleEl.textContent = category ? category.name : 'Wellness Essentials';
+    }
+  }
+  
+  debugLog('Filter states synced');
+}
+
+// ==================== HEADER COUNTS ====================
+function updateHeaderCounts() {
+  const updateBadge = (id, count) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = count;
+      el.classList.toggle("hidden", count === 0);
+    }
+  };
+  const cartTotal = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  updateBadge("cartCount", cartTotal);
+  updateBadge("wishlistCount", wishlist.length);
+}
+
+// ==================== WISHLIST ====================
+function toggleWishlist(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (!product) return;
+
+  const index = wishlist.findIndex(item => item.id === id);
+
+  if (index > -1) {
+    wishlist.splice(index, 1);
+    showToast("Removed from wishlist ♥", "info");
+  } else {
+    const wishlistItem = {
+      id: product.id,
+      name: product.title.split(' (')[0].trim(),
+      price: product.price,
+      originalPrice: product.originalPrice || null,
+      image: product.image,
+      brand: product.brand,
+      sku: product.sku,
+      description: product.description
+    };
+    wishlist.push(wishlistItem);
+    showToast("Added to wishlist ♥", "success");
+  }
+
+  localStorage.setItem("wishlist", JSON.stringify(wishlist));
+  updateHeaderCounts();
+  renderProducts();
+}
+
+// ==================== PRODUCT CARD ====================
+function createProductCard(p) {
+  const inWishlist = wishlist.some(x => x.id === p.id);
+  const isOutOfStock = !p.inStock;
+  const categoryData = categoryNames[p.category] || categoryNames['all'];
+
+  return `
+    <div class="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100
+                ${isOutOfStock ? 'opacity-60 grayscale cursor-not-allowed' : ''}"
+         ${!isOutOfStock ? `onclick="viewProductDetails(${p.id})"` : ''}
+         style="${isOutOfStock ? 'pointer-events: none;' : 'cursor: pointer;'}">
+
+      <div class="relative bg-gray-50 aspect-[6/4] overflow-hidden">
+        <img src="${p.image}" alt="${p.title}"
+             class="w-full h-full object-contain p-5 transition-transform duration-500 ${!isOutOfStock ? 'group-hover:scale-110' : ''}"
+             onerror="this.src='https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop'">
+
+        <div class="absolute top-2 left-2 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10
+                    ${isOutOfStock ? 'bg-red-600' : 'bg-green-600'}">
+          ${isOutOfStock ? 'Out of Stock' : 'In Stock'}
         </div>
+
+        <button onclick="event.stopPropagation(); toggleWishlist(${p.id})"
+                class="absolute top-2 right-2 w-9 h-9 bg-white rounded-full shadow-lg flex items-center justify-center 
+                       ${isOutOfStock ? 'opacity-50' : 'opacity-0 group-hover:opacity-100'} transition-opacity z-10">
+          <i class="${inWishlist ? 'fas fa-heart text-red-500' : 'far fa-heart text-gray-600'} text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-3">
+        <div class="flex justify-between items-start">
+          <p class="text-xs text-gray-500 uppercase font-medium truncate">${p.brand || 'Brand'}</p>
+          <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${categoryData.title.split(' ')[0]}</span>
+        </div>
+        <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mt-1">${p.title}</h3>
+        <p class="text-xs text-gray-500 mt-1">${p.subcategory || 'Wellness Product'}</p>
+
+        <div class="mt-2 flex items-center gap-2">
+          <span class="text-lg font-bold text-green-600">₹${p.price.toLocaleString()}</span>
+          ${p.originalPrice > p.price ? `
+            <span class="text-sm text-gray-500 line-through">₹${p.originalPrice.toLocaleString()}</span>
+          ` : ''}
+          ${p.discount > 0 ? `<span class="text-sm font-medium text-red-500">${p.discount}% OFF</span>` : ''}
+        </div>
+
+        <div class="flex items-center mt-2">
+          <div class="flex text-yellow-400">
+            ${'★'.repeat(Math.floor(p.rating))}${'☆'.repeat(5-Math.floor(p.rating))}
+          </div>
+          <span class="text-xs text-gray-500 ml-2">(${p.reviewCount})</span>
+        </div>
+
+        <button onclick="event.stopPropagation(); viewProductDetails(${p.id})"
+                class="mt-3 w-full font-medium text-sm py-2.5 rounded-lg transition
+                        ${isOutOfStock 
+                          ? 'bg-gray-300 text-gray-600 cursor-not-allowed' 
+                          : 'bg-[#36C2CE] hover:bg-[#2aa8b3] text-white'}">
+          ${isOutOfStock ? 'Out of Stock' : 'View Details'}
+        </button>
       </div>
     </div>
-  `).join("");
+  `;
 }
 
-// YE PURA FUNCTION REPLACE KAR DO (dono files me)
-window.goToProduct = function(id) {
-  const allProducts = Object.values(WELLNESS_DATA).flatMap(cat => cat.products);
-  const product = allProducts.find(p => p.id === id);
+// ==================== RENDERING ====================
+function renderProducts() {
+  debugLog('Rendering products, filteredProducts length:', filteredProducts.length);
   
+  const start = (currentPage - 1) * pageSize;
+  const paginated = filteredProducts.slice(start, start + pageSize);
+  const grid = document.getElementById("productsGrid");
+
+  if (grid) {
+    if (paginated.length > 0) {
+      grid.innerHTML = paginated.map(createProductCard).join("");
+      
+      // Show/Hide "Show More" button
+      const showMoreBtn = document.getElementById('showMoreBtn');
+      const showMoreContainer = document.getElementById('showMoreContainer');
+      if (showMoreBtn && showMoreContainer) {
+        if (filteredProducts.length > pageSize * currentPage) {
+          showMoreContainer.classList.remove('hidden');
+        } else {
+          showMoreContainer.classList.add('hidden');
+        }
+      }
+    } else {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-10">
+          <div class="text-gray-400 mb-4">
+            <i class="fas fa-search text-5xl"></i>
+          </div>
+          <p class="text-gray-500 mb-2">No wellness products found</p>
+          <p class="text-gray-400 text-sm">Try changing your filters</p>
+          <button onclick="clearFilters()" class="mt-4 px-4 py-2 bg-[#36C2CE] text-white rounded-lg">
+            Clear Filters
+          </button>
+        </div>
+      `;
+      
+      // Hide "Show More" button when no products
+      const showMoreContainer = document.getElementById('showMoreContainer');
+      if (showMoreContainer) showMoreContainer.classList.add('hidden');
+    }
+  }
+
+  setText("resultsCount", `Showing ${filteredProducts.length} products`);
+  renderPagination();
+}
+
+function renderPagination() {
+  const container = document.getElementById("pagination");
+  if (!container) return;
+  
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
+  container.innerHTML = "";
+  
+  if (totalPages <= 1) return;
+  
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.className = `px-4 py-2 rounded border mx-1 ${i === currentPage ? 'bg-[#36C2CE] text-white' : 'bg-white text-blue-600 border-blue-300 hover:bg-blue-50'}`;
+    btn.onclick = () => { 
+      currentPage = i; 
+      renderProducts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    container.appendChild(btn);
+  }
+}
+
+// Show more products function
+function showMoreProducts() {
+  if (filteredProducts.length > pageSize * currentPage) {
+    currentPage++;
+    renderProducts();
+  }
+}
+
+// ==================== CATEGORY CARDS ====================
+function initCategoryCards() {
+  const categoryCards = document.querySelectorAll('.category-card');
+  
+  categoryCards.forEach(card => {
+    card.addEventListener('click', function() {
+      // Remove active class from all cards
+      categoryCards.forEach(c => c.classList.remove('active'));
+      
+      // Add active class to clicked card
+      this.classList.add('active');
+      
+      // Get category from data attribute
+      const category = this.dataset.category;
+      
+      // Update category in filters
+      filterState.category = category;
+      
+      // Update radio buttons in desktop and mobile filters
+      updateRadioButtons('category', category);
+      updateRadioButtons('mobileCategory', category);
+      
+      // Apply filters
+      applyFilters();
+    });
+  });
+}
+
+function updateCategoryCardsUI() {
+  const categoryCards = document.querySelectorAll('.category-card');
+  categoryCards.forEach(card => {
+    if (card.dataset.category === filterState.category) {
+      card.classList.add('active');
+    } else {
+      card.classList.remove('active');
+    }
+  });
+}
+
+function updateRadioButtons(name, value) {
+  const radios = document.querySelectorAll(`input[name="${name}"]`);
+  radios.forEach(radio => {
+    radio.checked = (radio.value === value);
+  });
+}
+
+// ==================== EVENT LISTENERS ====================
+function initFilterEventListeners() {
+  debugLog('Initializing filter event listeners...');
+  
+  // Desktop Category Filters
+  document.addEventListener('change', (e) => {
+    if (e.target.name === 'category') {
+      filterState.category = e.target.value;
+      debugLog('Desktop category changed to:', filterState.category);
+      updateCategoryCardsUI();
+      applyFilters();
+    }
+    
+    if (e.target.name === 'mobileCategory') {
+      filterState.category = e.target.value;
+      debugLog('Mobile category changed to:', filterState.category);
+      updateCategoryCardsUI();
+    }
+    
+    if (e.target.name === 'brand') {
+      filterState.brand = e.target.value;
+      debugLog('Desktop brand changed to:', filterState.brand);
+      applyFilters();
+    }
+    
+    if (e.target.name === 'mobileBrand') {
+      filterState.brand = e.target.value;
+      debugLog('Mobile brand changed to:', filterState.brand);
+    }
+    
+    if (e.target.name === 'discount') {
+      filterState.discount = parseInt(e.target.value);
+      debugLog('Desktop discount changed to:', filterState.discount);
+      applyFilters();
+    }
+    
+    if (e.target.name === 'mobileDiscount') {
+      filterState.discount = parseInt(e.target.value);
+      debugLog('Mobile discount changed to:', filterState.discount);
+    }
+  });
+  
+  // Apply Desktop Filters Button
+  const applyDesktopBtn = document.getElementById('applyDesktopFilters');
+  if (applyDesktopBtn) {
+    applyDesktopBtn.addEventListener('click', applyFilters);
+  }
+  
+  // Apply Mobile Filters Button
+  const applyMobileBtn = document.getElementById('applyMobileFilters');
+  if (applyMobileBtn) {
+    applyMobileBtn.addEventListener('click', () => {
+      applyFilters();
+      document.getElementById('filterSheet').classList.add('translate-y-full');
+      document.getElementById('mobileSheetBackdrop').classList.add('hidden');
+    });
+  }
+  
+  // Clear Mobile Filters
+  const clearMobileBtn = document.getElementById('clearMobileFilters');
+  if (clearMobileBtn) {
+    clearMobileBtn.addEventListener('click', () => {
+      clearFilters();
+      document.getElementById('filterSheet').classList.add('translate-y-full');
+      document.getElementById('mobileSheetBackdrop').classList.add('hidden');
+    });
+  }
+  
+  // Sort Select
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) {
+    sortSelect.value = filterState.sort;
+    sortSelect.addEventListener("change", (e) => {
+      filterState.sort = e.target.value;
+      sortProducts(filterState.sort);
+      renderProducts();
+    });
+  }
+  
+  // Apply Sort Button
+  const applySortBtn = document.getElementById("applySortBtn");
+  if (applySortBtn) {
+    applySortBtn.addEventListener('click', () => {
+      const sort = document.querySelector('input[name="mobileSort"]:checked')?.value || 'default';
+      filterState.sort = sort;
+      
+      if (sortSelect) sortSelect.value = sort;
+      
+      sortProducts(sort);
+      renderProducts();
+      
+      document.getElementById('sortSheet').classList.add('translate-y-full');
+      document.getElementById('mobileSheetBackdrop').classList.add('hidden');
+    });
+  }
+  
+  // Show More Button
+  const showMoreBtn = document.getElementById('showMoreBtn');
+  if (showMoreBtn) {
+    showMoreBtn.addEventListener('click', showMoreProducts);
+  }
+  
+  debugLog('Filter event listeners initialized');
+}
+
+// ==================== PRICE SLIDERS ====================
+function initPriceSliders() {
+  // Desktop sliders
+  const desktopMin = document.getElementById('minThumb');
+  const desktopMax = document.getElementById('maxThumb');
+  
+  if (desktopMin && desktopMax) {
+    desktopMin.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const maxValue = parseInt(desktopMax.value);
+      
+      if (value > maxValue) {
+        e.target.value = maxValue;
+        filterState.minPrice = maxValue;
+      } else {
+        filterState.minPrice = value;
+      }
+      
+      document.getElementById('minValue').textContent = `₹${filterState.minPrice}`;
+      applyFilters();
+    });
+    
+    desktopMax.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const minValue = parseInt(desktopMin.value);
+      
+      if (value < minValue) {
+        e.target.value = minValue;
+        filterState.maxPrice = minValue;
+      } else {
+        filterState.maxPrice = value;
+      }
+      
+      document.getElementById('maxValue').textContent = `₹${filterState.maxPrice}`;
+      applyFilters();
+    });
+  }
+  
+  // Mobile sliders
+  const mobileMin = document.getElementById('mobileMinThumb');
+  const mobileMax = document.getElementById('mobileMaxThumb');
+  
+  if (mobileMin && mobileMax) {
+    mobileMin.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const maxValue = parseInt(mobileMax.value);
+      
+      if (value > maxValue) {
+        e.target.value = maxValue;
+        filterState.minPrice = maxValue;
+      } else {
+        filterState.minPrice = value;
+      }
+      
+      document.getElementById('mobileMinValue').textContent = `₹${filterState.minPrice}`;
+    });
+    
+    mobileMax.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const minValue = parseInt(mobileMin.value);
+      
+      if (value < minValue) {
+        e.target.value = minValue;
+        filterState.maxPrice = minValue;
+      } else {
+        filterState.maxPrice = value;
+      }
+      
+      document.getElementById('mobileMaxValue').textContent = `₹${filterState.maxPrice}`;
+    });
+  }
+}
+
+// ==================== VIEW PRODUCT DETAILS ====================
+function viewProductDetails(id) {
+  const product = allProducts.find(p => p.id === id);
   if (!product) {
-    alert("Product not found!");
+    showToast('Product not found');
+    return;
+  }
+  
+  if (!product.inStock) {
+    showToast('This product is currently out of stock', "info");
     return;
   }
 
-  // Save products for "Frequently Bought Together"
-  sessionStorage.setItem('currentPageProducts', JSON.stringify(allProducts));
-
-  // YE LINE SABSE ZAROORI – root me hai productdetails.html
-  const params = new URLSearchParams({
-    id: product.id,
-    name: encodeURIComponent(product.title || product.name),
-    price: product.price,
-    image: encodeURIComponent(product.image),
-    description: "Premium wellness product for your daily health needs.",
-    brand: "Goodneews",
-    category: currentSub || "wellness"
-  });
-
-  // Correct path – root me hai file
-  window.location.href = `/productdetails.html?${params.toString()}`;
-};
-
-// Handle Category Change
-document.querySelectorAll('input[name="wellness_subcat"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    if (radio.checked) {
-      renderProducts(radio.value);
-      history.pushState({ sub: radio.value }, "", `?sub=${radio.value}`);
-    }
-  });
-});
-
-// URL Parameter Support (Direct Link)
-const urlParams = new URLSearchParams(window.location.search);
-const subFromUrl = urlParams.get('sub');
-if (subFromUrl && WELLNESS_DATA[subFromUrl]) {
-  document.querySelector(`input[value="${subFromUrl}"]`).checked = true;
-  renderProducts(subFromUrl);
-} else {
-  renderProducts();
+  // Store in sessionStorage for product details page
+  sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+  
+  // Navigate to product details page
+  window.location.href = `productdetails.html?id=${product.id}&name=${encodeURIComponent(product.title)}&price=${product.price}`;
 }
 
-// Browser Back/Forward Support
-window.addEventListener('popstate', (e) => {
-  if (e.state?.sub && WELLNESS_DATA[e.state.sub]) {
-    document.querySelector(`input[value="${e.state.sub}"]`).checked = true;
-    renderProducts(e.state.sub);
+// ==================== MOBILE SHEETS ====================
+function initMobileSheets() {
+  const backdrop = document.getElementById("mobileSheetBackdrop");
+  const filterSheet = document.getElementById("filterSheet");
+  const sortSheet = document.getElementById("sortSheet");
+  
+  if (!backdrop || !filterSheet || !sortSheet) {
+    console.warn('Mobile sheet elements not found');
+    return;
   }
-});
+  
+  // Open Filter Sheet
+  document.getElementById("openFilterSheet")?.addEventListener("click", () => {
+    filterSheet.classList.remove("translate-y-full");
+    backdrop.classList.remove("hidden");
+  });
+  
+  // Open Sort Sheet
+  document.getElementById("openSortSheet")?.addEventListener("click", () => {
+    sortSheet.classList.remove("translate-y-full");
+    backdrop.classList.remove("hidden");
+  });
+  
+  // Close Filter Sheet
+  document.getElementById("closeFilterSheet")?.addEventListener("click", () => {
+    filterSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+  
+  // Close Sort Sheet
+  document.getElementById("closeSortSheet")?.addEventListener("click", () => {
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+  
+  // Close on backdrop click
+  backdrop.addEventListener("click", () => {
+    filterSheet.classList.add("translate-y-full");
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+}
 
-// Initialize Everything
-document.addEventListener('DOMContentLoaded', () => {
-  loadHeaderFooter();
-  initPriceSlider();
-  renderProducts();
-});
+// ==================== BANNER SLIDER ====================
+function initBannerSlider() {
+  const slides = document.querySelectorAll('.banner-slide');
+  const dots = document.querySelectorAll('.banner-dot');
+  
+  if (slides.length === 0) return;
+  
+  let currentSlide = 0;
+  
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === index);
+    });
+    
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+    
+    currentSlide = index;
+  }
+  
+  // Auto-rotate slides every 5 seconds
+  setInterval(() => {
+    let nextSlide = currentSlide + 1;
+    if (nextSlide >= slides.length) {
+      nextSlide = 0;
+    }
+    showSlide(nextSlide);
+  }, 5000);
+  
+  // Add click handlers to dots
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      showSlide(index);
+    });
+  });
+}
+
+// ==================== INITIALIZATION ====================
+function init() {
+  console.log('Initializing Wellness Essentials page...');
+  
+  // Initialize mobile sheets
+  initMobileSheets();
+  
+  // Initialize price sliders
+  initPriceSliders();
+  
+  // Initialize sort select
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) {
+    sortSelect.value = filterState.sort;
+    sortSelect.addEventListener("change", (e) => {
+      filterState.sort = e.target.value;
+      sortProducts(filterState.sort);
+      renderProducts();
+    });
+  }
+  
+  // Initialize "Show More" button
+  const showMoreBtn = document.getElementById('showMoreBtn');
+  if (showMoreBtn) {
+    showMoreBtn.addEventListener('click', showMoreProducts);
+  }
+  
+  // Initialize category cards
+  initCategoryCards();
+  
+  // Fetch initial products from backend
+  fetchProducts();
+  
+  // Update header counts
+  updateHeaderCounts();
+  
+  // Initialize banner slider
+  initBannerSlider();
+}
+
+// ==================== ON LOAD ====================
+document.addEventListener("DOMContentLoaded", init);``

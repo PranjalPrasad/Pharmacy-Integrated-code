@@ -1,440 +1,1007 @@
-// =============== FAKE PRODUCTS (unchanged) ===============
-const fakeProducts = [
-  { id: 1, name: "Dolo 650 Tablet", brand: "Micro Labs", price: 32, originalPrice: 45, discount: 29, category: "fever", image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=400&fit=crop", prescription: false, description: "Paracetamol 650mg for fever and pain relief." },
-  { id: 2, name: "Saridon Tablet", brand: "Piramal", price: 42, originalPrice: 55, discount: 24, category: "pain", image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=400&fit=crop", prescription: false, description: "Fast-acting headache relief..." },
-  { id: 3, name: "Crocin Advance", brand: "GSK", price: 28, originalPrice: 40, discount: 30, category: "fever", image: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop", prescription: false, description: "Optizorb technology..." },
-  { id: 4, name: "Eno Lemon 5g x30", brand: "GSK", price: 135, originalPrice: 180, discount: 25, category: "allergy", image: "https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&h=400&fit=crop", prescription: false, description: "Instant relief from acidity..." },
-  { id: 5, name: "Volini Gel 30g", brand: "Sun Pharma", price: 115, originalPrice: 150, discount: 23, category: "ointments", image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&h=400&fit=crop", prescription: false, description: "Pain relief gel..." },
-  { id: 6, name: "Vicks VapoRub 25ml", brand: "P&G", price: 98, originalPrice: 125, discount: 22, category: "ointments", image: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=400&h=400&fit=crop", prescription: false, description: "Relief from cold, cough..." },
-  { id: 7, name: "Himalaya Liv.52", brand: "Himalaya", price: 135, originalPrice: 180, discount: 25, category: "health-supp", image: "https://images.unsplash.com/photo-1550572017-4876b7788da6?w=400&h=400&fit=crop", prescription: false, description: "Protects liver..." },
-  { id: 8, name: "Moov Cream 35g", brand: "Paras", price: 105, originalPrice: 140, discount: 25, category: "pain", image: "https://images.unsplash.com/photo-1585435557343-3b092031a831?w=400&h=400&fit=crop", prescription: false, description: "Instant relief from back pain..." },
-  { id: 9, name: "Ayurvedic Tablets", brand: "Himalaya", price: 250, originalPrice: 350, discount: 29, category: "ayurvedic", image: "https://images.unsplash.com/photo-1599932887768-d6cb80133949?w=400&h=400&fit=crop", prescription: false, description: "Natural ayurvedic supplement..." },
-  { id: 10, name: "Cetrizine 10mg", brand: "BabyHug", price: 45, originalPrice: 60, discount: 25, category: "allergy", image: "https://images.unsplash.com/photo-1628771065518-0d82f1938462?w=400&h=400&fit=crop", prescription: false, description: "Fast relief from allergy..." },
-  { id: 11, name: "Baby Diaper Cream", brand: "Pampers", price: 180, originalPrice: 250, discount: 28, category: "ointments", image: "https://images.unsplash.com/photo-1620485843666-c561c49f1c17?w=400&h=400&fit=crop", prescription: false, description: "Gentle cream..." },
-  { id: 12, name: "Multivitamin Tablets", brand: "MeeMee", price: 320, originalPrice: 450, discount: 29, category: "health-supp", image: "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop", prescription: false, description: "Complete daily nutrition..." }
-];
-
-let products = [...fakeProducts];
-let filteredProducts = [...fakeProducts];
-let productGrid, sortSelect;
-
-let currentFilters = {
+// ==================== otc.js – CONNECTED TO BACKEND ====================
+// Base API URL - Update this to your backend URL
+const API_BASE_URL = 'http://localhost:8083/api/products';
+const WISHLIST_API_BASE = "http://localhost:8083/api/wishlist";
+// Global State
+let allProducts = [];
+let filteredProducts = [];
+let wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+let currentPage = 1;
+const pageSize = 12;
+// Enable debug mode
+const DEBUG_MODE = true;
+// Persistent Filter State
+let filterState = {
   category: 'all',
   brand: 'all',
-  discount: 'all',
+  discount: 0,
   minPrice: 0,
-  maxPrice: 2000
+  maxPrice: 2000,
+  sort: 'default'
 };
-
-// ======================================================
-document.addEventListener('DOMContentLoaded', () => {
-  productGrid = document.getElementById('productGrid');
-  sortSelect = document.getElementById('sortSelect');
-
-  sessionStorage.setItem('currentPageProducts', JSON.stringify(fakeProducts));
-
-  render(filteredProducts);
-  updateResultsCount();
-  initSlider();
-  initSorting();
-  initMobileSheets();
-  initFilters();
-
-  // ONE single delegated listener for the whole grid – solves the duplicate-heart bug
-  productGrid.addEventListener('click', (e) => {
-    const btn = e.target.closest('.wishlist-btn');
-    if (!btn) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const productId = Number(btn.dataset.id);
-    toggleWishlist(productId, btn);
-  });
-});
-
-// =============== CARD CREATION (now safe) ===============
-function createCard(p) {
-  const div = document.createElement('div');
-  div.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition cursor-pointer relative';
-
-  const priceLine = p.originalPrice
-    ? `₹${p.price} <s class="text-gray-400 text-sm">₹${p.originalPrice}</s> <span class="text-green-600 text-sm font-bold">${p.discount}% off</span>`
-    : `₹${p.price}`;
-
-  // check current wishlist state
-  const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-  const isWishlisted = wishlist.some(item => item.id === p.id);
-
-  div.innerHTML = `
-    <div class="relative">
-      <img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">
-      
-      <!-- Wishlist button – data-id is the only thing we need -->
-      <button class="wishlist-btn ${isWishlisted ? 'active' : ''}" data-id="${p.id}">
-        <i class="fa-${isWishlisted ? 'solid' : 'regular'} fa-heart"></i>
-      </button>
-    </div>
-    <div class="p-2">
-      <h3 class="font-semibold text-sm">${p.name}</h3>
-      <p class="text-xs text-gray-500 mt-1">${p.brand}</p>
-      <div class="mt-2 font-bold text-lg text-green-600">${priceLine}</div>
-      <button onclick="navigateToProductDetails(${p.id})" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold transition">
-        View Details
-      </button>
-    </div>
-  `;
-  return div;
-}
-
-// =============== WISHLIST TOGGLE (single listener ===============
-function toggleWishlist(productId, buttonElement) {
-  let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-  const product = products.find(p => p.id === productId);
-
-  const index = wishlist.findIndex(item => item.id === productId);
-
-  if (index === -1) {
-    // add
-    wishlist.push(product);
-    buttonElement.classList.add('active');
-    buttonElement.innerHTML = '<i class="fa-solid fa-heart"></i>';
-  } else {
-    // remove
-    wishlist.splice(index, 1);
-    buttonElement.classList.remove('active');
-    buttonElement.innerHTML = '<i class="fa-regular fa-heart"></i>';
+// =============== OTC CATEGORIES ===============
+const OTC_CATEGORIES = [
+  {
+    id: 'all',
+    name: 'All OTC Products',
+    backendSubcategories: []
+  },
+  {
+    id: 'ayurvedic',
+    name: 'Ayurvedic Medicines',
+    backendSubcategories: ['Ayurvedic Medicines', 'Ayurvedic', 'Herbal']
+  },
+  {
+    id: 'allergy',
+    name: 'Allergy',
+    backendSubcategories: ['Allergy', 'Allergy Relief']
+  },
+  {
+    id: 'fever',
+    name: 'Fever & Flu',
+    backendSubcategories: ['Fever & Flu', 'Fever', 'Flu']
+  },
+  {
+    id: 'pain',
+    name: 'Pain Relief',
+    backendSubcategories: ['Pain Relief', 'Pain']
+  },
+  {
+    id: 'ointments',
+    name: 'Ointments',
+    backendSubcategories: ['Ointments', 'Creams']
+  },
+  {
+    id: 'health-supp',
+    name: 'Health Supplements',
+    backendSubcategories: ['Health Supplements', 'Supplements']
   }
-
-  localStorage.setItem('wishlist', JSON.stringify(wishlist));
-
-  // let header badge know that wishlist changed
-  window.dispatchEvent(new CustomEvent('wishlistUpdated'));
+];
+// Helper: Safe text update
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
 }
-
-// =============== RENDER (unchanged except calling createCard) ===============
-function render(list) {
-  productGrid.innerHTML = ''; // clear
-  if (list.length === 0) {
-    productGrid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-500 text-xl">No products found</div>';
-    return;
-  }
-  list.forEach(p => productGrid.appendChild(createCard(p)));
-}
-
-function updateResultsCount() {
-  const countEl = document.getElementById('resultsCount');
-  if (countEl) {
-    countEl.textContent = `${filteredProducts.length} products found`;
-  }
-  updateTitle();
-}
-
-function updateTitle() {
-  const titleEl = document.querySelector('h2.text-3xl');
-  if (!titleEl) return;
-
-  const categoryNames = {
-    'all': 'All OTC Products',
-    'ayurvedic': 'Ayurvedic Medicines',
-    'allergy': 'Allergy Relief Products',
-    'fever': 'Fever & Flu Medicine',
-    'pain': 'Pain Relief Products',
-    'ointments': 'Ointments & Creams',
-    'health-supp': 'Health Supplements'
-  };
-
-  let title = categoryNames[currentFilters.category] || 'All OTC Products';
-
-  // Add brand to title if selected
-  if (currentFilters.brand !== 'all') {
-    title += ` - ${currentFilters.brand}`;
-  }
-
-  titleEl.textContent = title;
-}
-
-// Apply Filters Function
-function applyFilters() {
-  filteredProducts = products.filter(product => {
-    // Category filter
-    if (currentFilters.category !== 'all' && product.category !== currentFilters.category) {
-      return false;
+// Update page title based on category
+function updatePageTitle() {
+  const titleEl = document.getElementById('pageTitle');
+  if (titleEl) {
+    if (filterState.category === 'all') {
+      titleEl.textContent = 'All OTC Products';
+    } else {
+      const category = OTC_CATEGORIES.find(cat => cat.id === filterState.category);
+      titleEl.textContent = category ? category.name : 'OTC Products';
     }
-
-    // Brand filter
-    if (currentFilters.brand !== 'all' && product.brand !== currentFilters.brand) {
-      return false;
+  }
+}
+// Debug logging function
+function debugLog(...args) {
+  if (DEBUG_MODE) {
+    console.log('[DEBUG]', ...args);
+  }
+}
+async function getValidUserId() {
+    console.log("Getting valid user ID...");
+    try {
+        const endpoints = [
+            'http://localhost:8083/api/users',
+            'http://localhost:8083/api/users/all',
+            'http://localhost:8083/api/users/list'
+        ];
+ 
+        for (const endpoint of endpoints) {
+            try {
+                const response = await fetch(endpoint);
+                if (response.ok) {
+                    const users = await response.json();
+                    if (users && users.length > 0) {
+                        console.log("Found users:", users);
+                        return users[0].id || users[0].userId || 1;
+                    }
+                }
+            } catch (e) {
+                console.log(`Endpoint ${endpoint} not available`);
+            }
+        }
+    } catch (error) {
+        console.log("Could not fetch users:", error);
     }
-
-    // Price filter
-    if (product.price < currentFilters.minPrice || product.price > currentFilters.maxPrice) {
-      return false;
+    const testIds = [1, 100, 1000, 1001, 10000];
+    for (const testId of testIds) {
+        try {
+            const response = await fetch(`${WISHLIST_API_BASE}/get-wishlist-items?userId=${testId}`);
+            if (response.ok || response.status === 200) {
+                console.log(`User ID ${testId} is valid (wishlist endpoint works)`);
+                return testId;
+            }
+        } catch (e) {
+            console.log(`User ID ${testId} test failed:`, e.message);
+        }
     }
-
-    // Discount filter
-    if (currentFilters.discount !== 'all') {
-      const requiredDiscount = parseInt(currentFilters.discount);
-      if (product.discount < requiredDiscount) {
+    console.warn("No valid user ID found. Using default ID 1.");
+    console.warn("PLEASE CREATE A USER IN YOUR DATABASE WITH ID = 1");
+    return 1;
+}
+async function addToWishlistBackend(product) {
+    try {
+        const response = await fetch(`${WISHLIST_API_BASE}/add-wishlist-items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUserId,
+                productId: product.id,
+                productType: "MEDICINE"
+            })
+        });
+        if (response.ok) {
+            const result = await response.json();
+            console.log("Added to backend wishlist:", result);
+            return true;
+        } else {
+            const error = await response.json();
+            console.error("Failed to add to backend wishlist:", error);
+            return false;
+        }
+    } catch (err) {
+        console.error("Error calling wishlist API:", err);
         return false;
-      }
     }
-
-    return true;
-  });
-
-  render(filteredProducts);
-  updateResultsCount();
 }
-
-// Initialize Desktop Filters
-function initFilters() {
-  // Desktop form submit
-  const desktopForm = document.getElementById('filterForm');
-  if (desktopForm) {
-    desktopForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      currentFilters.category = document.querySelector('input[name="category"]:checked')?.value || 'all';
-      currentFilters.brand = document.querySelector('input[name="brand"]:checked')?.value || 'all';
-      currentFilters.discount = document.querySelector('input[name="discount"]:checked')?.value || 'all';
-      
-      applyFilters();
+async function removeFromWishlistBackend(product) {
+    try {
+        const response = await fetch(`${WISHLIST_API_BASE}/remove-wishlist-items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUserId,
+                productId: product.id
+            })
+        });
+        if (response.ok) {
+            console.log("Removed from backend wishlist");
+            return true;
+        } else {
+            console.error("Failed to remove from backend wishlist");
+            return false;
+        }
+    } catch (err) {
+        console.error("Error removing from wishlist:", err);
+        return false;
+    }
+}
+async function syncWishlist() {
+    try {
+        const response = await fetch(`${WISHLIST_API_BASE}/get-wishlist-items?userId=${currentUserId}`);
+        if (!response.ok) return;
+        const items = await response.json();
+        const backendWishlist = items.filter(item => item.productType === "MEDICINE").map(item => {
+            const product = allProducts.find(p => p.id === item.productId);
+            if (!product) return null;
+            return {
+                id: product.id,
+                name: product.title.split(' (')[0].trim(),
+                price: product.price,
+                originalPrice: product.originalPrice || null,
+                image: product.image
+            };
+        }).filter(Boolean);
+        localStorage.setItem("wishlist", JSON.stringify(backendWishlist));
+        wishlist = backendWishlist;
+        updateHeaderCounts();
+        renderProducts();
+    } catch (err) {
+        console.error("Error syncing wishlist:", err);
+    }
+}
+// ==================== FETCH PRODUCTS FROM BACKEND ====================
+async function fetchProducts() {
+  try {
+    debugLog('Starting fetchProducts for OTC...');
+    setText("resultsCount", "Loading products...");
+    // Clear existing products
+    allProducts = [];
+    filteredProducts = [];
+    // Fetch ALL products
+    const url = `${API_BASE_URL}/get-all-products?page=0&size=200`;
+    debugLog('Fetching from URL:', url);
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
     });
-
-    // Live filter on radio change
-    desktopForm.querySelectorAll('input[type="radio"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        currentFilters.category = document.querySelector('input[name="category"]:checked')?.value || 'all';
-        currentFilters.brand = document.querySelector('input[name="brand"]:checked')?.value || 'all';
-        currentFilters.discount = document.querySelector('input[name="discount"]:checked')?.value || 'all';
+    debugLog('Response status:', response.status, response.statusText);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    processProducts(data);
+  } catch (error) {
+    console.error('Error in fetchProducts:', error);
+    showToast('Error loading products. Please check console for details.');
+    setText("resultsCount", "Failed to load products");
+    // Show empty state
+    const grid = document.getElementById("productsGrid");
+    if (grid) {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-10">
+          <div class="text-gray-400 mb-4">
+            <i class="fas fa-exclamation-triangle text-5xl"></i>
+          </div>
+          <p class="text-gray-500 mb-2">Failed to load products</p>
+          <p class="text-gray-400 text-sm">Error: ${error.message}</p>
+          <button onclick="fetchProducts()" class="mt-4 px-4 py-2 bg-[#36C2CE] text-white rounded-lg">
+            Retry
+          </button>
+        </div>
+      `;
+    }
+  }
+}
+function processProducts(data) {
+  debugLog('API Response data:', data);
+  // Handle different response formats
+  let productsArray = [];
+  if (Array.isArray(data)) {
+    productsArray = data;
+  } else if (data.content && Array.isArray(data.content)) {
+    productsArray = data.content;
+  } else if (data.products && Array.isArray(data.products)) {
+    productsArray = data.products;
+  } else if (typeof data === 'object' && data !== null) {
+    productsArray = [data];
+  }
+  debugLog('Total products from API:', productsArray.length);
+  if (productsArray.length === 0) {
+    debugLog('No products received from API');
+    showToast('No products available. Please try again later.');
+  }
+  // Transform ALL products first
+  const allTransformedProducts = transformBackendProducts(productsArray);
+  // DEBUG: Check each product
+  debugLog('=== CHECKING OTC PRODUCT CATEGORIES ===');
+  allTransformedProducts.forEach(product => {
+    debugLog(`Product: "${product.title}" - Category: "${product.category}"`);
+  });
+  debugLog('=== END CHECK ===');
+  // Get all unique categories from products
+  const allCategories = [...new Set(allTransformedProducts.map(p => p.category))];
+  debugLog('All categories in DB:', allCategories);
+  // FILTER: Only keep products that match our OTC categories
+  allProducts = allTransformedProducts.filter(product => {
+    const productCategory = product.category || '';
+    // Check if this product's category matches any OTC category
+    const isOTCProduct = OTC_CATEGORIES.some(category => {
+      if (category.id === 'all') return false; // Skip "all" category
+  
+      return category.backendSubcategories.some(backendSubcat => {
+        // Case-insensitive comparison
+        const productCatLower = productCategory.toLowerCase();
+        const backendSubLower = backendSubcat.toLowerCase();
+    
+        // Check for exact match or partial match
+        return productCatLower === backendSubLower ||
+               productCatLower.includes(backendSubLower) ||
+               backendSubLower.includes(productCatLower);
+      });
+    });
+    if (!isOTCProduct) {
+      debugLog(`Filtered out (non-OTC): ${product.title} - ${product.category}`);
+    }
+    return isOTCProduct;
+  });
+  debugLog('OTC products after filtering:', allProducts.length);
+  debugLog('OTC product categories:', [...new Set(allProducts.map(p => p.category))]);
+  // Apply filters and update UI
+  applyFilters();
+  updateUIWithProducts();
+}
+// Transform backend product format to frontend format
+function transformBackendProducts(backendProducts) {
+  if (!Array.isArray(backendProducts) || backendProducts.length === 0) {
+    return [];
+  }
+  debugLog('Transforming', backendProducts.length, 'products');
+  return backendProducts.map((product, index) => {
+    try {
+      // Extract basic fields
+      const id = product.productId || product.id || index + 1;
+      const title = product.productName || product.name || 'Unnamed Product';
+      const price = Number(product.productPrice || product.price || 100);
+      const originalPrice = Number(product.productOldPrice || product.originalPrice || product.mrp || price * 1.2);
+      const discount = originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+  
+      // Get category - this is in productSubCategory field
+      const category = product.productSubCategory || 'Unknown';
+  
+      // Get brand - this is in brandName field
+      const brand = product.brandName || product.brand || product.manufacturer || 'Generic';
+  
+      const description = product.productDescription || product.description || 'No description available';
+      const stockQuantity = product.productQuantity || product.stockQuantity || product.quantity || 0;
+      const inStock = product.productStock === 'In-Stock' || stockQuantity > 0;
+  
+      // Get image URL
+      let imageUrl = 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop';
+  
+      if (product.productMainImage) {
+        // Check if it's a path starting with /api/
+        if (product.productMainImage.startsWith('/api/')) {
+          // It's a relative path, make it absolute
+          imageUrl = `http://localhost:8083${product.productMainImage}`;
+        }
+        // Check if it's base64
+        else if (product.productMainImage.startsWith('data:image')) {
+          imageUrl = product.productMainImage;
+        }
+        // Check if it's a URL
+        else if (product.productMainImage.startsWith('http')) {
+          imageUrl = product.productMainImage;
+        }
+        // Otherwise assume it's base64
+        else {
+          imageUrl = `data:image/jpeg;base64,${product.productMainImage}`;
+        }
+      } else if (product.productId) {
+        imageUrl = `${API_BASE_URL}/${product.productId}/image`;
+      }
+  
+      return {
+        id: id,
+        title: title,
+        price: price,
+        originalPrice: originalPrice,
+        discount: discount,
+        rating: product.rating || product.productRating || 4.0,
+        reviewCount: product.reviewCount || product.totalReviews || Math.floor(Math.random() * 1000),
+        category: category,
+        brand: brand,
+        image: imageUrl,
+        description: description,
+        inStock: inStock,
+        stockQuantity: stockQuantity
+      };
+    } catch (error) {
+      console.error('Error transforming product:', product, error);
+      return null;
+    }
+  }).filter(product => product !== null);
+}
+// Update UI with loaded products
+function updateUIWithProducts() {
+  // Update brands dropdown
+  updateBrandsDropdown();
+  // Update price range
+  updatePriceRange();
+  // Render products
+  renderProducts();
+}
+// Update brands dropdown
+function updateBrandsDropdown() {
+  const brands = [...new Set(allProducts.map(p => p.brand).filter(Boolean))];
+  brands.sort();
+  debugLog('Available brands:', brands);
+  // Update desktop brands (the brands dropdown in sidebar)
+  const desktopBrandsContainer = document.querySelector('#filterSidebar .border-b.pb-4 .mt-2.space-y-2');
+  if (desktopBrandsContainer) {
+    let html = `
+      <label class="flex items-center"><input type="radio" name="brand" value="all" ${filterState.brand === 'all' ? 'checked' : ''} class="w-5 h-5 text-primary"> <span class="ml-3 text-gray-700">All Brands</span></label>
+    `;
+    brands.forEach(brand => {
+      html += `
+        <label class="flex items-center"><input type="radio" name="brand" value="${brand}" ${filterState.brand === brand ? 'checked' : ''} class="w-5 h-5 text-primary"> <span class="ml-3 text-gray-700">${brand}</span></label>
+      `;
+    });
+    desktopBrandsContainer.innerHTML = html;
+    // Add event listeners
+    desktopBrandsContainer.querySelectorAll('input[name="brand"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        filterState.brand = e.target.value;
         applyFilters();
       });
     });
   }
-
-  // Mobile filters apply button
-  const applyMobileBtn = document.getElementById('applyMobileFilters');
-  if (applyMobileBtn) {
-    applyMobileBtn.addEventListener('click', () => {
-      currentFilters.category = document.querySelector('input[name="mobileCategory"]:checked')?.value || 'all';
-      currentFilters.brand = document.querySelector('input[name="mobileBrand"]:checked')?.value || 'all';
-      currentFilters.discount = document.querySelector('input[name="mobileDiscount"]:checked')?.value || 'all';
-      
-      applyFilters();
-      closeFilterSheet();
+  // Update mobile brands (inside filter sheet)
+  const mobileBrandsContainer = document.querySelector('#filterSheet [name="mobileBrand"]')?.parentElement;
+  if (mobileBrandsContainer) {
+    let html = `
+      <label class="flex items-center"><input type="radio" name="mobileBrand" value="all" ${filterState.brand === 'all' ? 'checked' : ''} class="w-5 h-5 text-primary"> <span class="ml-3 text-gray-700">All Brands</span></label>
+    `;
+    brands.forEach(brand => {
+      html += `
+        <label class="flex items-center"><input type="radio" name="mobileBrand" value="${brand}" ${filterState.brand === brand ? 'checked' : ''} class="w-5 h-5 text-primary"> <span class="ml-3 text-gray-700">${brand}</span></label>
+      `;
     });
-  }
-
-  // Mobile clear filters
-  const clearMobileBtn = document.getElementById('clearMobileFilters');
-  if (clearMobileBtn) {
-    clearMobileBtn.addEventListener('click', () => {
-      document.querySelectorAll('input[name="mobileCategory"], input[name="mobileBrand"], input[name="mobileDiscount"]').forEach(radio => {
-        if (radio.value === 'all') radio.checked = true;
-      });
-      
-      // Reset desktop filters too
-      document.querySelectorAll('input[name="category"], input[name="brand"], input[name="discount"]').forEach(radio => {
-        if (radio.value === 'all') radio.checked = true;
-      });
-
-      currentFilters = {
-        category: 'all',
-        brand: 'all',
-        discount: 'all',
-        minPrice: 0,
-        maxPrice: 2000
-      };
-
-      // Reset price sliders
-      document.getElementById('minThumb').value = 0;
-      document.getElementById('maxThumb').value = 2000;
-      document.getElementById('mobileMinThumb').value = 0;
-      document.getElementById('mobileMaxThumb').value = 2000;
-      updateDesktopSlider();
-      updateMobileSlider();
-
-      applyFilters();
-    });
+    mobileBrandsContainer.innerHTML = html;
   }
 }
-
-// Navigate to Product Details Page with URL parameters
-window.navigateToProductDetails = function(id) {
-  const product = products.find(p => p.id === id);
-  if (!product) {
-    console.error('Product not found with id:', id);
+// Update price range
+function updatePriceRange() {
+  if (allProducts.length === 0) return;
+  const prices = allProducts.map(p => p.price).filter(p => p > 0);
+  if (prices.length === 0) return;
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+  // Update filter state with actual product prices
+  filterState.minPrice = minPrice;
+  filterState.maxPrice = Math.min(maxPrice, 2000); // Cap at 2000 as per your original
+  debugLog('Price range:', minPrice, 'to', filterState.maxPrice);
+  // Update sliders if they exist
+  updatePriceSliders(minPrice, filterState.maxPrice);
+}
+// ==================== FILTER & SORT ====================
+function applyFilters() {
+  debugLog('Applying filters with', allProducts.length, 'products');
+  debugLog('Current filter state:', filterState);
+  filteredProducts = allProducts.filter(p => {
+    // Category filter
+    let categoryMatch = false;
+    if (filterState.category === 'all') {
+      categoryMatch = true;
+    } else {
+      const selectedCategory = OTC_CATEGORIES.find(cat => cat.id === filterState.category);
+      if (!selectedCategory || selectedCategory.id === 'all') {
+        categoryMatch = true;
+      } else {
+        const productCategory = p.category?.toLowerCase() || '';
+    
+        // Check if product matches any backend subcategory for this OTC category
+        categoryMatch = selectedCategory.backendSubcategories.some(backendSubcat => {
+          const backendSubLower = backendSubcat.toLowerCase();
+      
+          // Check for exact match or partial match
+          return productCategory === backendSubLower ||
+                 productCategory.includes(backendSubLower) ||
+                 backendSubLower.includes(productCategory);
+        });
+    
+        if (categoryMatch) {
+          debugLog(`✓ Product "${p.title}" matches category "${selectedCategory.name}" via category "${p.category}"`);
+        }
+      }
+    }
+    const brandMatch = filterState.brand === 'all' || p.brand === filterState.brand;
+    const discMatch = p.discount >= filterState.discount;
+    const priceMatch = p.price >= filterState.minPrice && p.price <= filterState.maxPrice;
+    const matches = categoryMatch && brandMatch && discMatch && priceMatch;
+    return matches;
+  });
+  debugLog('After filtering:', filteredProducts.length, 'products');
+  sortProducts(filterState.sort);
+  currentPage = 1;
+  renderProducts();
+}
+// ==================== HEADER COUNTS ====================
+function updateHeaderCounts() {
+  const updateBadge = (id, count) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = count;
+      el.classList.toggle("hidden", count === 0);
+    }
+  };
+  const cartTotal = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  updateBadge("cartCount", cartTotal);
+  updateBadge("wishlistCount", wishlist.length);
+}
+// ==================== WISHLIST ====================
+async function toggleWishlist(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (!product) return;
+  const index = wishlist.findIndex(item => item.id === id);
+  if (index > -1) {
+    const success = await removeFromWishlistBackend(product);
+    if (success) {
+      wishlist.splice(index, 1);
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      showToast("Removed from wishlist ♥");
+    }
+  } else {
+    const success = await addToWishlistBackend(product);
+    if (success) {
+      const wishlistItem = {
+        id: product.id,
+        name: product.title.split(' (')[0].trim(),
+        price: product.price,
+        originalPrice: product.originalPrice || null,
+        image: product.image
+      };
+      wishlist.push(wishlistItem);
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      showToast("Added to wishlist ♥");
+    }
+  }
+  updateHeaderCounts();
+  renderProducts();
+}
+function showToast(msg) {
+  // Remove existing toast
+  const existing = document.querySelector('.custom-toast');
+  if (existing) existing.remove();
+  const toast = document.createElement("div");
+  toast.className = "custom-toast fixed bottom-20 left-1/2 -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full z-50 shadow-lg";
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+// ==================== ORDER ON WHATSAPP FUNCTION ====================
+function orderOnWhatsApp(productId) {
+  const product = allProducts.find(p => p.id === productId);
+  if (!product) return;
+  if (!product.inStock) {
+    alert('This product is currently out of stock. Please check back later.');
     return;
   }
-
-  // Store current page name/category for reference
-  const currentPageName = document.title || 'OTC';
-  
-  sessionStorage.setItem('selectedProduct', JSON.stringify(product));
-  sessionStorage.setItem('currentPageProducts', JSON.stringify(products));
-  sessionStorage.setItem('currentPageName', currentPageName);
-
-  const params = new URLSearchParams({
-    id: product.id,
-    name: product.name,
-    brand: product.brand,
-    price: product.price,
-    originalPrice: product.originalPrice || '',
-    discount: product.discount || '',
-    image: product.image,
-    description: product.description || '',
-    prescription: product.prescription,
-    category: product.category || '',
-    sourcePage: currentPageName
-  });
-
-  window.location.href = `/productdetails.html?${params.toString()}`;
+  // WhatsApp business number (replace with actual number)
+  const phoneNumber = "919876543210";
+  // Create the message
+  const message = `Hello! I would like to order:\n\n` +
+                  `*${product.title}*\n` +
+                  `Price: ₹${product.price}\n` +
+                  (product.originalPrice ? `Original: ₹${product.originalPrice} (${product.discount}% OFF)\n` : '') +
+                  `Brand: ${product.brand}\n` +
+                  `Category: ${OTC_CATEGORIES.find(cat => cat.id === product.category)?.name || product.category}\n\n` +
+                  `Please let me know about availability and delivery options.`;
+  // Encode the message for URL
+  const encodedMessage = encodeURIComponent(message);
+  // Create WhatsApp URL
+  const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+  // Open in new tab
+  window.open(whatsappURL, '_blank');
+  // Optional: Track this action
+  console.log(`WhatsApp order initiated for: ${product.title}`);
 }
-
-function initSorting() {
-  sortSelect.addEventListener('change', () => {
-    const val = sortSelect.value;
-    let sorted = [...filteredProducts];
-    if (val === 'price-low') sorted.sort((a,b) => a.price - b.price);
-    if (val === 'price-high') sorted.sort((a,b) => b.price - a.price);
-    if (val === 'rating') sorted.sort((a,b) => (b.rating || 0) - (a.rating || 0));
-    if (val === 'newest') sorted.sort((a,b) => b.id - a.id);
-    render(sorted);
+// ==================== PRODUCT CARD ====================
+function createProductCard(p) {
+  const inWishlist = wishlist.some(x => x.id === p.id);
+  const isOutOfStock = !p.inStock;
+  return `
+    <div class="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-100
+                ${isOutOfStock ? 'opacity-60 grayscale cursor-not-allowed' : ''}"
+         style="${isOutOfStock ? 'pointer-events: none;' : 'cursor: pointer;'}">
+      <div class="relative bg-blue-50 aspect-[6/4] overflow-hidden">
+        <img src="${p.image}" alt="${p.title}"
+             class="w-full h-full object-contain p-5 transition-transform duration-500 ${!isOutOfStock ? 'group-hover:scale-110' : ''}"
+             onerror="this.src='https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop'">
+        <div class="absolute top-2 left-2 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10
+                    ${isOutOfStock ? 'bg-red-600' : 'bg-green-600'}">
+          ${isOutOfStock ? 'Out of Stock' : 'In Stock'}
+        </div>
+        <button onclick="event.stopPropagation(); toggleWishlist(${p.id})"
+                class="absolute top-2 right-2 w-9 h-9 bg-white rounded-full shadow-lg flex items-center justify-center
+                       ${isOutOfStock ? 'opacity-50' : 'opacity-0 group-hover:opacity-100'} transition-opacity z-10">
+          <i class="${inWishlist ? 'fas fa-heart text-red-500' : 'far fa-heart text-gray-600'} text-lg"></i>
+        </button>
+      </div>
+      <div class="p-3">
+        <p class="text-xs text-gray-500 uppercase font-medium truncate">${p.brand || 'Brand'}</p>
+        <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mt-1">${p.title}</h3>
+        <div class="mt-2 flex items-center gap-2">
+          <span class="text-lg font-bold text-green-600">₹${p.price.toLocaleString()}</span>
+          ${p.originalPrice > p.price ? `
+            <span class="text-sm text-gray-500 line-through">₹${p.originalPrice.toLocaleString()}</span>
+          ` : ''}
+          ${p.discount > 0 ? `<span class="text-sm font-medium text-red-500">${p.discount}% OFF</span>` : ''}
+        </div>
+        <button onclick="event.stopPropagation(); orderOnWhatsApp(${p.id})"
+                class="whatsapp-order-btn mt-3 w-full font-medium text-sm py-2.5 rounded-lg transition flex items-center justify-center gap-2
+                        ${isOutOfStock
+                          ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                          : ''}">
+          <i class="fab fa-whatsapp"></i>
+          ${isOutOfStock ? 'Out of Stock' : 'Order on WhatsApp'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+// ==================== RENDERING ====================
+function renderProducts() {
+  debugLog('Rendering products, filteredProducts length:', filteredProducts.length);
+  const start = (currentPage - 1) * pageSize;
+  const paginated = filteredProducts.slice(start, start + pageSize);
+  const grid = document.getElementById("productsGrid");
+  if (grid) {
+    if (paginated.length > 0) {
+      grid.innerHTML = paginated.map(createProductCard).join("");
+    } else {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-10">
+          <div class="text-gray-400 mb-4">
+            <i class="fas fa-search text-5xl"></i>
+          </div>
+          <p class="text-gray-500 mb-2">No products found</p>
+          <p class="text-gray-400 text-sm">Try changing your filters</p>
+          <button onclick="clearFilters()" class="mt-4 px-4 py-2 bg-[#36C2CE] text-white rounded-lg">
+            Clear Filters
+          </button>
+        </div>
+      `;
+    }
+  }
+  setText("resultsCount", `Showing ${filteredProducts.length} products`);
+  updatePageTitle();
+  renderPagination();
+}
+function renderPagination() {
+  const container = document.getElementById("pagination");
+  if (!container) return;
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
+  container.innerHTML = "";
+  if (totalPages <= 1) return;
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.className = `px-4 py-2 rounded border mx-1 ${i === currentPage ? 'bg-[#36C2CE] text-white' : 'bg-white text-blue-600 border-blue-300 hover:bg-blue-50'}`;
+    btn.onclick = () => {
+      currentPage = i;
+      renderProducts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    container.appendChild(btn);
+  }
+}
+function sortProducts(type) {
+  switch (type) {
+    case 'price-low':
+      filteredProducts.sort((a, b) => a.price - b.price);
+      break;
+    case 'price-high':
+      filteredProducts.sort((a, b) => b.price - a.price);
+      break;
+    case 'rating':
+      filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      break;
+    case 'newest':
+      filteredProducts.sort((a, b) => b.id - a.id);
+      break;
+    default:
+      // Keep original order
+      break;
+  }
+}
+// Clear all filters
+function clearFilters() {
+  filterState = {
+    category: 'all',
+    brand: 'all',
+    discount: 0,
+    minPrice: 0,
+    maxPrice: 2000,
+    sort: 'default'
+  };
+  // Reset UI
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) sortSelect.value = 'default';
+  // Reset radio buttons
+  document.querySelectorAll('input[name="category"][value="all"]').forEach(radio => {
+    radio.checked = true;
   });
-
-  // Mobile sort apply
-  const applySortBtn = document.getElementById('applySortBtn');
-  if (applySortBtn) {
-    applySortBtn.addEventListener('click', () => {
-      const selectedSort = document.querySelector('input[name="mobileSort"]:checked')?.value || 'default';
-      sortSelect.value = selectedSort;
-      sortSelect.dispatchEvent(new Event('change'));
-      closeSortSheet();
+  document.querySelectorAll('input[name="brand"][value="all"]').forEach(radio => {
+    radio.checked = true;
+  });
+  document.querySelectorAll('input[name="discount"][value="0"]').forEach(radio => {
+    radio.checked = true;
+  });
+  document.querySelectorAll('input[name="mobileCategory"][value="all"]').forEach(radio => {
+    radio.checked = true;
+  });
+  document.querySelectorAll('input[name="mobileBrand"][value="all"]').forEach(radio => {
+    radio.checked = true;
+  });
+  document.querySelectorAll('input[name="mobileDiscount"][value="0"]').forEach(radio => {
+    radio.checked = true;
+  });
+  // Reset price sliders
+  document.getElementById('minThumb').value = 0;
+  document.getElementById('maxThumb').value = 2000;
+  document.getElementById('mobileMinThumb').value = 0;
+  document.getElementById('mobileMaxThumb').value = 2000;
+  applyFilters();
+}
+// ==================== PRICE SLIDERS ====================
+function initPriceSliders() {
+  // Desktop sliders
+  const desktopMin = document.getElementById('minThumb');
+  const desktopMax = document.getElementById('maxThumb');
+  if (desktopMin && desktopMax) {
+    desktopMin.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const maxValue = parseInt(desktopMax.value);
+  
+      if (value > maxValue) {
+        e.target.value = maxValue;
+        filterState.minPrice = maxValue;
+      } else {
+        filterState.minPrice = value;
+      }
+  
+      document.getElementById('minValue').textContent = `₹${filterState.minPrice}`;
+      applyFilters();
+    });
+    desktopMax.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const minValue = parseInt(desktopMin.value);
+  
+      if (value < minValue) {
+        e.target.value = minValue;
+        filterState.maxPrice = minValue;
+      } else {
+        filterState.maxPrice = value;
+      }
+  
+      document.getElementById('maxValue').textContent = `₹${filterState.maxPrice}`;
+      applyFilters();
+    });
+  }
+  // Mobile sliders
+  const mobileMin = document.getElementById('mobileMinThumb');
+  const mobileMax = document.getElementById('mobileMaxThumb');
+  if (mobileMin && mobileMax) {
+    mobileMin.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const maxValue = parseInt(mobileMax.value);
+  
+      if (value > maxValue) {
+        e.target.value = maxValue;
+        filterState.minPrice = maxValue;
+      } else {
+        filterState.minPrice = value;
+      }
+  
+      document.getElementById('mobileMinValue').textContent = `₹${filterState.minPrice}`;
+      // Don't apply filters here, wait for Apply button
+    });
+    mobileMax.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const minValue = parseInt(mobileMin.value);
+  
+      if (value < minValue) {
+        e.target.value = minValue;
+        filterState.maxPrice = minValue;
+      } else {
+        filterState.maxPrice = value;
+      }
+  
+      document.getElementById('mobileMaxValue').textContent = `₹${filterState.maxPrice}`;
+      // Don't apply filters here, wait for Apply button
     });
   }
 }
-
-// Desktop Price Slider
-function initSlider() {
-  const minThumb = document.getElementById('minThumb');
-  const maxThumb = document.getElementById('maxThumb');
-  const mobileMinThumb = document.getElementById('mobileMinThumb');
-  const mobileMaxThumb = document.getElementById('mobileMaxThumb');
-
-  const updateDesktopSlider = () => {
-    const minVal = parseInt(minThumb.value);
-    const maxVal = parseInt(maxThumb.value);
-    
-    if (minVal > maxVal - 50) {
-      minThumb.value = maxVal - 50;
-    }
-    
-    const fill = document.getElementById('desktopFill');
-    if (fill) {
-      fill.style.left = (minVal / 2000) * 100 + '%';
-      fill.style.width = ((maxVal - minVal) / 2000) * 100 + '%';
-    }
-    
-    const minValue = document.getElementById('minValue');
-    const maxValue = document.getElementById('maxValue');
-    if (minValue) minValue.textContent = '₹' + minVal;
-    if (maxValue) maxValue.textContent = '₹' + maxVal;
-    
-    currentFilters.minPrice = minVal;
-    currentFilters.maxPrice = maxVal;
-  };
-
-  const updateMobileSlider = () => {
-    const minVal = parseInt(mobileMinThumb.value);
-    const maxVal = parseInt(mobileMaxThumb.value);
-    
-    if (minVal > maxVal - 50) {
-      mobileMinThumb.value = maxVal - 50;
-    }
-    
-    const fill = document.getElementById('mobileFill');
-    if (fill) {
-      fill.style.left = (minVal / 2000) * 100 + '%';
-      fill.style.width = ((maxVal - minVal) / 2000) * 100 + '%';
-    }
-    
-    const minValue = document.getElementById('mobileMinValue');
-    const maxValue = document.getElementById('mobileMaxValue');
-    if (minValue) minValue.textContent = '₹' + minVal;
-    if (maxValue) maxValue.textContent = '₹' + maxVal;
-    
-    currentFilters.minPrice = minVal;
-    currentFilters.maxPrice = maxVal;
-  };
-
-  if (minThumb && maxThumb) {
-    minThumb.oninput = () => {
-      updateDesktopSlider();
-      applyFilters();
-    };
-    maxThumb.oninput = () => {
-      updateDesktopSlider();
-      applyFilters();
-    };
-    updateDesktopSlider();
+function updatePriceSliders(minPrice, maxPrice) {
+  // Ensure min and max are valid numbers
+  minPrice = Math.max(0, Math.floor(minPrice));
+  maxPrice = Math.max(minPrice + 100, Math.ceil(maxPrice));
+  // Update desktop sliders
+  const desktopMin = document.getElementById('minThumb');
+  const desktopMax = document.getElementById('maxThumb');
+  const desktopMinVal = document.getElementById('minValue');
+  const desktopMaxVal = document.getElementById('maxValue');
+  if (desktopMin && desktopMax) {
+    desktopMin.min = minPrice;
+    desktopMin.max = maxPrice;
+    desktopMin.value = filterState.minPrice;
+    desktopMax.min = minPrice;
+    desktopMax.max = maxPrice;
+    desktopMax.value = filterState.maxPrice;
+    if (desktopMinVal) desktopMinVal.textContent = `₹${filterState.minPrice}`;
+    if (desktopMaxVal) desktopMaxVal.textContent = `₹${filterState.maxPrice}`;
   }
-
-  if (mobileMinThumb && mobileMaxThumb) {
-    mobileMinThumb.oninput = updateMobileSlider;
-    mobileMaxThumb.oninput = updateMobileSlider;
-    updateMobileSlider();
+  // Update mobile sliders
+  const mobileMin = document.getElementById('mobileMinThumb');
+  const mobileMax = document.getElementById('mobileMaxThumb');
+  const mobileMinVal = document.getElementById('mobileMinValue');
+  const mobileMaxVal = document.getElementById('mobileMaxValue');
+  if (mobileMin && mobileMax) {
+    mobileMin.min = minPrice;
+    mobileMin.max = maxPrice;
+    mobileMin.value = filterState.minPrice;
+    mobileMax.min = minPrice;
+    mobileMax.max = maxPrice;
+    mobileMax.value = filterState.maxPrice;
+    if (mobileMinVal) mobileMinVal.textContent = `₹${filterState.minPrice}`;
+    if (mobileMaxVal) mobileMaxVal.textContent = `₹${filterState.maxPrice}`;
   }
-
-  window.updateDesktopSlider = updateDesktopSlider;
-  window.updateMobileSlider = updateMobileSlider;
 }
-
-// Mobile Sheets
-function initMobileSheets() {
-  const backdrop = document.getElementById('mobileSheetBackdrop');
-  const filterSheet = document.getElementById('filterSheet');
-  const sortSheet = document.getElementById('sortSheet');
+// ==================== INITIALIZATION ====================
+async function init() {
+  console.log('Initializing OTC page...');
+  // Initialize mobile sheets
+  initMobileSheets();
+  // Initialize price sliders
+  initPriceSliders();
+  // Initialize sort select
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) {
+    sortSelect.value = filterState.sort;
+    sortSelect.addEventListener("change", (e) => {
+      filterState.sort = e.target.value;
+      sortProducts(filterState.sort);
+      renderProducts();
+    });
+  }
+  // Initialize category filters (your HTML already has them, just add listeners)
+  initCategoryFilters();
+  // Initialize discount filters
+  initDiscountFilters();
+  // Initialize "Apply Desktop Filters" button
+  initDesktopFilterButton();
+  // Fetch initial products
+  currentUserId = await getValidUserId();
+  await fetchProducts();
+  await syncWishlist();
+  // Update header counts
+  updateHeaderCounts();
+  // Initialize banner slider
+  initBanner();
+}
+// Initialize category filters
+function initCategoryFilters() {
+  // Desktop category filters
+  document.querySelectorAll('#filterSidebar input[name="category"]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      filterState.category = e.target.value;
+      applyFilters();
+    });
+  });
+  // Mobile category filters
+  document.querySelectorAll('#filterSheet input[name="mobileCategory"]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      // Update filter state but don't apply yet
+      filterState.category = e.target.value;
+    });
+  });
+}
+// Initialize discount filters
+function initDiscountFilters() {
+  // Desktop discount filters
+  const desktopDiscountContainer = document.querySelector('#filterSidebar input[name="discount"]')?.closest('.mt-4');
+  if (desktopDiscountContainer && desktopDiscountContainer.querySelectorAll('input').length === 0) {
+    const discountOptions = [
+      { value: 0, label: 'All Products' },
+      { value: 10, label: '10% or more' },
+      { value: 20, label: '20% or more' },
+      { value: 30, label: '30% or more' }
+    ];
+    let html = '';
+    discountOptions.forEach(option => {
+      html += `
+        <label class="flex items-center"><input type="radio" name="discount" value="${option.value}" ${filterState.discount === option.value ? 'checked' : ''} class="w-5 h-5 text-primary"> <span class="ml-3 text-gray-700">${option.label}</span></label>
+      `;
+    });
+    desktopDiscountContainer.innerHTML = html;
+    desktopDiscountContainer.querySelectorAll('input[name="discount"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        filterState.discount = parseInt(e.target.value);
+        applyFilters();
+      });
+    });
+  }
+  // Mobile discount filters (already in HTML)
+  document.querySelectorAll('#filterSheet input[name="mobileDiscount"]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      filterState.discount = parseInt(e.target.value);
+    });
+  });
+}
+// Initialize desktop filter button
+function initDesktopFilterButton() {
+  const applyDesktopBtn = document.getElementById('applyDesktopFilters');
+  if (applyDesktopBtn) {
+    applyDesktopBtn.addEventListener('click', () => {
+      // Get current filter values
+      const category = document.querySelector('#filterSidebar input[name="category"]:checked')?.value || 'all';
+      const brand = document.querySelector('#filterSidebar input[name="brand"]:checked')?.value || 'all';
+      const discount = parseInt(document.querySelector('#filterSidebar input[name="discount"]:checked')?.value || '0');
   
-  // Open Filter Sheet
-  document.getElementById('openFilterSheet')?.addEventListener('click', () => {
-    backdrop.classList.remove('hidden');
-    filterSheet.classList.remove('translate-y-full');
-  });
-
-  // Close Filter Sheet
-  const closeFilterSheet = () => {
-    backdrop.classList.add('hidden');
-    filterSheet.classList.add('translate-y-full');
-  };
-
-  document.getElementById('closeFilterSheet')?.addEventListener('click', closeFilterSheet);
-  window.closeFilterSheet = closeFilterSheet;
-
-  // Open Sort Sheet
-  document.getElementById('openSortSheet')?.addEventListener('click', () => {
-    backdrop.classList.remove('hidden');
-    sortSheet.classList.remove('translate-y-full');
-  });
-
-  // Close Sort Sheet
-  const closeSortSheet = () => {
-    backdrop.classList.add('hidden');
-    sortSheet.classList.add('translate-y-full');
-  };
-
-  document.getElementById('closeSortSheet')?.addEventListener('click', closeSortSheet);
-  window.closeSortSheet = closeSortSheet;
-
-  // Click backdrop to close
-  backdrop.addEventListener('click', () => {
-    closeFilterSheet();
-    closeSortSheet();
+      filterState.category = category;
+      filterState.brand = brand;
+      filterState.discount = discount;
+  
+      applyFilters();
+    });
+  }
+}
+// Initialize banner slider
+function initBanner() {
+  const slides = document.querySelectorAll('.banner-slide');
+  const dots = document.querySelectorAll('.banner-dot');
+  if (slides.length === 0) return;
+  let currentSlide = 0;
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === index);
+    });
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+    currentSlide = index;
+  }
+  // Auto-rotate slides every 5 seconds
+  setInterval(() => {
+    let nextSlide = currentSlide + 1;
+    if (nextSlide >= slides.length) {
+      nextSlide = 0;
+    }
+    showSlide(nextSlide);
+  }, 5000);
+  // Add click handlers to dots
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      showSlide(index);
+    });
   });
 }
-
-window.sortProducts = function(type) {
-  sortSelect.value = type;
-  sortSelect.dispatchEvent(new Event('change'));
-  document.getElementById('mobileSheetBackdrop')?.click();
-};
+// ==================== MOBILE SHEETS ====================
+function initMobileSheets() {
+  const backdrop = document.getElementById("mobileSheetBackdrop");
+  const filterSheet = document.getElementById("filterSheet");
+  const sortSheet = document.getElementById("sortSheet");
+  if (!backdrop || !filterSheet || !sortSheet) {
+    console.warn('Mobile sheet elements not found');
+    return;
+  }
+  // Open Filter Sheet
+  document.getElementById("openFilterSheet")?.addEventListener("click", () => {
+    filterSheet.classList.remove("translate-y-full");
+    backdrop.classList.remove("hidden");
+  });
+  // Open Sort Sheet
+  document.getElementById("openSortSheet")?.addEventListener("click", () => {
+    sortSheet.classList.remove("translate-y-full");
+    backdrop.classList.remove("hidden");
+  });
+  // Close Filter Sheet
+  document.getElementById("closeFilterSheet")?.addEventListener("click", () => {
+    filterSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+  // Close Sort Sheet
+  document.getElementById("closeSortSheet")?.addEventListener("click", () => {
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+  // Close on backdrop click
+  backdrop.addEventListener("click", () => {
+    filterSheet.classList.add("translate-y-full");
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+  // Apply Mobile Filters
+  document.getElementById("applyMobileFilters")?.addEventListener("click", () => {
+    const category = document.querySelector('input[name="mobileCategory"]:checked')?.value || 'all';
+    const brand = document.querySelector('input[name="mobileBrand"]:checked')?.value || 'all';
+    const discount = parseInt(document.querySelector('input[name="mobileDiscount"]:checked')?.value || '0');
+    filterState.category = category;
+    filterState.brand = brand;
+    filterState.discount = discount;
+    applyFilters();
+    filterSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+  // Apply Mobile Sort
+  document.getElementById("applySortBtn")?.addEventListener("click", () => {
+    const sort = document.querySelector('input[name="mobileSort"]:checked')?.value || 'default';
+    filterState.sort = sort;
+    const sortSelect = document.getElementById("sortSelect");
+    if (sortSelect) sortSelect.value = sort;
+    sortProducts(sort);
+    renderProducts();
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+  // Clear Mobile Filters
+  document.getElementById("clearMobileFilters")?.addEventListener("click", () => {
+    clearFilters();
+    filterSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+}
+// ==================== ON LOAD ====================
+document.addEventListener("DOMContentLoaded", init);

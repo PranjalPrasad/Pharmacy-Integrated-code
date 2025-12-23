@@ -1,646 +1,1431 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // ================
-  // Data & Configuration
-  // ================
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  let products = []; // Will be populated from backend
-  const API_BASE_URL = 'http://localhost:8083/api/products'; // Update with your backend URL
+// ==================== fertility.js – CONNECTED TO BACKEND ====================
 
-  // ================
-  // DOM Elements
-  // ================
-  const productGrid = document.getElementById('productGrid');
-  const categoryList = document.getElementById('categoryList');
-  const brandList = document.getElementById('brandList');
-  const brandToggle = (brandList && brandList.previousElementSibling) ? brandList.previousElementSibling.querySelector('span') : null;
-  const brandFilters = document.querySelectorAll('.brand-filter');
-  const sortSelect = document.getElementById('sortSelect');
-  const uploadModal = document.getElementById('uploadModal');
-  const validPrescriptionModal = document.getElementById('validPrescriptionModal');
-  const validPrescriptionBtn = document.getElementById('validPrescriptionBtn');
-  const cartCountElement = document.getElementById('cart-count');
+// Base API URL - Update this to your backend URL
+const API_BASE_URL = 'http://localhost:8083/api/products';
+const WISHLIST_API_BASE = 'http://localhost:8083/api/wishlist';
+// Global State
+let allProducts = [];
+let filteredProducts = [];
+let wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+let currentPage = 1;
+const pageSize = 12;
 
-  // keep track of active filters
-  let activeCategory = null; // null = all
-  let activeSort = null;
-  let allBrands = new Set();
+// Enable debug mode
+const DEBUG_MODE = true;
 
-  // ================
-  // API Functions
-  // ================
-  async function fetchProducts() {
-    try {
-      showLoadingState();
-      // Fetch products by subcategory "digestive" - using the correct endpoint
-      const encodedSubCategory = encodeURIComponent('digestive');
-      const response = await fetch(`${API_BASE_URL}/get-by-sub-category/${encodedSubCategory}`);
-      
-      if (!response.ok) throw new Error('Failed to fetch products by subcategory');
-      
-      const data = await response.json();
-      products = Array.isArray(data) ? data : []; // Handle array response
-      
-      // Transform backend data to frontend format
-      products = products.map(product => transformProductData(product));
-      
-      // Filter products to ensure only "digestive" subcategory products are shown
-      products = products.filter(product => 
-        product.subCategory && product.subCategory.toLowerCase() === 'digestive'
-      );
-      
-      // Extract unique brands for filtering
-      allBrands = new Set(products.map(p => p.brand).filter(Boolean));
-      updateBrandFilters();
-      
-      displayProducts(products);
-      updateCategoryList();
-      
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      showErrorState('Failed to load Digestive Care products. Please try again later.');
-      // Fallback to empty products array
-      products = [];
+// Persistent Filter State
+let filterState = {
+  category: 'all',
+  brand: 'all',
+  discount: 0,
+  minPrice: 0,
+  maxPrice: 3000,
+  sort: 'default'
+};
+const FERTILITY_CATEGORIES = [
+  {
+    id: 'all',
+    name: 'All Fertility Products',
+    backendSubcategories: []
+  },
+  {
+    id: 'male',
+    name: 'Male Infertility',
+    backendSubcategories: [
+      'Male Fertility',
+      'Male Infertility',
+      'Male Reproductive',
+      'Sperm Health',
+      'Sperm Count',
+      'Sperm Motility',
+      'Testosterone',
+      'Shilajit',
+      'Maca Root',
+      'Tribulus',
+      'Ashwagandha Male', // More specific
+      'Zinc Male' // More specific
+    ]
+  },
+  {
+    id: 'female',
+    name: 'Female Infertility',
+    backendSubcategories: [
+      'Female Fertility',
+      'Female Infertility',
+      'Female Reproductive',
+      'Ovulation',
+      'Menstrual Health',
+      'PCOS',
+      'Folic Acid',
+      'Shatavari',
+      'CoQ10',
+      'Vitamin E',
+      'Ashwagandha Female', // More specific
+      'Prenatal' // More specific
+    ]
+  },
+  {
+    id: 'ayurvedic',
+    name: 'Ayurvedic Supplements',
+    backendSubcategories: [
+      'Ayurvedic Fertility',
+      'Ayurvedic',
+      'Herbal Ayurvedic',
+      'Ashwagandha',
+      'Gokshura',
+      'Kapikacchu',
+      'Fenugreek',
+      'Shatavari',
+      'Tribulus',
+      'Shilajit',
+      'Herbal'
+    ]
+  },
+  {
+    id: 'vitamins',
+    name: 'Vitamins & Minerals',
+    backendSubcategories: [
+      'Fertility Vitamins',
+      'Multivitamin',
+      'Vitamin',
+      'Mineral',
+      'Zinc',
+      'Selenium',
+      'Vitamin B',
+      'Vitamin D',
+      'Vitamin E',
+      'Folic Acid',
+      'CoQ10',
+      'Minerals'
+    ]
+  },
+  {
+    id: 'herbal',
+    name: 'Herbal Teas & Powders',
+    backendSubcategories: [
+      'Herbal Tea',
+      'Fertility Tea',
+      'Tea',
+      'Herbal Powder',
+      'Powder',
+      'Red Clover',
+      'Herbal Blend',
+      'Green Tea'
+    ]
+  }
+];
+// Category Display Names
+const categoryDisplayNames = {
+  'all': 'All Fertility Products',
+  'male': 'Male Fertility Support',
+  'female': 'Female Fertility Support',
+  'ayurvedic': 'Ayurvedic Fertility Supplements',
+  'vitamins': 'Vitamins & Minerals',
+  'herbal': 'Herbal Teas & Powders'
+};
+// Helper: Safe text update
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+// Update page title based on category
+function updatePageTitle() {
+  const titleEl = document.getElementById('pageTitle');
+  if (titleEl) {
+    if (filterState.category === 'all') {
+      titleEl.textContent = 'All Fertility Products';
+    } else {
+      const category = FERTILITY_CATEGORIES.find(cat => cat.id === filterState.category);
+      titleEl.textContent = category ? category.name : 'Fertility Products';
     }
   }
-
-  // Transform backend product data to frontend format
-  function transformProductData(backendProduct) {
-    return {
-      // Frontend fields -> Backend fields mapping
-      id: backendProduct.productId,
-      productId: backendProduct.productId,
-      name: backendProduct.productName,
-      productName: backendProduct.productName,
-      price: backendProduct.productPrice || backendProduct.price,
-      originalPrice: backendProduct.productOldPrice || backendProduct.mrp,
-      mrp: backendProduct.productOldPrice || backendProduct.mrp,
-      discount: calculateDiscount(backendProduct.productPrice, backendProduct.productOldPrice || backendProduct.mrp),
-      category: backendProduct.productCategory,
-      subCategory: backendProduct.productSubCategory,
-      brand: backendProduct.brandName || backendProduct.brand,
-      image: backendProduct.productMainImage || backendProduct.image,
-      productMainImage: backendProduct.productMainImage,
-      prescriptionRequired: backendProduct.prescriptionRequired || false,
-      description: backendProduct.productDescription,
-      stock: backendProduct.productStock,
-      status: backendProduct.productStatus,
-      // Include all backend fields for compatibility
-      ...backendProduct
-    };
+}
+// Debug logging function
+function debugLog(...args) {
+  if (DEBUG_MODE) {
+    console.log('[DEBUG]', ...args);
   }
-
-  function calculateDiscount(currentPrice, originalPrice) {
-    if (!originalPrice || originalPrice <= currentPrice) return '';
-    const discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
-    return `${discountPercent}% off`;
-  }
-
-  async function fetchProductsByCategory(category) {
-    try {
-      showLoadingState();
-      const encodedCategory = encodeURIComponent(category);
-      const response = await fetch(`${API_BASE_URL}/get-by-category/${encodedCategory}`);
-      
-      if (!response.ok) throw new Error('Failed to fetch products by category');
-      
-      const categoryProducts = await response.json();
-      // Transform the category products as well
-      const transformedProducts = categoryProducts.map(product => transformProductData(product));
-      
-      // Filter for Digestive products only from this category
-      return transformedProducts.filter(product => 
-        product.subCategory && product.subCategory.toLowerCase() === 'digestive'
-      );
-      
-    } catch (error) {
-      console.error('Error fetching products by category:', error);
-      return [];
-    }
-  }
-
-  async function fetchProductDetails(productId) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/get-product/${productId}`);
-      if (!response.ok) throw new Error('Failed to fetch product details');
-      const product = await response.json();
-      return transformProductData(product);
-    } catch (error) {
-      console.error('Error fetching product details:', error);
-      return null;
-    }
-  }
-
-  // ================
-  // UI Helpers
-  // ================
-  function showLoadingState() {
-    if (!productGrid) return;
-    productGrid.innerHTML = `
-      <div class="col-span-full flex justify-center items-center py-8">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <span class="ml-3 text-gray-600">Loading Digestive Care products...</span>
-      </div>
-    `;
-  }
-
-  function showErrorState(message) {
-    if (!productGrid) return;
-    productGrid.innerHTML = `
-      <div class="col-span-full text-center py-8">
-        <p class="text-red-600 mb-4">${message}</p>
-        <button onclick="fetchProducts()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-          Retry
-        </button>
-      </div>
-    `;
-  }
-
-  function updateBrandFilters() {
-    if (!brandList) return;
-    
-    // Clear existing brand filters (keep the structure)
-    const brandFilterContainer = brandList.querySelector('.space-y-2');
-    if (brandFilterContainer) {
-      brandFilterContainer.innerHTML = '';
-      
-      allBrands.forEach(brand => {
-        if (brand) { // Only add if brand is not null/undefined
-          const label = document.createElement('label');
-          label.className = 'flex items-center space-x-2';
-          label.innerHTML = `
-            <input type="checkbox" class="brand-filter rounded text-blue-600" value="${escapeHtml(brand)}">
-            <span class="text-sm text-gray-700">${escapeHtml(brand)}</span>
-          `;
-          brandFilterContainer.appendChild(label);
-        }
-      });
-      
-      // Reattach event listeners to new brand filters
-      const newBrandFilters = brandFilterContainer.querySelectorAll('.brand-filter');
-      newBrandFilters.forEach(filter => {
-        filter.addEventListener('change', () => {
-          applyFilters(products);
-        });
-      });
-    }
-  }
-
-  function updateCategoryList() {
-    if (!categoryList) return;
-    
-    const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-    
-    // Update category list with actual categories from backend
-    const categoryLinks = categoryList.querySelectorAll('.category-link');
-    categoryLinks.forEach(link => {
-      const categoryText = link.textContent.trim();
-      if (!categories.includes(categoryText)) {
-        link.parentElement.style.display = 'none';
-      } else {
-        link.parentElement.style.display = 'block';
+}
+// ==================== FETCH PRODUCTS FROM BACKEND ====================
+async function fetchProducts() {
+  try {
+    debugLog('Starting fetchProducts for Fertility...');
+    setText("resultsCount", "Loading products...");
+   
+    // Clear existing products
+    allProducts = [];
+    filteredProducts = [];
+   
+    // Fetch ALL products
+    const url = `${API_BASE_URL}/get-all-products?page=0&size=200`;
+   
+    debugLog('Fetching from URL:', url);
+   
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     });
-  }
-
-  function updateCartCount() {
-    if (!cartCountElement) return;
-    const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-    cartCountElement.textContent = totalItems;
-    localStorage.setItem('cartCount', totalItems);
-  }
-
-  // Initialize cart from localStorage
-  (function loadCart() {
-    const stored = JSON.parse(localStorage.getItem('cart') || 'null');
-    if (Array.isArray(stored)) cart = stored;
-    updateCartCount();
-  })();
-
-  // ================
-  // Product Rendering
-  // ================
-  function createProductCard(product) {
-    const productDiv = document.createElement('div');
-    productDiv.className = 'product-card bg-white p-4 shadow rounded-lg flex flex-col justify-between relative cursor-pointer hover:shadow-lg transition-shadow';
-
-    const prescriptionBadge = product.prescriptionRequired
-      ? '<div class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">Rx Required</div>'
-      : '';
-
-    // Generate image URL - using main image from backend
-    const imageUrl = product.productMainImage && !product.productMainImage.startsWith('http')
-      ? `${API_BASE_URL}/${product.productId}/image`
-      : product.image || product.productMainImage || 'https://via.placeholder.com/150?text=No+Image';
-
-    const originalPrice = product.originalPrice || product.mrp || product.productOldPrice;
-    const currentPrice = product.price || product.productPrice;
-    const discount = product.discount || calculateDiscount(currentPrice, originalPrice);
-
-    // Safely format prices
-    const formattedPrice = currentPrice ? currentPrice.toFixed(2) : '0.00';
-    const formattedOriginalPrice = originalPrice ? originalPrice.toFixed(2) : null;
-
-    const actionButton = product.prescriptionRequired
-      ? `<button 
-            class="mt-3 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition flex items-center justify-center gap-2 upload-pres-btn" 
-            data-product='${escapeHtml(JSON.stringify(product))}'>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Upload Prescription
-          </button>`
-      : `<button 
-            class="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition flex items-center justify-center gap-2 add-to-cart-btn" 
-            data-id="${product.id}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            View Details
-          </button>`;
-
-    productDiv.innerHTML = `
-      ${prescriptionBadge}
-      <img src="${imageUrl}" alt="${escapeHtml(product.name)}" class="product-image w-full h-32 object-cover rounded-lg mb-3" onerror="this.src='https://via.placeholder.com/150?text=Image+Error'">
-      <p class="text-sm text-gray-600 font-medium">${escapeHtml(product.name)}</p>
-      <p class="text-xs text-gray-500">${escapeHtml(product.brand)}</p>
-      ${product.prescriptionRequired ? '<p class="text-red-600 text-xs mt-1 font-semibold">⚠️ Prescription needed</p>' : ''}
-      <p class="text-green-600 font-bold mt-2">₹${formattedPrice} 
-        ${formattedOriginalPrice ? `<span class="text-gray-500 line-through text-sm">₹${formattedOriginalPrice}</span> <span class="text-green-600 text-sm">${discount}</span>` : ''}</p>
-      ${actionButton}
-    `;
-
-    // click handlers
-    productDiv.addEventListener('click', (event) => {
-      if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
-      if (product.prescriptionRequired) {
-        openUploadModalForProduct(product);
-      } else {
-        openProductDetails(product);
-      }
-    });
-
-    return productDiv;
-  }
-
-  function displayProducts(list) {
-    if (!productGrid) return;
-    productGrid.innerHTML = '';
-    
-    if (list.length === 0) {
-      productGrid.innerHTML = `
-        <div class="col-span-full text-center py-8">
-          <p class="text-gray-500">No Digestive Care products found.</p>
-          <p class="text-sm text-gray-400 mt-2">Try checking back later or browse other categories</p>
+   
+    debugLog('Response status:', response.status, response.statusText);
+   
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+   
+    const data = await response.json();
+   
+    processProducts(data);
+   
+  } catch (error) {
+    console.error('Error in fetchProducts:', error);
+    showToast('Error loading products. Please check console for details.');
+    setText("resultsCount", "Failed to load products");
+   
+    // Show empty state
+    const grid = document.getElementById("productsGrid");
+    if (grid) {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-10">
+          <div class="text-gray-400 mb-4">
+            <i class="fas fa-exclamation-triangle text-5xl"></i>
+          </div>
+          <p class="text-gray-500 mb-2">Failed to load products</p>
+          <p class="text-gray-400 text-sm">Error: ${error.message}</p>
+          <button onclick="fetchProducts()" class="mt-4 px-4 py-2 bg-[#36C2CE] text-white rounded-lg">
+            Retry
+          </button>
         </div>
       `;
-      return;
     }
-    
-    list.forEach(product => productGrid.appendChild(createProductCard(product)));
   }
-
-  // ================
-  // Product interactions
-  // ================
-  function openProductDetails(product) {
-    const productDetailsUrl = `/productdetails.html?id=${product.id}`;
-    window.location.href = productDetailsUrl;
+}
+function processProducts(data) {
+  debugLog('API Response data:', data);
+ 
+  // Handle different response formats
+  let productsArray = [];
+ 
+  if (Array.isArray(data)) {
+    productsArray = data;
+  } else if (data.content && Array.isArray(data.content)) {
+    productsArray = data.content;
+  } else if (data.products && Array.isArray(data.products)) {
+    productsArray = data.products;
+  } else if (typeof data === 'object' && data !== null) {
+    productsArray = [data];
   }
-  window.openProductDetails = openProductDetails;
-
-  function addToCartById(productId) {
-    const product = products.find(p => p.id == productId);
-    if (!product) return;
-    const existing = cart.find(item => item.id === productId);
-    if (existing) existing.quantity = (existing.quantity || 1) + 1;
-    else cart.push({ ...product, quantity: 1 });
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
+ 
+  debugLog('Total products from API:', productsArray.length);
+ 
+  if (productsArray.length === 0) {
+    debugLog('No products received from API');
+    showToast('No products available. Please try again later.');
   }
-  window.addToCart = addToCartById;
-
-  // ================
-  // Category & Brand Filters
-  // ================
-  categoryList?.addEventListener('click', async (e) => {
-    // expand toggle
-    if (e.target.classList.contains('expand-toggle')) {
-      const li = e.target.parentElement;
-      const subcategory = li.querySelector('.subcategory');
-      if (subcategory) {
-        subcategory.classList.toggle('hidden');
-      } else {
-        const category = li.querySelector('.category-link')?.textContent?.trim();
-        if (category) {
-          const categoryProducts = await fetchProductsByCategory(category);
-          const subItems = [...new Set(categoryProducts.map(p => p.name))];
-          if (subItems.length) {
-            const ul = document.createElement('ul');
-            ul.className = 'subcategory hidden ml-4 space-y-2';
-            subItems.forEach(item => {
-              const li2 = document.createElement('li');
-              li2.innerHTML = `<a href="#" class="subcategory-link text-sm text-gray-600 hover:text-primary">${escapeHtml(item)}</a>`;
-              ul.appendChild(li2);
-            });
-            li.appendChild(ul);
-            ul.classList.toggle('hidden');
-          }
-        }
-      }
-      e.target.textContent = e.target.textContent === '+' ? '-' : '+';
-      return;
-    }
-
-    // filter by category link or subcategory link
-    if (e.target.classList.contains('category-link') || e.target.classList.contains('subcategory-link')) {
-      e.preventDefault();
-      const text = e.target.textContent.trim();
-      
-      if (e.target.classList.contains('subcategory-link')) {
-        // Filter by product name locally
-        const filtered = products.filter(p => p.name === text);
-        activeCategory = text;
-        applyFilters(filtered);
-      } else {
-        // Fetch products by category from backend
-        activeCategory = text;
-        showLoadingState();
-        const categoryProducts = await fetchProductsByCategory(text);
-        applyFilters(categoryProducts);
-      }
-    }
+ 
+  // Transform ALL products first
+  const allTransformedProducts = transformBackendProducts(productsArray);
+ 
+  // DEBUG: Check each product
+  debugLog('=== CHECKING FERTILITY PRODUCT SUB CATEGORIES ===');
+  allTransformedProducts.forEach(product => {
+    debugLog(`Product: "${product.title}" - Subcategory: "${product.subcategory}"`);
   });
-
-  // brand toggle (expand/collapse)
-  if (brandToggle) {
-    brandToggle.addEventListener('click', () => {
-      brandList.classList.toggle('hidden');
-      brandToggle.textContent = brandToggle.textContent === '+' ? '-' : '+';
+  debugLog('=== END CHECK ===');
+ 
+  // Get all unique subcategories from products
+  const allSubcategories = [...new Set(allTransformedProducts.map(p => p.subcategory))];
+  debugLog('All subcategories in DB:', allSubcategories);
+ 
+  // FILTER: Only keep products that match our Fertility categories
+  allProducts = allTransformedProducts.filter(product => {
+    const productSubcategory = product.subcategory || '';
+   
+    // Check if this product's subcategory matches any Fertility category
+    const isFertilityProduct = FERTILITY_CATEGORIES.some(category => {
+      if (category.id === 'all') return false; // Skip "all" category
+     
+      return category.backendSubcategories.some(backendSubcat => {
+        // Case-insensitive comparison
+        const productSubLower = productSubcategory.toLowerCase();
+        const backendSubLower = backendSubcat.toLowerCase();
+       
+        // Check for exact match or partial match
+        return productSubLower === backendSubLower ||
+               productSubLower.includes(backendSubLower) ||
+               backendSubLower.includes(productSubLower);
+      });
+    });
+   
+    if (!isFertilityProduct) {
+      debugLog(`Filtered out (non-Fertility): ${product.title} - ${product.subcategory}`);
+    }
+   
+    return isFertilityProduct;
+  });
+ 
+  debugLog('Fertility products after filtering:', allProducts.length);
+  debugLog('Fertility product subcategories:', [...new Set(allProducts.map(p => p.subcategory))]);
+ 
+  // Apply filters and update UI
+  applyFilters();
+  updateUIWithProducts();
+}
+// Transform backend product format to frontend format
+function transformBackendProducts(backendProducts) {
+  if (!Array.isArray(backendProducts) || backendProducts.length === 0) {
+    return [];
+  }
+ 
+  debugLog('Transforming', backendProducts.length, 'products');
+ 
+  return backendProducts.map((product, index) => {
+    try {
+      // Extract basic fields
+      const id = product.productId || product.id || index + 1;
+      const title = product.productName || product.name || 'Unnamed Product';
+      const price = Number(product.productPrice || product.price || 100);
+      const originalPrice = Number(product.productOldPrice || product.originalPrice || product.mrp || price * 1.2);
+      const discount = originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+     
+      // Get subcategory - this is in productSubCategory field
+      const subcategory = product.productSubCategory || 'Unknown';
+     
+      // Get brand - this is in brandName field
+      const brand = product.brandName || product.brand || product.manufacturer || 'Generic';
+     
+      const description = product.productDescription || product.description || 'No description available';
+      const stockQuantity = product.productQuantity || product.stockQuantity || product.quantity || 0;
+      const inStock = product.productStock === 'In-Stock' || stockQuantity > 0;
+     
+      // Get image URL
+      let imageUrl = 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop';
+     
+      if (product.productMainImage) {
+        // Check if it's a path starting with /api/
+        if (product.productMainImage.startsWith('/api/')) {
+          // It's a relative path, make it absolute
+          imageUrl = `http://localhost:8083${product.productMainImage}`;
+        }
+        // Check if it's base64
+        else if (product.productMainImage.startsWith('data:image')) {
+          imageUrl = product.productMainImage;
+        }
+        // Check if it's a URL
+        else if (product.productMainImage.startsWith('http')) {
+          imageUrl = product.productMainImage;
+        }
+        // Otherwise assume it's base64
+        else {
+          imageUrl = `data:image/jpeg;base64,${product.productMainImage}`;
+        }
+      } else if (product.productId) {
+        imageUrl = `${API_BASE_URL}/${product.productId}/image`;
+      }
+     
+      // Generate SKU if not available
+      const sku = product.sku || `F${String(id).padStart(4, '0')}`;
+     
+      return {
+        id: id,
+        title: title,
+        price: price,
+        originalPrice: originalPrice,
+        discount: discount,
+        rating: product.rating || product.productRating || 4.0,
+        reviewCount: product.reviewCount || product.totalReviews || Math.floor(Math.random() * 1000),
+        subcategory: subcategory,
+        brand: brand,
+        image: imageUrl,
+        description: description,
+        inStock: inStock,
+        stockQuantity: stockQuantity,
+        sku: sku
+      };
+    } catch (error) {
+      console.error('Error transforming product:', product, error);
+      return null;
+    }
+  }).filter(product => product !== null);
+}
+// Update UI with loaded products
+function updateUIWithProducts() {
+  // Update brands dropdown
+  updateBrandsDropdown();
+ 
+  // Update categories dropdown (Fertility categories)
+  updateCategoriesDropdown();
+ 
+  // Update price range
+  updatePriceRange();
+ 
+  // Initialize filter event listeners <-- ADD THIS LINE
+  initFilterEventListeners();
+ 
+  // Sync filter states <-- ADD THIS LINE
+  syncFilterStates();
+ 
+  // Render products
+  renderProducts();
+}
+// Find your existing init function and ADD the call:
+async function init() {
+  console.log('Initializing Fertility Essentials page...');
+ 
+  // Initialize mobile sheets
+  initMobileSheets();
+ 
+  // Initialize price sliders
+  initPriceSliders();
+ 
+  // Initialize sort select
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) {
+    sortSelect.value = filterState.sort;
+    sortSelect.addEventListener("change", (e) => {
+      filterState.sort = e.target.value;
+      sortProducts(filterState.sort);
+      renderProducts();
     });
   }
-
-  // sorting
-  sortSelect?.addEventListener('change', () => {
-    activeSort = sortSelect.value;
-    applyFilters(products);
-  });
-
-  // Apply filters
-  function applyFilters(startList) {
-    let list = Array.isArray(startList) ? [...startList] : [...products];
-
-    // brand filters
-    const selectedBrands = Array.from(document.querySelectorAll('.brand-filter:checked')).map(f => f.value);
-    if (selectedBrands.length > 0) {
-      list = list.filter(p => selectedBrands.includes(p.brand));
-    }
-
-    // sorting
-    if (activeSort === 'Price: Low to High') {
-      list.sort((a, b) => (a.price || 0) - (b.price || 0));
-    } else if (activeSort === 'Price: High to Low') {
-      list.sort((a, b) => (b.price || 0) - (a.price || 0));
-    } else if (activeSort === 'Discount') {
-      list.sort((a, b) => {
-        const discountA = a.mrp ? ((a.mrp - a.price) / a.mrp) * 100 : 0;
-        const discountB = b.mrp ? ((b.mrp - b.price) / b.mrp) * 100 : 0;
-        return discountB - discountA;
-      });
-    }
-    displayProducts(list);
+ 
+  // Initialize discount filters
+  initDiscountFilters();
+ 
+  // Initialize "Show More" button
+  const showMoreBtn = document.getElementById('showMoreBtn');
+  if (showMoreBtn) {
+    showMoreBtn.addEventListener('click', showMoreProducts);
   }
-
-  // ================
-  // Upload Prescription Modal Integration
-  // ================
-  function openUploadModalForProduct(product) {
-    if (!uploadModal) {
-      window.location.href = `/prescribed.html?id=${product.id}`;
-      return;
-    }
-
-    uploadModal.dataset.productId = product.id;
-    const modalProductName = uploadModal.querySelector('#modalProductName') || document.getElementById('modalProductName');
-    if (modalProductName) modalProductName.textContent = `Upload Prescription for: ${product.name}`;
-
-    const modalProductImage = uploadModal.querySelector('.modal-product-image');
-    if (modalProductImage) {
-      const imageUrl = product.productMainImage && !product.productMainImage.startsWith('http')
-        ? `${API_BASE_URL}/${product.id}/image`
-        : product.image || product.productMainImage || 'https://via.placeholder.com/150?text=No+Image';
-      modalProductImage.src = imageUrl;
-    }
-
-    let fileInput = uploadModal.querySelector('#prescriptionFile');
-    if (!fileInput) {
-      fileInput = uploadModal.querySelector('input[type="file"]');
-    }
-    if (!fileInput) {
-      fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = 'image/*,.pdf';
-      fileInput.id = 'prescriptionFile';
-      fileInput.className = 'hidden';
-      uploadModal.querySelector('label')?.appendChild(fileInput) || uploadModal.appendChild(fileInput);
-    }
-
-    const fileNameDisplay = uploadModal.querySelector('#fileNameDisplay') || document.getElementById('fileNameDisplay');
-
-    const newFileInput = fileInput.cloneNode();
-    newFileInput.id = fileInput.id;
-    newFileInput.accept = fileInput.accept;
-    newFileInput.className = fileInput.className;
-    fileInput.parentNode.replaceChild(newFileInput, fileInput);
-    fileInput = newFileInput;
-
-    fileInput.addEventListener('change', function () {
-      const file = fileInput.files[0];
-      if (!file) {
-        if (fileNameDisplay) fileNameDisplay.textContent = '';
-        return;
-      }
-      if (fileNameDisplay) fileNameDisplay.textContent = file.name;
-
-      if (file.type.startsWith('image/')) {
-        const previewImg = uploadModal.querySelector('#prescriptionPreviewImg');
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          if (previewImg) {
-            previewImg.src = evt.target.result;
-            previewImg.classList.remove('hidden');
-          }
-          uploadModal.dataset.tempDataURL = evt.target.result;
-          uploadModal.dataset.tempFileName = file.name;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        uploadModal.dataset.tempDataURL = '';
-        uploadModal.dataset.tempFileName = file.name;
-      }
+ 
+  // Initialize filter event listeners <-- ADD THIS LINE
+  initFilterEventListeners();
+ 
+  currentUserId = await getValidUserId();
+  await loadWishlistFromBackend();
+ 
+  // Fetch initial products
+  await fetchProducts();
+ 
+  // Update header counts
+  updateHeaderCounts();
+ 
+  // Initialize banner slider
+  initBannerSlider();
+}
+// Update brands dropdown
+function updateBrandsDropdown() {
+  const brands = [...new Set(allProducts.map(p => p.brand).filter(Boolean))];
+  brands.sort();
+ 
+  debugLog('Available brands:', brands);
+ 
+  // Update desktop brands (inside sidebar - it's hidden by default, need to populate)
+  const desktopBrands = document.querySelector('#filterSidebar [name="brand"]')?.closest('.mt-2');
+  if (desktopBrands && desktopBrands.querySelectorAll('input').length === 0) {
+    let html = `
+      <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer">
+        <input type="radio" name="brand" value="all" ${filterState.brand === 'all' ? 'checked' : ''} class="w-4 h-4 text-blue-600">
+        <span class="text-sm">All Brands</span>
+      </label>
+    `;
+   
+    brands.forEach(brand => {
+      html += `
+        <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer">
+          <input type="radio" name="brand" value="${brand}" ${filterState.brand === brand ? 'checked' : ''} class="w-4 h-4 text-blue-600">
+          <span class="text-sm">${brand}</span>
+        </label>
+      `;
     });
-
-    const label = uploadModal.querySelector('label');
-    if (label) {
-      label.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        const fi = uploadModal.querySelector('#prescriptionFile');
-        if (fi) fi.click();
-      }, { once: true });
-    }
-
-    const submitBtn = uploadModal.querySelector('#submitPrescription') || document.getElementById('submitPrescription');
-    if (submitBtn) {
-      const newBtn = submitBtn.cloneNode(true);
-      submitBtn.parentNode.replaceChild(newBtn, submitBtn);
-      newBtn.addEventListener('click', () => {
-        const prodId = uploadModal.dataset.productId;
-        const tmpName = uploadModal.dataset.tempFileName;
-        const tmpData = uploadModal.dataset.tempDataURL || null;
-        
-        const fi = uploadModal.querySelector('#prescriptionFile');
-        if (!tmpName && fi && fi.files[0]) {
-          const file = fi.files[0];
-          const reader = new FileReader();
-          reader.onload = function (evt) {
-            savePrescription(prodId, file.name, evt.target.result);
-            uploadModal.classList.add('hidden');
-            clearModalTempState();
-          };
-          reader.readAsDataURL(file);
-          return;
-        }
-
-        if (!tmpName) {
-          alert('Please choose a prescription file before submitting.');
-          return;
-        }
-
-        savePrescription(prodId, tmpName, tmpData);
-        uploadModal.classList.add('hidden');
-        clearModalTempState();
-        alert('Prescription uploaded successfully.');
+   
+    desktopBrands.innerHTML = html;
+   
+    // Add event listeners
+    desktopBrands.querySelectorAll('input[name="brand"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        filterState.brand = e.target.value;
+        applyFilters();
       });
-    }
-
-    uploadModal.classList.remove('hidden');
-  }
-
-  function savePrescription(productId, fileName, dataURL) {
-    if (!productId) return;
-    const prescriptions = JSON.parse(localStorage.getItem('prescriptions') || '{}');
-    prescriptions[productId] = {
-      fileName,
-      dataURL: dataURL || null,
-      uploadedAt: new Date().toISOString()
-    };
-    localStorage.setItem('prescriptions', JSON.stringify(prescriptions));
-  }
-
-  function clearModalTempState() {
-    if (!uploadModal) return;
-    delete uploadModal.dataset.tempFileName;
-    delete uploadModal.dataset.tempDataURL;
-    const previewImg = uploadModal.querySelector('#prescriptionPreviewImg');
-    if (previewImg) {
-      previewImg.src = '';
-      previewImg.classList.add('hidden');
-    }
-    const fileNameDisplay = uploadModal.querySelector('#fileNameDisplay');
-    if (fileNameDisplay) fileNameDisplay.textContent = '';
-    const fi = uploadModal.querySelector('#prescriptionFile');
-    if (fi) fi.value = '';
-  }
-
-  // Event delegation for dynamic buttons
-  document.body.addEventListener('click', (e) => {
-    const up = e.target.closest('.upload-pres-btn');
-    if (up) {
-      e.stopPropagation();
-      const productData = up.getAttribute('data-product');
-      if (productData) {
-        try {
-          const product = JSON.parse(unescapeHtml(productData));
-          openUploadModalForProduct(product);
-        } catch (err) {
-          window.location.href = `/prescribed.html`;
-        }
-      }
-      return;
-    }
-
-    const atc = e.target.closest('.add-to-cart-btn');
-    if (atc) {
-      e.stopPropagation();
-      const pid = atc.getAttribute('data-id');
-      if (pid) {
-        const product = products.find(p => p.id == pid);
-        if (product) openProductDetails(product);
-      }
-      return;
-    }
-  });
-
-  // Modal close handlers
-  if (uploadModal) {
-    uploadModal.addEventListener('click', (e) => {
-      if (e.target === uploadModal) {
-        uploadModal.classList.add('hidden');
-        clearModalTempState();
-      }
     });
-
-    const closeUploadModalBtn = document.getElementById('closeUploadModal');
-    if (closeUploadModalBtn) {
-      closeUploadModalBtn.addEventListener('click', () => {
-        uploadModal.classList.add('hidden');
-        clearModalTempState();
+  }
+ 
+  // Update mobile brands (inside filter sheet)
+  const mobileBrands = document.querySelector('#filterSheet [name="mobileBrand"]')?.closest('div');
+  if (mobileBrands && mobileBrands.querySelectorAll('input').length === 0) {
+    let html = `
+      <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer">
+        <input type="radio" name="mobileBrand" value="all" ${filterState.brand === 'all' ? 'checked' : ''} class="w-4 h-4 text-blue-600">
+        <span class="text-sm">All Brands</span>
+      </label>
+    `;
+   
+    brands.forEach(brand => {
+      html += `
+        <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer">
+          <input type="radio" name="mobileBrand" value="${brand}" ${filterState.brand === brand ? 'checked' : ''} class="w-4 h-4 text-blue-600">
+          <span class="text-sm">${brand}</span>
+        </label>
+      `;
+    });
+   
+    mobileBrands.innerHTML = html;
+  }
+}
+// Update categories dropdown (Fertility categories)
+function updateCategoriesDropdown() {
+  debugLog('Updating categories dropdown with:', FERTILITY_CATEGORIES);
+ 
+  // Update desktop categories (already has static HTML, just add event listeners)
+  const desktopCategories = document.querySelector('#filterSidebar input[name="category"]')?.closest('.mt-5');
+  if (desktopCategories) {
+    // Add event listeners to existing radio buttons
+    desktopCategories.querySelectorAll('input[name="category"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        filterState.category = e.target.value;
+        debugLog('Category changed to:', filterState.category);
+        applyFilters();
       });
-    }
+    });
   }
-
-  if (validPrescriptionBtn && validPrescriptionModal) {
-    validPrescriptionBtn.addEventListener('click', () => validPrescriptionModal.classList.remove('hidden'));
-    validPrescriptionModal.addEventListener('click', (e) => { if (e.target === validPrescriptionModal) validPrescriptionModal.classList.add('hidden'); });
-    const validClose = validPrescriptionModal.querySelector('#closeValidPrescriptionModal') || validPrescriptionModal.querySelector('button');
-    if (validClose) validClose.addEventListener('click', () => validPrescriptionModal.classList.add('hidden'));
+ 
+  // Update mobile categories (in filter sheet)
+  const mobileCategories = document.querySelector('#filterSheet [name="mobileCategory"]')?.closest('div');
+  if (mobileCategories && mobileCategories.querySelectorAll('input').length === 0) {
+    let html = '';
+   
+    FERTILITY_CATEGORIES.forEach(category => {
+      html += `
+        <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer">
+          <input type="radio" name="mobileCategory" value="${category.id}" ${filterState.category === category.id ? 'checked' : ''} class="w-4 h-4 text-blue-600">
+          <span class="text-sm">${category.name}</span>
+        </label>
+      `;
+    });
+   
+    mobileCategories.innerHTML = html;
   }
-
-  // ================
-  // Utility functions
-  // ================
-  function escapeHtml(str) {
-    if (typeof str !== 'string') return str;
-    return str.replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&#039;');
-  }
-
-  function unescapeHtml(encoded) {
-    if (!encoded) return encoded;
-    return encoded.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
-  }
-
-  // ================
-  // Initialize App
-  // ================
-  // Expose functions globally
-  window.uploadPrescription = function (productObjOrId) {
-    if (typeof productObjOrId === 'number' || typeof productObjOrId === 'string') {
-      const p = products.find(x => x.id == productObjOrId);
-      if (p) openUploadModalForProduct(p);
-      else window.location.href = `/prescribed.html?id=${productObjOrId}`;
-    } else if (typeof productObjOrId === 'object' && productObjOrId !== null) {
-      openUploadModalForProduct(productObjOrId);
+}
+// Update price range
+function updatePriceRange() {
+  if (allProducts.length === 0) return;
+ 
+  const prices = allProducts.map(p => p.price).filter(p => p > 0);
+  if (prices.length === 0) return;
+ 
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+ 
+  // Update filter state with actual product prices
+  filterState.minPrice = minPrice;
+  filterState.maxPrice = Math.max(maxPrice, 3000); // Keep min 3000 as default max
+ 
+  debugLog('Price range:', minPrice, 'to', filterState.maxPrice);
+ 
+  // Update sliders if they exist
+  updatePriceSliders(minPrice, filterState.maxPrice);
+}
+function applyFilters() {
+  debugLog('Applying filters with', allProducts.length, 'products');
+  debugLog('Current filter state:', filterState);
+ 
+  // First, sync the UI with current filter state
+  syncFilterStates();
+ 
+  filteredProducts = allProducts.filter(p => {
+    // Category filter - MOST IMPORTANT FIX
+    let categoryMatch = false;
+   
+    if (filterState.category === 'all') {
+      categoryMatch = true;
     } else {
-      window.location.href = '/prescribed.html';
+      const selectedCategory = FERTILITY_CATEGORIES.find(cat => cat.id === filterState.category);
+      if (!selectedCategory || selectedCategory.id === 'all') {
+        categoryMatch = true;
+      } else {
+        const productSubcategory = (p.subcategory || '').toLowerCase().trim();
+       
+        // Check if product matches any backend subcategory for this Fertility category
+        categoryMatch = selectedCategory.backendSubcategories.some(backendSubcat => {
+          const backendSubLower = backendSubcat.toLowerCase().trim();
+         
+          // DEBUG: Log what's being compared
+          if (DEBUG_MODE) {
+            debugLog(`Comparing: "${productSubcategory}" with "${backendSubLower}"`);
+          }
+         
+          // STRICT MATCHING - Fixed the issue
+          // Only match if the product subcategory EXACTLY matches one of our fertility subcategories
+          // OR if it contains the EXACT fertility subcategory as a complete word
+          const exactMatch = productSubcategory === backendSubLower;
+         
+          // For partial matches, check if it's a COMPLETE word match, not just substring
+          // Example: "Male Infertility" should match "Infertility" (as a word)
+          // But "Female Infertility" should NOT match "Male Infertility"
+          const wordMatch = productSubcategory.split(/\s+/).some(word =>
+            word === backendSubLower || backendSubLower.split(/\s+/).some(w => w === word)
+          );
+         
+          // Also check if backend subcategory is a complete word in product subcategory
+          const containsAsWord = productSubcategory.includes(backendSubLower) &&
+                                (productSubcategory === backendSubLower ||
+                                 productSubcategory.startsWith(backendSubLower + ' ') ||
+                                 productSubcategory.endsWith(' ' + backendSubLower) ||
+                                 productSubcategory.includes(' ' + backendSubLower + ' '));
+         
+          const matches = exactMatch || wordMatch || containsAsWord;
+         
+          if (matches && DEBUG_MODE) {
+            debugLog(`✓ MATCH: Product "${p.title}" (${productSubcategory}) matches "${backendSubLower}" for category "${selectedCategory.name}"`);
+          }
+         
+          return matches;
+        });
+       
+        // If no match found with backend subcategories, try direct category mapping
+        if (!categoryMatch) {
+          // Additional check: if product subcategory contains the category name
+          const categoryNameLower = selectedCategory.name.toLowerCase();
+          if (productSubcategory.includes(categoryNameLower)) {
+            categoryMatch = true;
+            if (DEBUG_MODE) {
+              debugLog(`✓ Category name match: Product "${p.title}" contains "${categoryNameLower}"`);
+            }
+          }
+        }
+      }
+    }
+   
+    // Other filters
+    const brandMatch = filterState.brand === 'all' || p.brand === filterState.brand;
+    const discMatch = p.discount >= filterState.discount;
+    const priceMatch = p.price >= filterState.minPrice && p.price <= filterState.maxPrice;
+   
+    const matches = categoryMatch && brandMatch && discMatch && priceMatch;
+   
+    if (!matches && DEBUG_MODE) {
+      debugLog(`✗ Product "${p.title}" filtered out:`, {
+        categoryMatch,
+        brandMatch,
+        discMatch,
+        priceMatch,
+        category: filterState.category,
+        brand: filterState.brand,
+        productBrand: p.brand,
+        productDiscount: p.discount,
+        requiredDiscount: filterState.discount
+      });
+    }
+   
+    return matches;
+  });
+  debugLog('After filtering:', filteredProducts.length, 'products');
+ 
+  // Apply sorting
+  sortProducts(filterState.sort);
+ 
+  // Reset to first page
+  currentPage = 1;
+ 
+  // Render products
+  renderProducts();
+}
+// ==================== HEADER COUNTS ====================
+function updateHeaderCounts() {
+  const updateBadge = (id, count) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = count;
+      el.classList.toggle("hidden", count === 0);
     }
   };
-
-  window.addToCart = addToCartById;
-
-  // Start the application
+  const cartTotal = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  updateBadge("cartCount", cartTotal);
+  updateBadge("wishlistCount", wishlistedItems.length);
+}
+// ==================== WISHLIST ====================
+async function toggleWishlist(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (!product) return;
+  const isIn = wishlistedItems.some(item => item.productId === p.id && item.productType === "MEDICINE");
+  if (isIn) {
+    const success = await removeFromWishlistBackend(product);
+    if (success) {
+      wishlistedItems = wishlistedItems.filter(item => !(item.productId === id && item.productType === "MEDICINE"));
+      const index = wishlist.findIndex(item => item.id === id);
+      if (index > -1) {
+        wishlist.splice(index, 1);
+      }
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      showToast("Removed from wishlist ♥", "info");
+    }
+  } else {
+    const success = await addToWishlistBackend(product);
+    if (success) {
+      wishlistedItems.push({productId: id, productType: "MEDICINE"});
+      const wishlistItem = {
+        id: product.id,
+        name: product.title.split(' (')[0].trim(),
+        price: product.price,
+        originalPrice: product.originalPrice || null,
+        image: product.image,
+        brand: product.brand,
+        sku: product.sku,
+        description: product.description
+      };
+      wishlist.push(wishlistItem);
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      showToast("Added to wishlist ♥", "success");
+    }
+  }
+  updateHeaderCounts();
+  renderProducts();
+}
+function showToast(msg, type = "success") {
+  // Remove existing toast
+  const existing = document.querySelector('.custom-toast');
+  if (existing) existing.remove();
+ 
+  const toast = document.createElement("div");
+  toast.className = `custom-toast fixed bottom-20 left-1/2 -translate-x-1/2 ${type === 'success' ? 'bg-green-500' : 'bg-blue-500'} text-white px-6 py-3 rounded-full z-50 shadow-lg`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+ 
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+// ==================== PRODUCT CARD ====================
+function createProductCard(p) {
+  const inWishlist = wishlistedItems.some(item => item.productId === p.id && item.productType === "MEDICINE");
+  const isOutOfStock = !p.inStock;
+  return `
+    <div class="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-100
+                ${isOutOfStock ? 'opacity-60 grayscale cursor-not-allowed' : ''}"
+         ${!isOutOfStock ? `onclick="viewProductDetails(${p.id})"` : ''}
+         style="${isOutOfStock ? 'pointer-events: none;' : 'cursor: pointer;'}">
+      <div class="relative bg-blue-50 aspect-[6/4] overflow-hidden">
+        <img src="${p.image}" alt="${p.title}"
+             class="w-full h-full object-contain p-5 transition-transform duration-500 ${!isOutOfStock ? 'group-hover:scale-110' : ''}"
+             onerror="this.src='https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400&h=400&fit=crop'">
+        <div class="absolute top-2 left-2 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10
+                    ${isOutOfStock ? 'bg-red-600' : 'bg-green-600'}">
+          ${isOutOfStock ? 'Out of Stock' : 'In Stock'}
+        </div>
+        <button onclick="event.stopPropagation(); toggleWishlist(${p.id})"
+                class="absolute top-2 right-2 w-9 h-9 bg-white rounded-full shadow-lg flex items-center justify-center
+                       ${isOutOfStock ? 'opacity-50' : 'opacity-0 group-hover:opacity-100'} transition-opacity z-10">
+          <i class="${inWishlist ? 'fas fa-heart text-red-500' : 'far fa-heart text-gray-600'} text-lg"></i>
+        </button>
+      </div>
+      <div class="p-3">
+        <p class="text-xs text-gray-500 uppercase font-medium truncate">${p.brand || 'Brand'}</p>
+        <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mt-1">${p.title}</h3>
+        <p class="text-xs text-gray-500 mt-1">${p.subcategory || 'Fertility Product'}</p>
+        <div class="mt-2 flex items-center gap-2">
+          <span class="text-lg font-bold text-green-600">₹${p.price.toLocaleString()}</span>
+          ${p.originalPrice > p.price ? `
+            <span class="text-sm text-gray-500 line-through">₹${p.originalPrice.toLocaleString()}</span>
+          ` : ''}
+          ${p.discount > 0 ? `<span class="text-sm font-medium text-red-500">${p.discount}% OFF</span>` : ''}
+        </div>
+        <div class="flex items-center mt-2">
+          <div class="flex text-yellow-400">
+            ${'★'.repeat(Math.floor(p.rating))}${'☆'.repeat(5-Math.floor(p.rating))}
+          </div>
+          <span class="text-xs text-gray-500 ml-2">(${p.reviewCount})</span>
+        </div>
+        <button onclick="event.stopPropagation(); viewProductDetails(${p.id})"
+                class="mt-3 w-full font-medium text-sm py-2.5 rounded-lg transition
+                        ${isOutOfStock
+                          ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                          : 'bg-[#36C2CE] hover:bg-[#0a7272] text-white'}">
+          ${isOutOfStock ? 'Out of Stock' : 'View Details'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+// ==================== RENDERING ====================
+function renderProducts() {
+  debugLog('Rendering products, filteredProducts length:', filteredProducts.length);
+ 
+  const start = (currentPage - 1) * pageSize;
+  const paginated = filteredProducts.slice(start, start + pageSize);
+  const grid = document.getElementById("productsGrid");
+  if (grid) {
+    if (paginated.length > 0) {
+      grid.innerHTML = paginated.map(createProductCard).join("");
+     
+      // Show/Hide "Show More" button
+      const showMoreBtn = document.getElementById('showMoreBtn');
+      if (showMoreBtn) {
+        if (filteredProducts.length > pageSize * currentPage) {
+          showMoreBtn.classList.remove('hidden');
+        } else {
+          showMoreBtn.classList.add('hidden');
+        }
+      }
+    } else {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-10">
+          <div class="text-gray-400 mb-4">
+            <i class="fas fa-search text-5xl"></i>
+          </div>
+          <p class="text-gray-500 mb-2">No products found</p>
+          <p class="text-gray-400 text-sm">Try changing your filters</p>
+          <button onclick="clearFilters()" class="mt-4 px-4 py-2 bg-[#36C2CE] text-white rounded-lg">
+            Clear Filters
+          </button>
+        </div>
+      `;
+     
+      // Hide "Show More" button when no products
+      const showMoreBtn = document.getElementById('showMoreBtn');
+      if (showMoreBtn) showMoreBtn.classList.add('hidden');
+    }
+  }
+  setText("resultsCount", `Showing ${filteredProducts.length} products`);
+  updatePageTitle();
+  renderPagination();
+}
+function renderPagination() {
+  const container = document.getElementById("pagination");
+  if (!container) return;
+ 
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
+  container.innerHTML = "";
+ 
+  if (totalPages <= 1) return;
+ 
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.className = `px-4 py-2 rounded border mx-1 ${i === currentPage ? 'bg-[#36C2CE] text-white' : 'bg-white text-blue-600 border-blue-300 hover:bg-blue-50'}`;
+    btn.onclick = () => {
+      currentPage = i;
+      renderProducts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    container.appendChild(btn);
+  }
+}
+// Show more products function
+function showMoreProducts() {
+  if (filteredProducts.length > pageSize * currentPage) {
+    currentPage++;
+    renderProducts();
+  }
+}
+function sortProducts(type) {
+  switch (type) {
+    case 'price-low':
+      filteredProducts.sort((a, b) => a.price - b.price);
+      break;
+    case 'price-high':
+      filteredProducts.sort((a, b) => b.price - a.price);
+      break;
+    case 'rating':
+      filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      break;
+    case 'newest':
+      filteredProducts.sort((a, b) => b.id - a.id);
+      break;
+    default:
+      // Keep original order
+      break;
+  }
+}
+function clearFilters() {
+  filterState = {
+    category: 'all',
+    brand: 'all',
+    discount: 0,
+    minPrice: 0,
+    maxPrice: 3000,
+    sort: 'default'
+  };
+ 
+  // Reset UI
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) sortSelect.value = 'default';
+ 
+  // Sync filter states <-- ADD THIS LINE
+  syncFilterStates();
+ 
+  // Fetch products with cleared filters
   fetchProducts();
-});
+}
+// ==================== PRICE SLIDERS ====================
+function initPriceSliders() {
+  // Desktop sliders
+  const desktopMin = document.getElementById('minThumb');
+  const desktopMax = document.getElementById('maxThumb');
+ 
+  if (desktopMin && desktopMax) {
+    desktopMin.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const maxValue = parseInt(desktopMax.value);
+     
+      if (value > maxValue) {
+        e.target.value = maxValue;
+        filterState.minPrice = maxValue;
+      } else {
+        filterState.minPrice = value;
+      }
+     
+      document.getElementById('minValue').textContent = `₹${filterState.minPrice}`;
+      applyFilters();
+    });
+   
+    desktopMax.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const minValue = parseInt(desktopMin.value);
+     
+      if (value < minValue) {
+        e.target.value = minValue;
+        filterState.maxPrice = minValue;
+      } else {
+        filterState.maxPrice = value;
+      }
+     
+      document.getElementById('maxValue').textContent = `₹${filterState.maxPrice}`;
+      applyFilters();
+    });
+  }
+ 
+  // Mobile sliders
+  const mobileMin = document.getElementById('mobileMinThumb');
+  const mobileMax = document.getElementById('mobileMaxThumb');
+ 
+  if (mobileMin && mobileMax) {
+    mobileMin.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const maxValue = parseInt(mobileMax.value);
+     
+      if (value > maxValue) {
+        e.target.value = maxValue;
+        filterState.minPrice = maxValue;
+      } else {
+        filterState.minPrice = value;
+      }
+     
+      document.getElementById('mobileMinValue').textContent = `₹${filterState.minPrice}`;
+    });
+   
+    mobileMax.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const minValue = parseInt(mobileMin.value);
+     
+      if (value < minValue) {
+        e.target.value = minValue;
+        filterState.maxPrice = minValue;
+      } else {
+        filterState.maxPrice = value;
+      }
+     
+      document.getElementById('mobileMaxValue').textContent = `₹${filterState.maxPrice}`;
+    });
+  }
+}
+function updatePriceSliders(minPrice, maxPrice) {
+  // Ensure min and max are valid numbers
+  minPrice = Math.max(0, Math.floor(minPrice));
+  maxPrice = Math.max(minPrice + 100, Math.ceil(maxPrice));
+ 
+  // Update desktop sliders
+  const desktopMin = document.getElementById('minThumb');
+  const desktopMax = document.getElementById('maxThumb');
+  const desktopMinVal = document.getElementById('minValue');
+  const desktopMaxVal = document.getElementById('maxValue');
+ 
+  if (desktopMin && desktopMax) {
+    desktopMin.min = minPrice;
+    desktopMin.max = maxPrice;
+    desktopMin.value = minPrice;
+   
+    desktopMax.min = minPrice;
+    desktopMax.max = maxPrice;
+    desktopMax.value = maxPrice;
+   
+    if (desktopMinVal) desktopMinVal.textContent = `₹${minPrice}`;
+    if (desktopMaxVal) desktopMaxVal.textContent = `₹${maxPrice}`;
+   
+    // Update filter state
+    filterState.minPrice = minPrice;
+    filterState.maxPrice = maxPrice;
+  }
+ 
+  // Update mobile sliders
+  const mobileMin = document.getElementById('mobileMinThumb');
+  const mobileMax = document.getElementById('mobileMaxThumb');
+  const mobileMinVal = document.getElementById('mobileMinValue');
+  const mobileMaxVal = document.getElementById('mobileMaxValue');
+ 
+  if (mobileMin && mobileMax) {
+    mobileMin.min = minPrice;
+    mobileMin.max = maxPrice;
+    mobileMin.value = minPrice;
+   
+    mobileMax.min = minPrice;
+    mobileMax.max = maxPrice;
+    mobileMax.value = maxPrice;
+   
+    if (mobileMinVal) mobileMinVal.textContent = `₹${minPrice}`;
+    if (mobileMaxVal) mobileMaxVal.textContent = `₹${maxPrice}`;
+  }
+}
+// ==================== VIEW PRODUCT DETAILS ====================
+function viewProductDetails(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (!product) {
+    showToast('Product not found');
+    return;
+  }
+ 
+  if (!product.inStock) {
+    showToast('This product is currently out of stock', "info");
+    return;
+  }
+  // Store in sessionStorage for product details page
+  sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+ 
+  // Navigate to product details page
+  window.location.href = `productdetails.html?id=${product.id}&name=${encodeURIComponent(product.title)}&price=${product.price}`;
+}
+// ==================== MOBILE SHEETS ====================
+function initMobileSheets() {
+  const backdrop = document.getElementById("mobileSheetBackdrop");
+  const filterSheet = document.getElementById("filterSheet");
+  const sortSheet = document.getElementById("sortSheet");
+ 
+  if (!backdrop || !filterSheet || !sortSheet) {
+    console.warn('Mobile sheet elements not found');
+    return;
+  }
+ 
+  // Open Filter Sheet
+  document.getElementById("openFilterSheet")?.addEventListener("click", () => {
+    filterSheet.classList.remove("translate-y-full");
+    backdrop.classList.remove("hidden");
+  });
+ 
+  // Open Sort Sheet
+  document.getElementById("openSortSheet")?.addEventListener("click", () => {
+    sortSheet.classList.remove("translate-y-full");
+    backdrop.classList.remove("hidden");
+  });
+ 
+  // Close Filter Sheet
+  document.getElementById("closeFilterSheet")?.addEventListener("click", () => {
+    filterSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+ 
+  // Close Sort Sheet
+  document.getElementById("closeSortSheet")?.addEventListener("click", () => {
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+ 
+  // Close on backdrop click
+  backdrop.addEventListener("click", () => {
+    filterSheet.classList.add("translate-y-full");
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+ 
+  // Apply Mobile Filters
+  document.getElementById("applyMobileFilters")?.addEventListener("click", () => {
+    const category = document.querySelector('input[name="mobileCategory"]:checked')?.value || 'all';
+    const brand = document.querySelector('input[name="mobileBrand"]:checked')?.value || 'all';
+    const discount = parseInt(document.querySelector('input[name="mobileDiscount"]:checked')?.value || '0');
+   
+    filterState.category = category;
+    filterState.brand = brand;
+    filterState.discount = discount;
+   
+    applyFilters();
+   
+    filterSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+ 
+  // Apply Mobile Sort
+  document.getElementById("applySortBtn")?.addEventListener("click", () => {
+    const sort = document.querySelector('input[name="mobileSort"]:checked')?.value || 'default';
+    filterState.sort = sort;
+   
+    const sortSelect = document.getElementById("sortSelect");
+    if (sortSelect) sortSelect.value = sort;
+   
+    sortProducts(sort);
+    renderProducts();
+   
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+ 
+  // Clear Mobile Filters
+  document.getElementById("clearMobileFilters")?.addEventListener("click", () => {
+    clearFilters();
+    filterSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+}
+// ==================== INITIALIZATION ====================
+async function init() {
+  console.log('Initializing Fertility Essentials page...');
+ 
+  // Initialize mobile sheets
+  initMobileSheets();
+ 
+  // Initialize price sliders
+  initPriceSliders();
+ 
+  // Initialize sort select
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) {
+    sortSelect.value = filterState.sort;
+    sortSelect.addEventListener("change", (e) => {
+      filterState.sort = e.target.value;
+      sortProducts(filterState.sort);
+      renderProducts();
+    });
+  }
+ 
+  // Initialize discount filters
+  initDiscountFilters();
+ 
+  // Initialize "Show More" button
+  const showMoreBtn = document.getElementById('showMoreBtn');
+  if (showMoreBtn) {
+    showMoreBtn.addEventListener('click', showMoreProducts);
+  }
+ 
+  currentUserId = await getValidUserId();
+  await loadWishlistFromBackend();
+ 
+  // Fetch initial products
+  await fetchProducts();
+ 
+  // Update header counts
+  updateHeaderCounts();
+ 
+  // Initialize banner slider
+  initBannerSlider();
+}
+// Initialize discount filters
+function initDiscountFilters() {
+  const discountOptions = [
+    { value: 0, label: 'All Products' },
+    { value: 10, label: '10% or more' },
+    { value: 20, label: '20% or more' },
+    { value: 30, label: '30% or more' }
+  ];
+ 
+  // Desktop discount filters (inside sidebar - it's hidden by default, need to populate)
+  const desktopDiscounts = document.querySelector('#filterSidebar [name="discount"]')?.closest('.mt-4');
+  if (desktopDiscounts && desktopDiscounts.querySelectorAll('input').length === 0) {
+    let html = '';
+    discountOptions.forEach(option => {
+      html += `
+        <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 cursor-pointer">
+          <input type="radio" name="discount" value="${option.value}" ${filterState.discount === option.value ? 'checked' : ''} class="w-4 h-4 text-blue-600">
+          <span class="text-sm">${option.label}</span>
+        </label>
+      `;
+    });
+    desktopDiscounts.innerHTML = html;
+   
+    desktopDiscounts.querySelectorAll('input[name="discount"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        filterState.discount = parseInt(e.target.value);
+        applyFilters();
+      });
+    });
+  }
+ 
+  // Mobile discount filters (already in HTML)
+  // Just add event listeners
+  document.querySelectorAll('input[name="mobileDiscount"]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      filterState.discount = parseInt(e.target.value);
+    });
+  });
+}
+// Initialize banner slider
+function initBannerSlider() {
+  const slides = document.querySelectorAll('.banner-slide');
+  const dots = document.querySelectorAll('.banner-dot');
+ 
+  if (slides.length === 0) return;
+ 
+  let currentSlide = 0;
+ 
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === index);
+    });
+   
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+   
+    currentSlide = index;
+  }
+ 
+  // Auto-rotate slides every 5 seconds
+  setInterval(() => {
+    let nextSlide = currentSlide + 1;
+    if (nextSlide >= slides.length) {
+      nextSlide = 0;
+    }
+    showSlide(nextSlide);
+  }, 5000);
+ 
+  // Add click handlers to dots
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      showSlide(index);
+    });
+  });
+}
+// ==================== ADD THESE RIGHT HERE ====================
+// Add this function to initialize all filter event listeners
+function initFilterEventListeners() {
+  debugLog('Initializing filter event listeners...');
+ 
+  // 1. Desktop Category Filters
+  const desktopCategoryInputs = document.querySelectorAll('#filterSidebar input[name="category"]');
+  desktopCategoryInputs.forEach(input => {
+    // Remove existing listeners first to avoid duplicates
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+   
+    newInput.addEventListener('change', (e) => {
+      filterState.category = e.target.value;
+      debugLog('Desktop category changed to:', filterState.category);
+      applyFilters();
+    });
+  });
+ 
+  // 2. Desktop Brand Filters
+  const desktopBrandInputs = document.querySelectorAll('#filterSidebar input[name="brand"]');
+  desktopBrandInputs.forEach(input => {
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+   
+    newInput.addEventListener('change', (e) => {
+      filterState.brand = e.target.value;
+      debugLog('Desktop brand changed to:', filterState.brand);
+      applyFilters();
+    });
+  });
+ 
+  // 3. Desktop Discount Filters
+  const desktopDiscountInputs = document.querySelectorAll('#filterSidebar input[name="discount"]');
+  desktopDiscountInputs.forEach(input => {
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+   
+    newInput.addEventListener('change', (e) => {
+      filterState.discount = parseInt(e.target.value);
+      debugLog('Desktop discount changed to:', filterState.discount);
+      applyFilters();
+    });
+  });
+ 
+  // 4. Mobile Category Filters (in filter sheet)
+  const mobileCategoryInputs = document.querySelectorAll('#filterSheet input[name="mobileCategory"]');
+  mobileCategoryInputs.forEach(input => {
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+   
+    newInput.addEventListener('change', (e) => {
+      filterState.category = e.target.value;
+      debugLog('Mobile category changed to:', filterState.category);
+     
+      // Update corresponding desktop radio
+      const desktopRadio = document.querySelector(`#filterSidebar input[name="category"][value="${e.target.value}"]`);
+      if (desktopRadio) {
+        desktopRadio.checked = true;
+      }
+    });
+  });
+ 
+  // 5. Mobile Brand Filters (in filter sheet)
+  const mobileBrandInputs = document.querySelectorAll('#filterSheet input[name="mobileBrand"]');
+  mobileBrandInputs.forEach(input => {
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+   
+    newInput.addEventListener('change', (e) => {
+      filterState.brand = e.target.value;
+      debugLog('Mobile brand changed to:', filterState.brand);
+     
+      // Update corresponding desktop radio
+      const desktopRadio = document.querySelector(`#filterSidebar input[name="brand"][value="${e.target.value}"]`);
+      if (desktopRadio) {
+        desktopRadio.checked = true;
+      }
+    });
+  });
+ 
+  // 6. Mobile Discount Filters (in filter sheet)
+  const mobileDiscountInputs = document.querySelectorAll('#filterSheet input[name="mobileDiscount"]');
+  mobileDiscountInputs.forEach(input => {
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+   
+    newInput.addEventListener('change', (e) => {
+      filterState.discount = parseInt(e.target.value);
+      debugLog('Mobile discount changed to:', filterState.discount);
+     
+      // Update corresponding desktop radio
+      const desktopRadio = document.querySelector(`#filterSidebar input[name="discount"][value="${e.target.value}"]`);
+      if (desktopRadio) {
+        desktopRadio.checked = true;
+      }
+    });
+  });
+ 
+  debugLog('Filter event listeners initialized');
+}
+// Add this function to synchronize filter states
+function syncFilterStates() {
+  debugLog('Syncing filter states...');
+ 
+  // Sync desktop radios with filterState
+  const categoryRadio = document.querySelector(`#filterSidebar input[name="category"][value="${filterState.category}"]`);
+  if (categoryRadio) categoryRadio.checked = true;
+ 
+  const brandRadio = document.querySelector(`#filterSidebar input[name="brand"][value="${filterState.brand}"]`);
+  if (brandRadio) brandRadio.checked = true;
+ 
+  const discountRadio = document.querySelector(`#filterSidebar input[name="discount"][value="${filterState.discount}"]`);
+  if (discountRadio) discountRadio.checked = true;
+ 
+  // Sync mobile radios with filterState
+  const mobileCategoryRadio = document.querySelector(`#filterSheet input[name="mobileCategory"][value="${filterState.category}"]`);
+  if (mobileCategoryRadio) mobileCategoryRadio.checked = true;
+ 
+  const mobileBrandRadio = document.querySelector(`#filterSheet input[name="mobileBrand"][value="${filterState.brand}"]`);
+  if (mobileBrandRadio) mobileBrandRadio.checked = true;
+ 
+  const mobileDiscountRadio = document.querySelector(`#filterSheet input[name="mobileDiscount"][value="${filterState.discount}"]`);
+  if (mobileDiscountRadio) mobileDiscountRadio.checked = true;
+ 
+  debugLog('Filter states synced');
+}
+// ==================== ON LOAD ====================
+document.addEventListener("DOMContentLoaded", init);
+let currentUserId = 1;
+let wishlistedItems = [];
+async function getValidUserId() {
+    console.log("Getting valid user ID...");
+    try {
+        const endpoints = [
+            'http://localhost:8083/api/users',
+            'http://localhost:8083/api/users/all',
+            'http://localhost:8083/api/users/list'
+        ];
+    
+        for (const endpoint of endpoints) {
+            try {
+                const response = await fetch(endpoint);
+                if (response.ok) {
+                    const users = await response.json();
+                    if (users && users.length > 0) {
+                        console.log("Found users:", users);
+                        return users[0].id || users[0].userId || 1;
+                    }
+                }
+            } catch (e) {
+                console.log(`Endpoint ${endpoint} not available`);
+            }
+        }
+    } catch (error) {
+        console.log("Could not fetch users:", error);
+    }
+    const testIds = [1, 100, 1000, 1001, 10000];
+    for (const testId of testIds) {
+        try {
+            const response = await fetch(`${WISHLIST_API_BASE}/get-wishlist-items?userId=${testId}`);
+            if (response.ok || response.status === 200) {
+                console.log(`User ID ${testId} is valid (wishlist endpoint works)`);
+                return testId;
+            }
+        } catch (e) {
+            console.log(`User ID ${testId} test failed:`, e.message);
+        }
+    }
+    console.warn("No valid user ID found. Using default ID 1.");
+    console.warn("PLEASE CREATE A USER IN YOUR DATABASE WITH ID = 1");
+    return 1;
+}
+async function loadWishlistFromBackend() {
+  try {
+    const response = await fetch(`${WISHLIST_API_BASE}/get-wishlist-items?userId=${currentUserId}`);
+    if (response.ok) {
+      wishlistedItems = await response.json();
+    } else {
+      wishlistedItems = [];
+    }
+  } catch (error) {
+    console.error('Error loading wishlist:', error);
+    wishlistedItems = [];
+  }
+}
+async function addToWishlistBackend(product) {
+    try {
+        const response = await fetch(`${WISHLIST_API_BASE}/add-wishlist-items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUserId,
+                productId: product.id,
+                productType: "MEDICINE"
+            })
+        });
+        if (response.ok) {
+            const result = await response.json();
+            console.log("Added to backend wishlist:", result);
+            return true;
+        } else {
+            const error = await response.json();
+            console.error("Failed to add to backend wishlist:", error);
+            return false;
+        }
+    } catch (err) {
+        console.error("Error calling wishlist API:", err);
+        return false;
+    }
+}
+async function removeFromWishlistBackend(product) {
+    try {
+        const response = await fetch(`${WISHLIST_API_BASE}/remove-wishlist-items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUserId,
+                productId: product.id
+            })
+        });
+        if (response.ok) {
+            console.log("Removed from backend wishlist");
+            return true;
+        } else {
+            console.error("Failed to remove from backend wishlist");
+            return false;
+        }
+    } catch (err) {
+        console.error("Error removing from wishlist:", err);
+        return false;
+    }
+}

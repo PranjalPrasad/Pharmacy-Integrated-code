@@ -1,570 +1,1108 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // ================
-  // Data & Configuration
-  // ================
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  let products = []; // Will be populated from backend
-  const API_BASE_URL = 'http://localhost:8083/api/products';
-
-  // ================
-  // DOM Elements
-  // ================
-  const productGrid = document.getElementById('productGrid');
-  const categoryList = document.getElementById('categoryList');
-  const brandList = document.getElementById('brandList');
-  const brandToggle = (brandList && brandList.previousElementSibling) ? brandList.previousElementSibling.querySelector('span') : null;
-  const brandFilters = document.querySelectorAll('.brand-filter');
-  const sortSelect = document.getElementById('sortSelect');
-  const uploadModal = document.getElementById('uploadModal');
-  const validPrescriptionModal = document.getElementById('validPrescriptionModal');
-  const validPrescriptionBtn = document.getElementById('validPrescriptionBtn');
-  const cartCountElement = document.getElementById('cart-count');
-
-  // keep track of active filters
-  let activeCategory = null;
-  let activeSort = null;
-  let allBrands = new Set();
-
-  // ================
-  // API Functions
-  // ================
-  async function fetchProducts() {
+// ==================== lifestyle.js – CONNECTED TO BACKEND ====================
+// Base API URL - Update this to your backend URL
+const API_BASE_URL = 'http://localhost:8083/api/products';
+const WISHLIST_API_BASE = "http://localhost:8083/api/wishlist";
+// Global State
+let allProducts = [];
+let filteredProducts = [];
+let wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+let currentPage = 1;
+const pageSize = 12;
+// Enable debug mode
+const DEBUG_MODE = true;
+// Persistent Filter State
+let filterState = {
+  category: 'all',
+  brand: 'all',
+  discount: 0,
+  minPrice: 0,
+  maxPrice: 5000,
+  sort: 'default'
+};
+// =============== LIFESTYLE DISORDER CATEGORIES ===============
+const LIFESTYLE_CATEGORIES = [
+  {
+    id: 'all',
+    name: 'All Lifestyle Products',
+    backendSubcategories: []
+  },
+  {
+    id: 'diabetes',
+    name: 'Diabetes Care',
+    backendSubcategories: ['Diabetes', 'Blood Sugar', 'Diabetic Care', 'Glucose']
+  },
+  {
+    id: 'heart-bp',
+    name: 'Heart & Blood Pressure',
+    backendSubcategories: ['Heart Care', 'Cardiac', 'Blood Pressure', 'Hypertension', 'Cholesterol']
+  },
+  {
+    id: 'thyroid',
+    name: 'Thyroid Support',
+    backendSubcategories: ['Thyroid', 'Hypothyroidism', 'Hyperthyroidism', 'Iodine']
+  },
+  {
+    id: 'vitamins',
+    name: 'Vitamins & Supplements',
+    backendSubcategories: ['Vitamins', 'Supplements', 'Multivitamin', 'Vitamin D', 'Calcium', 'Iron']
+  },
+  {
+    id: 'nutrition',
+    name: 'Nutritional Support',
+    backendSubcategories: ['Nutrition', 'Protein', 'Fiber', 'Dietary Supplements']
+  },
+  {
+    id: 'wellness',
+    name: 'General Wellness',
+    backendSubcategories: ['Wellness', 'Immunity', 'Stress Relief', 'General Health']
+  }
+];
+// Helper: Safe text update
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+// Update page title based on category
+function updatePageTitle() {
+  const titleEl = document.getElementById('pageTitle');
+  if (titleEl) {
+    if (filterState.category === 'all') {
+      titleEl.textContent = 'All Lifestyle Products';
+    } else {
+      const category = LIFESTYLE_CATEGORIES.find(cat => cat.id === filterState.category);
+      titleEl.textContent = category ? category.name : 'Lifestyle Products';
+    }
+  }
+}
+// Debug logging function
+function debugLog(...args) {
+  if (DEBUG_MODE) {
+    console.log('[DEBUG]', ...args);
+  }
+}
+async function getValidUserId() {
+    console.log("Getting valid user ID...");
     try {
-      showLoadingState();
-      
-      // Fetch products ONLY by subcategory "first"
-      const encodedSubCategory = encodeURIComponent('First Aid');
-      const response = await fetch(`${API_BASE_URL}/get-by-sub-category/${encodedSubCategory}`);
-      
-      if (!response.ok) throw new Error('Failed to fetch products by subcategory');
-      
-      const data = await response.json();
-      products = Array.isArray(data) ? data : [];
-      
-      // Transform backend data to frontend format
-      products = products.map(product => transformProductData(product));
-      
-      // Extract unique brands for filtering
-      allBrands = new Set(products.map(p => p.brand).filter(Boolean));
-      updateBrandFilters();
-      
-      displayProducts(products);
-      updateCategoryList();
-      
-    } catch (error) {
-      console.error('Error fetching products:', error);
-      showErrorState('Failed to load products. Please try again later.');
-      products = [];
-    }
-  }
-
-  // Transform backend product data to frontend format
-  function transformProductData(backendProduct) {
-    return {
-      id: backendProduct.productId,
-      productId: backendProduct.productId,
-      name: backendProduct.productName,
-      productName: backendProduct.productName,
-      price: backendProduct.productPrice || backendProduct.price,
-      originalPrice: backendProduct.productOldPrice || backendProduct.mrp,
-      mrp: backendProduct.productOldPrice || backendProduct.mrp,
-      discount: calculateDiscount(backendProduct.productPrice, backendProduct.productOldPrice || backendProduct.mrp),
-      category: backendProduct.productCategory,
-      subCategory: backendProduct.productSubCategory,
-      brand: backendProduct.brandName || backendProduct.brand,
-      image: backendProduct.productMainImage || backendProduct.image,
-      productMainImage: backendProduct.productMainImage,
-      prescriptionRequired: backendProduct.prescriptionRequired || false,
-      description: backendProduct.productDescription,
-      stock: backendProduct.productStock,
-      status: backendProduct.productStatus,
-      ...backendProduct
-    };
-  }
-
-  function calculateDiscount(currentPrice, originalPrice) {
-    if (!originalPrice || originalPrice <= currentPrice) return '';
-    const discountPercent = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
-    return `${discountPercent}% off`;
-  }
-
-  // ================
-  // UI Helpers
-  // ================
-  function showLoadingState() {
-    if (!productGrid) return;
-    productGrid.innerHTML = `
-      <div class="col-span-full flex justify-center items-center py-8">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        <span class="ml-3 text-gray-600">Loading products...</span>
-      </div>
-    `;
-  }
-
-  function showErrorState(message) {
-    if (!productGrid) return;
-    productGrid.innerHTML = `
-      <div class="col-span-full text-center py-8">
-        <p class="text-red-600 mb-4">${message}</p>
-        <button onclick="fetchProducts()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-          Retry
-        </button>
-      </div>
-    `;
-  }
-
-  function updateBrandFilters() {
-    if (!brandList) return;
+        const endpoints = [
+            'http://localhost:8083/api/users',
+            'http://localhost:8083/api/users/all',
+            'http://localhost:8083/api/users/list'
+        ];
     
-    const brandFilterContainer = brandList.querySelector('.space-y-2');
-    if (brandFilterContainer) {
-      brandFilterContainer.innerHTML = '';
-      
-      allBrands.forEach(brand => {
-        if (brand) {
-          const label = document.createElement('label');
-          label.className = 'flex items-center space-x-2';
-          label.innerHTML = `
-            <input type="checkbox" class="brand-filter rounded text-blue-600" value="${escapeHtml(brand)}">
-            <span class="text-sm text-gray-700">${escapeHtml(brand)}</span>
-          `;
-          brandFilterContainer.appendChild(label);
+        for (const endpoint of endpoints) {
+            try {
+                const response = await fetch(endpoint);
+                if (response.ok) {
+                    const users = await response.json();
+                    if (users && users.length > 0) {
+                        console.log("Found users:", users);
+                        return users[0].id || users[0].userId || 1;
+                    }
+                }
+            } catch (e) {
+                console.log(`Endpoint ${endpoint} not available`);
+            }
         }
-      });
-      
-      const newBrandFilters = brandFilterContainer.querySelectorAll('.brand-filter');
-      newBrandFilters.forEach(filter => {
-        filter.addEventListener('change', () => {
-          applyFilters();
-        });
-      });
+    } catch (error) {
+        console.log("Could not fetch users:", error);
     }
-  }
-
-  function updateCategoryList() {
-    if (!categoryList) return;
-    
-    const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-    
-    const categoryLinks = categoryList.querySelectorAll('.category-link');
-    categoryLinks.forEach(link => {
-      const categoryText = link.textContent.trim();
-      if (!categories.includes(categoryText)) {
-        link.parentElement.style.display = 'none';
-      } else {
-        link.parentElement.style.display = 'block';
+    const testIds = [1, 100, 1000, 1001, 10000];
+    for (const testId of testIds) {
+        try {
+            const response = await fetch(`${WISHLIST_API_BASE}/get-wishlist-items?userId=${testId}`);
+            if (response.ok || response.status === 200) {
+                console.log(`User ID ${testId} is valid (wishlist endpoint works)`);
+                return testId;
+            }
+        } catch (e) {
+            console.log(`User ID ${testId} test failed:`, e.message);
+        }
+    }
+    console.warn("No valid user ID found. Using default ID 1.");
+    console.warn("PLEASE CREATE A USER IN YOUR DATABASE WITH ID = 1");
+    return 1;
+}
+async function addToWishlistBackend(product) {
+    try {
+        const response = await fetch(`${WISHLIST_API_BASE}/add-wishlist-items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUserId,
+                productId: product.id,
+                productType: "MEDICINE"
+            })
+        });
+        if (response.ok) {
+            const result = await response.json();
+            console.log("Added to backend wishlist:", result);
+            return true;
+        } else {
+            const error = await response.json();
+            console.error("Failed to add to backend wishlist:", error);
+            return false;
+        }
+    } catch (err) {
+        console.error("Error calling wishlist API:", err);
+        return false;
+    }
+}
+async function removeFromWishlistBackend(product) {
+    try {
+        const response = await fetch(`${WISHLIST_API_BASE}/remove-wishlist-items`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUserId,
+                productId: product.id
+            })
+        });
+        if (response.ok) {
+            console.log("Removed from backend wishlist");
+            return true;
+        } else {
+            console.error("Failed to remove from backend wishlist");
+            return false;
+        }
+    } catch (err) {
+        console.error("Error removing from wishlist:", err);
+        return false;
+    }
+}
+async function syncWishlist() {
+    try {
+        const response = await fetch(`${WISHLIST_API_BASE}/get-wishlist-items?userId=${currentUserId}`);
+        if (!response.ok) return;
+        const items = await response.json();
+        const backendWishlist = items.filter(item => item.productType === "MEDICINE").map(item => {
+            const product = allProducts.find(p => p.id === item.productId);
+            if (!product) return null;
+            return {
+                id: product.id,
+                name: product.title.split(' (')[0].trim(),
+                price: product.price,
+                originalPrice: product.originalPrice || null,
+                image: product.image
+            };
+        }).filter(Boolean);
+        localStorage.setItem("wishlist", JSON.stringify(backendWishlist));
+        wishlist = backendWishlist;
+        updateHeaderCounts();
+        renderProducts();
+    } catch (err) {
+        console.error("Error syncing wishlist:", err);
+    }
+}
+// ==================== FETCH PRODUCTS FROM BACKEND ====================
+async function fetchProducts() {
+  try {
+    debugLog('Starting fetchProducts for Lifestyle...');
+    setText("resultsCount", "Loading products...");
+   
+    // Clear existing products
+    allProducts = [];
+    filteredProducts = [];
+   
+    // Fetch ALL products
+    const url = `${API_BASE_URL}/get-all-products?page=0&size=200`;
+   
+    debugLog('Fetching from URL:', url);
+   
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
       }
     });
-  }
-
-  function updateCartCount() {
-    if (!cartCountElement) return;
-    const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-    cartCountElement.textContent = totalItems;
-    localStorage.setItem('cartCount', totalItems);
-  }
-
-  // Initialize cart from localStorage
-  (function loadCart() {
-    const stored = JSON.parse(localStorage.getItem('cart') || 'null');
-    if (Array.isArray(stored)) cart = stored;
-    updateCartCount();
-  })();
-
-  // ================
-  // Product Rendering
-  // ================
-  function createProductCard(product) {
-    const productDiv = document.createElement('div');
-    productDiv.className = 'product-card bg-white p-4 shadow rounded-lg flex flex-col justify-between relative cursor-pointer hover:shadow-lg transition-shadow';
-
-    const prescriptionBadge = product.prescriptionRequired
-      ? '<div class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">Rx Required</div>'
-      : '';
-
-    const imageUrl = product.productMainImage && !product.productMainImage.startsWith('http')
-      ? `${API_BASE_URL}/${product.productId}/image`
-      : product.image || product.productMainImage || 'https://via.placeholder.com/150?text=No+Image';
-
-    const originalPrice = product.originalPrice || product.mrp || product.productOldPrice;
-    const currentPrice = product.price || product.productPrice;
-    const discount = product.discount || calculateDiscount(currentPrice, originalPrice);
-
-    const formattedPrice = currentPrice ? currentPrice.toFixed(2) : '0.00';
-    const formattedOriginalPrice = originalPrice ? originalPrice.toFixed(2) : null;
-
-    const actionButton = product.prescriptionRequired
-      ? `<button 
-            class="mt-3 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition flex items-center justify-center gap-2 upload-pres-btn" 
-            data-product='${escapeHtml(JSON.stringify(product))}'>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            Upload Prescription
-          </button>`
-      : `<button 
-            class="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition flex items-center justify-center gap-2 add-to-cart-btn" 
-            data-id="${product.id}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-            </svg>
-            View Details
-          </button>`;
-
-    productDiv.innerHTML = `
-      ${prescriptionBadge}
-      <img src="${imageUrl}" alt="${escapeHtml(product.name)}" class="product-image w-full h-32 object-cover rounded-lg mb-3" onerror="this.src='https://via.placeholder.com/150?text=Image+Error'">
-      <p class="text-sm text-gray-600 font-medium">${escapeHtml(product.name)}</p>
-      <p class="text-xs text-gray-500">${escapeHtml(product.brand)}</p>
-      ${product.prescriptionRequired ? '<p class="text-red-600 text-xs mt-1 font-semibold">⚠️ Prescription needed</p>' : ''}
-      <p class="text-green-600 font-bold mt-2">₹${formattedPrice} 
-        ${formattedOriginalPrice ? `<span class="text-gray-500 line-through text-sm">₹${formattedOriginalPrice}</span> <span class="text-green-600 text-sm">${discount}</span>` : ''}</p>
-      ${actionButton}
-    `;
-
-    productDiv.addEventListener('click', (event) => {
-      if (event.target.tagName === 'BUTTON' || event.target.closest('button')) return;
-      if (product.prescriptionRequired) {
-        openUploadModalForProduct(product);
-      } else {
-        openProductDetails(product);
-      }
-    });
-
-    return productDiv;
-  }
-
-  function displayProducts(list) {
-    if (!productGrid) return;
-    productGrid.innerHTML = '';
-    
-    if (list.length === 0) {
-      productGrid.innerHTML = `
-        <div class="col-span-full text-center py-8">
-          <p class="text-gray-500">No products found.</p>
-          <p class="text-sm text-gray-400 mt-2">Try checking back later or browse other categories</p>
+   
+    debugLog('Response status:', response.status, response.statusText);
+   
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+   
+    const data = await response.json();
+   
+    processProducts(data);
+   
+  } catch (error) {
+    console.error('Error in fetchProducts:', error);
+    showToast('Error loading products. Please check console for details.');
+    setText("resultsCount", "Failed to load products");
+   
+    // Show empty state
+    const grid = document.getElementById("productsGrid");
+    if (grid) {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-10">
+          <div class="text-gray-400 mb-4">
+            <i class="fas fa-exclamation-triangle text-5xl"></i>
+          </div>
+          <p class="text-gray-500 mb-2">Failed to load products</p>
+          <p class="text-gray-400 text-sm">Error: ${error.message}</p>
+          <button onclick="fetchProducts()" class="mt-4 px-4 py-2 bg-[#36C2CE] text-white rounded-lg">
+            Retry
+          </button>
         </div>
       `;
-      return;
     }
-    
-    list.forEach(product => productGrid.appendChild(createProductCard(product)));
   }
-
-  // ================
-  // Product interactions
-  // ================
-  function openProductDetails(product) {
-    const productDetailsUrl = `/productdetails.html?id=${product.id}`;
-    window.location.href = productDetailsUrl;
+}
+function processProducts(data) {
+  debugLog('API Response data:', data);
+ 
+  // Handle different response formats
+  let productsArray = [];
+ 
+  if (Array.isArray(data)) {
+    productsArray = data;
+  } else if (data.content && Array.isArray(data.content)) {
+    productsArray = data.content;
+  } else if (data.products && Array.isArray(data.products)) {
+    productsArray = data.products;
+  } else if (typeof data === 'object' && data !== null) {
+    productsArray = [data];
   }
-  window.openProductDetails = openProductDetails;
-
-  function addToCartById(productId) {
-    const product = products.find(p => p.id == productId);
-    if (!product) return;
-    const existing = cart.find(item => item.id === productId);
-    if (existing) existing.quantity = (existing.quantity || 1) + 1;
-    else cart.push({ ...product, quantity: 1 });
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
+ 
+  debugLog('Total products from API:', productsArray.length);
+ 
+  if (productsArray.length === 0) {
+    debugLog('No products received from API');
+    showToast('No products available. Please try again later.');
   }
-  window.addToCart = addToCartById;
-
-  // ================
-  // Category & Brand Filters
-  // ================
-  categoryList?.addEventListener('click', async (e) => {
-    if (e.target.classList.contains('expand-toggle')) {
-      const li = e.target.parentElement;
-      const subcategory = li.querySelector('.subcategory');
-      if (subcategory) {
-        subcategory.classList.toggle('hidden');
-      }
-      e.target.textContent = e.target.textContent === '+' ? '-' : '+';
-      return;
-    }
-
-    if (e.target.classList.contains('category-link') || e.target.classList.contains('subcategory-link')) {
-      e.preventDefault();
-      const text = e.target.textContent.trim();
-      
-      if (e.target.classList.contains('subcategory-link')) {
-        const filtered = products.filter(p => p.name === text);
-        activeCategory = text;
-        applyFilters(filtered);
-      } else {
-        activeCategory = text;
-        const filtered = products.filter(p => p.category === text);
-        applyFilters(filtered);
-      }
-    }
+ 
+  // Transform ALL products first
+  const allTransformedProducts = transformBackendProducts(productsArray);
+ 
+  // DEBUG: Check each product
+  debugLog('=== CHECKING LIFESTYLE PRODUCT SUB CATEGORIES ===');
+  allTransformedProducts.forEach(product => {
+    debugLog(`Product: "${product.title}" - Subcategory: "${product.subcategory}"`);
   });
-
-  if (brandToggle) {
-    brandToggle.addEventListener('click', () => {
-      brandList.classList.toggle('hidden');
-      brandToggle.textContent = brandToggle.textContent === '+' ? '-' : '+';
+  debugLog('=== END CHECK ===');
+ 
+  // Get all unique subcategories from products
+  const allSubcategories = [...new Set(allTransformedProducts.map(p => p.subcategory))];
+  debugLog('All subcategories in DB:', allSubcategories);
+ 
+  // FILTER: Only keep products that match our Lifestyle Disorder categories
+  allProducts = allTransformedProducts.filter(product => {
+    const productSubcategory = product.subcategory || '';
+   
+    // Check if this product's subcategory matches any Lifestyle category
+    const isLifestyleProduct = LIFESTYLE_CATEGORIES.some(category => {
+      if (category.id === 'all') return false; // Skip "all" category
+     
+      return category.backendSubcategories.some(backendSubcat => {
+        // Case-insensitive comparison
+        const productSubLower = productSubcategory.toLowerCase();
+        const backendSubLower = backendSubcat.toLowerCase();
+       
+        // Check for exact match or partial match
+        return productSubLower === backendSubLower ||
+               productSubLower.includes(backendSubLower) ||
+               backendSubLower.includes(productSubLower);
+      });
+    });
+   
+    if (!isLifestyleProduct) {
+      debugLog(`Filtered out (non-Lifestyle): ${product.title} - ${product.subcategory}`);
+    }
+   
+    return isLifestyleProduct;
+  });
+ 
+  debugLog('Lifestyle products after filtering:', allProducts.length);
+  debugLog('Lifestyle product subcategories:', [...new Set(allProducts.map(p => p.subcategory))]);
+ 
+  // Apply filters and update UI
+  applyFilters();
+  updateUIWithProducts();
+}
+// Transform backend product format to frontend format
+function transformBackendProducts(backendProducts) {
+  if (!Array.isArray(backendProducts) || backendProducts.length === 0) {
+    return [];
+  }
+ 
+  debugLog('Transforming', backendProducts.length, 'products');
+ 
+  return backendProducts.map((product, index) => {
+    try {
+      // Extract basic fields
+      const id = product.productId || product.id || index + 1;
+      const title = product.productName || product.name || 'Unnamed Product';
+      const price = Number(product.productPrice || product.price || 100);
+      const originalPrice = Number(product.productOldPrice || product.originalPrice || product.mrp || price * 1.2);
+      const discount = originalPrice > price ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+     
+      // Get subcategory - this is in productSubCategory field
+      const subcategory = product.productSubCategory || 'Unknown';
+     
+      // Get brand - this is in brandName field
+      const brand = product.brandName || product.brand || product.manufacturer || 'Generic';
+     
+      const description = product.productDescription || product.description || 'No description available';
+      const stockQuantity = product.productQuantity || product.stockQuantity || product.quantity || 0;
+      const inStock = product.productStock === 'In-Stock' || stockQuantity > 0;
+     
+      // Get image URL
+      let imageUrl = 'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop';
+     
+      if (product.productMainImage) {
+        // Check if it's a path starting with /api/
+        if (product.productMainImage.startsWith('/api/')) {
+          // It's a relative path, make it absolute
+          imageUrl = `http://localhost:8083${product.productMainImage}`;
+        }
+        // Check if it's base64
+        else if (product.productMainImage.startsWith('data:image')) {
+          imageUrl = product.productMainImage;
+        }
+        // Check if it's a URL
+        else if (product.productMainImage.startsWith('http')) {
+          imageUrl = product.productMainImage;
+        }
+        // Otherwise assume it's base64
+        else {
+          imageUrl = `data:image/jpeg;base64,${product.productMainImage}`;
+        }
+      } else if (product.productId) {
+        imageUrl = `${API_BASE_URL}/${product.productId}/image`;
+      }
+     
+      return {
+        id: id,
+        title: title,
+        price: price,
+        originalPrice: originalPrice,
+        discount: discount,
+        rating: product.rating || product.productRating || 4.0,
+        reviewCount: product.reviewCount || product.totalReviews || Math.floor(Math.random() * 1000),
+        subcategory: subcategory,
+        brand: brand,
+        image: imageUrl,
+        description: description,
+        inStock: inStock,
+        stockQuantity: stockQuantity
+      };
+    } catch (error) {
+      console.error('Error transforming product:', product, error);
+      return null;
+    }
+  }).filter(product => product !== null);
+}
+// Update UI with loaded products
+function updateUIWithProducts() {
+  // Update brands dropdown
+  updateBrandsDropdown();
+ 
+  // Update price range
+  updatePriceRange();
+ 
+  // Render products
+  renderProducts();
+}
+// Update brands dropdown
+function updateBrandsDropdown() {
+  const brands = [...new Set(allProducts.map(p => p.brand).filter(Boolean))];
+  brands.sort();
+ 
+  debugLog('Available brands:', brands);
+ 
+  // Update desktop brands (the brands dropdown in sidebar)
+  const desktopBrandsContainer = document.querySelector('#filterSidebar .border-b.pb-4 .mt-2.space-y-2');
+  if (desktopBrandsContainer) {
+    let html = `
+      <label class="flex items-center"><input type="radio" name="brand" value="all" ${filterState.brand === 'all' ? 'checked' : ''} class="w-5 h-5 text-primary"> <span class="ml-3 text-gray-700">All Brands</span></label>
+    `;
+   
+    brands.forEach(brand => {
+      html += `
+        <label class="flex items-center"><input type="radio" name="brand" value="${brand}" ${filterState.brand === brand ? 'checked' : ''} class="w-5 h-5 text-primary"> <span class="ml-3 text-gray-700">${brand}</span></label>
+      `;
+    });
+   
+    desktopBrandsContainer.innerHTML = html;
+   
+    // Add event listeners
+    desktopBrandsContainer.querySelectorAll('input[name="brand"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        filterState.brand = e.target.value;
+        applyFilters();
+      });
     });
   }
-
-  sortSelect?.addEventListener('change', () => {
-    activeSort = sortSelect.value;
-    applyFilters();
-  });
-
-  function applyFilters(startList) {
-    let list = Array.isArray(startList) ? [...startList] : [...products];
-
-    const selectedBrands = Array.from(document.querySelectorAll('.brand-filter:checked')).map(f => f.value);
-    if (selectedBrands.length > 0) {
-      list = list.filter(p => selectedBrands.includes(p.brand));
-    }
-
-    if (activeSort === 'Price: Low to High') {
-      list.sort((a, b) => (a.price || 0) - (b.price || 0));
-    } else if (activeSort === 'Price: High to Low') {
-      list.sort((a, b) => (b.price || 0) - (a.price || 0));
-    } else if (activeSort === 'Discount') {
-      list.sort((a, b) => {
-        const discountA = a.mrp ? ((a.mrp - a.price) / a.mrp) * 100 : 0;
-        const discountB = b.mrp ? ((b.mrp - b.price) / b.mrp) * 100 : 0;
-        return discountB - discountA;
-      });
-    }
-    displayProducts(list);
-  }
-
-  // ================
-  // Upload Prescription Modal Integration
-  // ================
-  function openUploadModalForProduct(product) {
-    if (!uploadModal) {
-      window.location.href = `/prescribed.html?id=${product.id}`;
-      return;
-    }
-
-    uploadModal.dataset.productId = product.id;
-    const modalProductName = uploadModal.querySelector('#modalProductName') || document.getElementById('modalProductName');
-    if (modalProductName) modalProductName.textContent = `Upload Prescription for: ${product.name}`;
-
-    const modalProductImage = uploadModal.querySelector('.modal-product-image');
-    if (modalProductImage) {
-      const imageUrl = product.productMainImage && !product.productMainImage.startsWith('http')
-        ? `${API_BASE_URL}/${product.id}/image`
-        : product.image || product.productMainImage || 'https://via.placeholder.com/150?text=No+Image';
-      modalProductImage.src = imageUrl;
-    }
-
-    let fileInput = uploadModal.querySelector('#prescriptionFile');
-    if (!fileInput) {
-      fileInput = uploadModal.querySelector('input[type="file"]');
-    }
-    if (!fileInput) {
-      fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.accept = 'image/*,.pdf';
-      fileInput.id = 'prescriptionFile';
-      fileInput.className = 'hidden';
-      uploadModal.querySelector('label')?.appendChild(fileInput) || uploadModal.appendChild(fileInput);
-    }
-
-    const fileNameDisplay = uploadModal.querySelector('#fileNameDisplay') || document.getElementById('fileNameDisplay');
-
-    const newFileInput = fileInput.cloneNode();
-    newFileInput.id = fileInput.id;
-    newFileInput.accept = fileInput.accept;
-    newFileInput.className = fileInput.className;
-    fileInput.parentNode.replaceChild(newFileInput, fileInput);
-    fileInput = newFileInput;
-
-    fileInput.addEventListener('change', function () {
-      const file = fileInput.files[0];
-      if (!file) {
-        if (fileNameDisplay) fileNameDisplay.textContent = '';
-        return;
-      }
-      if (fileNameDisplay) fileNameDisplay.textContent = file.name;
-
-      if (file.type.startsWith('image/')) {
-        const previewImg = uploadModal.querySelector('#prescriptionPreviewImg');
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          if (previewImg) {
-            previewImg.src = evt.target.result;
-            previewImg.classList.remove('hidden');
-          }
-          uploadModal.dataset.tempDataURL = evt.target.result;
-          uploadModal.dataset.tempFileName = file.name;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        uploadModal.dataset.tempDataURL = '';
-        uploadModal.dataset.tempFileName = file.name;
-      }
+ 
+  // Update mobile brands (inside filter sheet)
+  const mobileBrandsContainer = document.querySelector('#filterSheet [name="mobileBrand"]')?.parentElement;
+  if (mobileBrandsContainer) {
+    let html = `
+      <label class="flex items-center"><input type="radio" name="mobileBrand" value="all" ${filterState.brand === 'all' ? 'checked' : ''} class="w-5 h-5 text-primary"> <span class="ml-3 text-gray-700">All Brands</span></label>
+    `;
+   
+    brands.forEach(brand => {
+      html += `
+        <label class="flex items-center"><input type="radio" name="mobileBrand" value="${brand}" ${filterState.brand === brand ? 'checked' : ''} class="w-5 h-5 text-primary"> <span class="ml-3 text-gray-700">${brand}</span></label>
+      `;
     });
-
-    const label = uploadModal.querySelector('label');
-    if (label) {
-      label.addEventListener('click', (ev) => {
-        ev.preventDefault();
-        const fi = uploadModal.querySelector('#prescriptionFile');
-        if (fi) fi.click();
-      }, { once: true });
-    }
-
-    const submitBtn = uploadModal.querySelector('#submitPrescription') || document.getElementById('submitPrescription');
-    if (submitBtn) {
-      const newBtn = submitBtn.cloneNode(true);
-      submitBtn.parentNode.replaceChild(newBtn, submitBtn);
-      newBtn.addEventListener('click', () => {
-        const prodId = uploadModal.dataset.productId;
-        const tmpName = uploadModal.dataset.tempFileName;
-        const tmpData = uploadModal.dataset.tempDataURL || null;
-        
-        const fi = uploadModal.querySelector('#prescriptionFile');
-        if (!tmpName && fi && fi.files[0]) {
-          const file = fi.files[0];
-          const reader = new FileReader();
-          reader.onload = function (evt) {
-            savePrescription(prodId, file.name, evt.target.result);
-            uploadModal.classList.add('hidden');
-            clearModalTempState();
-          };
-          reader.readAsDataURL(file);
-          return;
-        }
-
-        if (!tmpName) {
-          alert('Please choose a prescription file before submitting.');
-          return;
-        }
-
-        savePrescription(prodId, tmpName, tmpData);
-        uploadModal.classList.add('hidden');
-        clearModalTempState();
-        alert('Prescription uploaded successfully.');
-      });
-    }
-
-    uploadModal.classList.remove('hidden');
+   
+    mobileBrandsContainer.innerHTML = html;
   }
-
-  function savePrescription(productId, fileName, dataURL) {
-    if (!productId) return;
-    const prescriptions = JSON.parse(localStorage.getItem('prescriptions') || '{}');
-    prescriptions[productId] = {
-      fileName,
-      dataURL: dataURL || null,
-      uploadedAt: new Date().toISOString()
-    };
-    localStorage.setItem('prescriptions', JSON.stringify(prescriptions));
-  }
-
-  function clearModalTempState() {
-    if (!uploadModal) return;
-    delete uploadModal.dataset.tempFileName;
-    delete uploadModal.dataset.tempDataURL;
-    const previewImg = uploadModal.querySelector('#prescriptionPreviewImg');
-    if (previewImg) {
-      previewImg.src = '';
-      previewImg.classList.add('hidden');
-    }
-    const fileNameDisplay = uploadModal.querySelector('#fileNameDisplay');
-    if (fileNameDisplay) fileNameDisplay.textContent = '';
-    const fi = uploadModal.querySelector('#prescriptionFile');
-    if (fi) fi.value = '';
-  }
-
-  // Event delegation for dynamic buttons
-  document.body.addEventListener('click', (e) => {
-    const up = e.target.closest('.upload-pres-btn');
-    if (up) {
-      e.stopPropagation();
-      const productData = up.getAttribute('data-product');
-      if (productData) {
-        try {
-          const product = JSON.parse(unescapeHtml(productData));
-          openUploadModalForProduct(product);
-        } catch (err) {
-          window.location.href = `/prescribed.html`;
-        }
-      }
-      return;
-    }
-
-    const atc = e.target.closest('.add-to-cart-btn');
-    if (atc) {
-      e.stopPropagation();
-      const pid = atc.getAttribute('data-id');
-      if (pid) {
-        const product = products.find(p => p.id == pid);
-        if (product) openProductDetails(product);
-      }
-      return;
-    }
-  });
-
-  // Modal close handlers
-  if (uploadModal) {
-    uploadModal.addEventListener('click', (e) => {
-      if (e.target === uploadModal) {
-        uploadModal.classList.add('hidden');
-        clearModalTempState();
-      }
-    });
-
-    const closeUploadModalBtn = document.getElementById('closeUploadModal');
-    if (closeUploadModalBtn) {
-      closeUploadModalBtn.addEventListener('click', () => {
-        uploadModal.classList.add('hidden');
-        clearModalTempState();
-      });
-    }
-  }
-
-  if (validPrescriptionBtn && validPrescriptionModal) {
-    validPrescriptionBtn.addEventListener('click', () => validPrescriptionModal.classList.remove('hidden'));
-    validPrescriptionModal.addEventListener('click', (e) => { if (e.target === validPrescriptionModal) validPrescriptionModal.classList.add('hidden'); });
-    const validClose = validPrescriptionModal.querySelector('#closeValidPrescriptionModal') || validPrescriptionModal.querySelector('button');
-    if (validClose) validClose.addEventListener('click', () => validPrescriptionModal.classList.add('hidden'));
-  }
-
-  // ================
-  // Utility functions
-  // ================
-  function escapeHtml(str) {
-    if (typeof str !== 'string') return str;
-    return str.replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&#039;');
-  }
-
-  function unescapeHtml(encoded) {
-    if (!encoded) return encoded;
-    return encoded.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
-  }
-
-  // ================
-  // Initialize App
-  // ================
-  window.uploadPrescription = function (productObjOrId) {
-    if (typeof productObjOrId === 'number' || typeof productObjOrId === 'string') {
-      const p = products.find(x => x.id == productObjOrId);
-      if (p) openUploadModalForProduct(p);
-      else window.location.href = `/prescribed.html?id=${productObjOrId}`;
-    } else if (typeof productObjOrId === 'object' && productObjOrId !== null) {
-      openUploadModalForProduct(productObjOrId);
+}
+// Update price range
+function updatePriceRange() {
+  if (allProducts.length === 0) return;
+ 
+  const prices = allProducts.map(p => p.price).filter(p => p > 0);
+  if (prices.length === 0) return;
+ 
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+ 
+  // Update filter state with actual product prices
+  filterState.minPrice = minPrice;
+  filterState.maxPrice = Math.min(maxPrice, 5000); // Cap at 5000 as per your HTML
+ 
+  debugLog('Price range:', minPrice, 'to', filterState.maxPrice);
+ 
+  // Update sliders if they exist
+  updatePriceSliders(minPrice, filterState.maxPrice);
+}
+// ==================== FILTER & SORT ====================
+function applyFilters() {
+  debugLog('Applying filters with', allProducts.length, 'products');
+  debugLog('Current filter state:', filterState);
+ 
+  filteredProducts = allProducts.filter(p => {
+    // Category filter
+    let categoryMatch = false;
+   
+    if (filterState.category === 'all') {
+      categoryMatch = true;
     } else {
-      window.location.href = '/prescribed.html';
+      const selectedCategory = LIFESTYLE_CATEGORIES.find(cat => cat.id === filterState.category);
+      if (!selectedCategory || selectedCategory.id === 'all') {
+        categoryMatch = true;
+      } else {
+        const productSubcategory = p.subcategory?.toLowerCase() || '';
+       
+        // Check if product matches any backend subcategory for this Lifestyle category
+        categoryMatch = selectedCategory.backendSubcategories.some(backendSubcat => {
+          const backendSubLower = backendSubcat.toLowerCase();
+         
+          // Check for exact match or partial match
+          return productSubcategory === backendSubLower ||
+                 productSubcategory.includes(backendSubLower) ||
+                 backendSubLower.includes(productSubcategory);
+        });
+       
+        if (categoryMatch) {
+          debugLog(`✓ Product "${p.title}" matches category "${selectedCategory.name}" via subcategory "${p.subcategory}"`);
+        }
+      }
+    }
+   
+    const brandMatch = filterState.brand === 'all' || p.brand === filterState.brand;
+    const discMatch = p.discount >= filterState.discount;
+    const priceMatch = p.price >= filterState.minPrice && p.price <= filterState.maxPrice;
+   
+    const matches = categoryMatch && brandMatch && discMatch && priceMatch;
+   
+    return matches;
+  });
+  debugLog('After filtering:', filteredProducts.length, 'products');
+ 
+  sortProducts(filterState.sort);
+  currentPage = 1;
+  renderProducts();
+}
+// ==================== HEADER COUNTS ====================
+function updateHeaderCounts() {
+  const updateBadge = (id, count) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = count;
+      el.classList.toggle("hidden", count === 0);
     }
   };
-
-  window.addToCart = addToCartById;
-
-  // Start the application - ONLY fetches "first" subcategory products
-  fetchProducts();
-});
+  const cartTotal = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  updateBadge("cartCount", cartTotal);
+  updateBadge("wishlistCount", wishlist.length);
+}
+// ==================== WISHLIST ====================
+async function toggleWishlist(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (!product) return;
+  const index = wishlist.findIndex(item => item.id === id);
+  if (index > -1) {
+    const success = await removeFromWishlistBackend(product);
+    if (success) {
+      wishlist.splice(index, 1);
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      showToast("Removed from wishlist ♥");
+    }
+  } else {
+    const success = await addToWishlistBackend(product);
+    if (success) {
+      const wishlistItem = {
+        id: product.id,
+        name: product.title.split(' (')[0].trim(),
+        price: product.price,
+        originalPrice: product.originalPrice || null,
+        image: product.image
+      };
+      wishlist.push(wishlistItem);
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      showToast("Added to wishlist ♥");
+    }
+  }
+  updateHeaderCounts();
+  renderProducts();
+}
+function showToast(msg) {
+  // Remove existing toast
+  const existing = document.querySelector('.custom-toast');
+  if (existing) existing.remove();
+ 
+  const toast = document.createElement("div");
+  toast.className = "custom-toast fixed bottom-20 left-1/2 -translate-x-1/2 bg-black text-white px-6 py-3 rounded-full z-50 shadow-lg";
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+ 
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.3s';
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+}
+// ==================== PRODUCT CARD ====================
+function createProductCard(p) {
+  const inWishlist = wishlist.some(x => x.id === p.id);
+  const isOutOfStock = !p.inStock;
+  return `
+    <div class="group relative bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-blue-100
+                ${isOutOfStock ? 'opacity-60 grayscale cursor-not-allowed' : ''}"
+         ${!isOutOfStock ? `onclick="viewProductDetails(${p.id})"` : ''}
+         style="${isOutOfStock ? 'pointer-events: none;' : 'cursor: pointer;'}">
+      <div class="relative bg-blue-50 aspect-[6/4] overflow-hidden">
+        <img src="${p.image}" alt="${p.title}"
+             class="w-full h-full object-contain p-5 transition-transform duration-500 ${!isOutOfStock ? 'group-hover:scale-110' : ''}"
+             onerror="this.src='https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop'">
+        <div class="absolute top-2 left-2 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md z-10
+                    ${isOutOfStock ? 'bg-red-600' : 'bg-green-600'}">
+          ${isOutOfStock ? 'Out of Stock' : 'In Stock'}
+        </div>
+        <button onclick="event.stopPropagation(); toggleWishlist(${p.id})"
+                class="absolute top-2 right-2 w-9 h-9 bg-white rounded-full shadow-lg flex items-center justify-center
+                       ${isOutOfStock ? 'opacity-50' : 'opacity-0 group-hover:opacity-100'} transition-opacity z-10">
+          <i class="${inWishlist ? 'fas fa-heart text-red-500' : 'far fa-heart text-gray-600'} text-lg"></i>
+        </button>
+      </div>
+      <div class="p-3">
+        <p class="text-xs text-gray-500 uppercase font-medium truncate">${p.brand || 'Brand'}</p>
+        <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mt-1">${p.title}</h3>
+        <p class="text-xs text-gray-500 mt-1">${p.subcategory || 'Lifestyle Product'}</p>
+        <div class="mt-2 flex items-center gap-2">
+          <span class="text-lg font-bold text-green-600">₹${p.price.toLocaleString()}</span>
+          ${p.originalPrice > p.price ? `
+            <span class="text-sm text-gray-500 line-through">₹${p.originalPrice.toLocaleString()}</span>
+          ` : ''}
+          ${p.discount > 0 ? `<span class="text-sm font-medium text-red-500">${p.discount}% OFF</span>` : ''}
+        </div>
+        <button onclick="event.stopPropagation(); viewProductDetails(${p.id})"
+                class="mt-3 w-full font-medium text-sm py-2.5 rounded-lg transition
+                        ${isOutOfStock
+                          ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                          : 'bg-[#36C2CE] hover:bg-[#0a7272] text-white'}">
+          ${isOutOfStock ? 'Out of Stock' : 'View Details'}
+        </button>
+      </div>
+    </div>
+  `;
+}
+// ==================== RENDERING ====================
+function renderProducts() {
+  debugLog('Rendering products, filteredProducts length:', filteredProducts.length);
+ 
+  const start = (currentPage - 1) * pageSize;
+  const paginated = filteredProducts.slice(start, start + pageSize);
+  const grid = document.getElementById("productsGrid");
+  if (grid) {
+    if (paginated.length > 0) {
+      grid.innerHTML = paginated.map(createProductCard).join("");
+    } else {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-10">
+          <div class="text-gray-400 mb-4">
+            <i class="fas fa-search text-5xl"></i>
+          </div>
+          <p class="text-gray-500 mb-2">No products found</p>
+          <p class="text-gray-400 text-sm">Try changing your filters</p>
+          <button onclick="clearFilters()" class="mt-4 px-4 py-2 bg-[#36C2CE] text-white rounded-lg">
+            Clear Filters
+          </button>
+        </div>
+      `;
+    }
+  }
+  setText("resultsCount", `Showing ${filteredProducts.length} products`);
+  updatePageTitle();
+  renderPagination();
+}
+function renderPagination() {
+  const container = document.getElementById("pagination");
+  if (!container) return;
+ 
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
+  container.innerHTML = "";
+ 
+  if (totalPages <= 1) return;
+ 
+  for (let i = 1; i <= totalPages; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i;
+    btn.className = `px-4 py-2 rounded border mx-1 ${i === currentPage ? 'bg-[#36C2CE] text-white' : 'bg-white text-blue-600 border-blue-300 hover:bg-blue-50'}`;
+    btn.onclick = () => {
+      currentPage = i;
+      renderProducts();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    container.appendChild(btn);
+  }
+}
+function sortProducts(type) {
+  switch (type) {
+    case 'price-low':
+      filteredProducts.sort((a, b) => a.price - b.price);
+      break;
+    case 'price-high':
+      filteredProducts.sort((a, b) => b.price - a.price);
+      break;
+    case 'rating':
+      filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      break;
+    case 'newest':
+      filteredProducts.sort((a, b) => b.id - a.id);
+      break;
+    default:
+      // Keep original order
+      break;
+  }
+}
+// Clear all filters
+function clearFilters() {
+  filterState = {
+    category: 'all',
+    brand: 'all',
+    discount: 0,
+    minPrice: 0,
+    maxPrice: 5000,
+    sort: 'default'
+  };
+ 
+  // Reset UI
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) sortSelect.value = 'default';
+ 
+  // Reset radio buttons
+  document.querySelectorAll('input[name="category"][value="all"]').forEach(radio => {
+    radio.checked = true;
+  });
+ 
+  document.querySelectorAll('input[name="brand"][value="all"]').forEach(radio => {
+    radio.checked = true;
+  });
+ 
+  document.querySelectorAll('input[name="discount"][value="0"]').forEach(radio => {
+    radio.checked = true;
+  });
+ 
+  document.querySelectorAll('input[name="mobileCategory"][value="all"]').forEach(radio => {
+    radio.checked = true;
+  });
+ 
+  document.querySelectorAll('input[name="mobileBrand"][value="all"]').forEach(radio => {
+    radio.checked = true;
+  });
+ 
+  document.querySelectorAll('input[name="mobileDiscount"][value="0"]').forEach(radio => {
+    radio.checked = true;
+  });
+ 
+  // Reset price sliders
+  document.getElementById('minThumb').value = 0;
+  document.getElementById('maxThumb').value = 5000;
+  document.getElementById('mobileMinThumb').value = 0;
+  document.getElementById('mobileMaxThumb').value = 5000;
+ 
+  applyFilters();
+}
+// ==================== PRICE SLIDERS ====================
+function initPriceSliders() {
+  // Desktop sliders
+  const desktopMin = document.getElementById('minThumb');
+  const desktopMax = document.getElementById('maxThumb');
+ 
+  if (desktopMin && desktopMax) {
+    desktopMin.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const maxValue = parseInt(desktopMax.value);
+     
+      if (value > maxValue) {
+        e.target.value = maxValue;
+        filterState.minPrice = maxValue;
+      } else {
+        filterState.minPrice = value;
+      }
+     
+      document.getElementById('minValue').textContent = `₹${filterState.minPrice}`;
+      applyFilters();
+    });
+   
+    desktopMax.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const minValue = parseInt(desktopMin.value);
+     
+      if (value < minValue) {
+        e.target.value = minValue;
+        filterState.maxPrice = minValue;
+      } else {
+        filterState.maxPrice = value;
+      }
+     
+      document.getElementById('maxValue').textContent = `₹${filterState.maxPrice}`;
+      applyFilters();
+    });
+  }
+ 
+  // Mobile sliders
+  const mobileMin = document.getElementById('mobileMinThumb');
+  const mobileMax = document.getElementById('mobileMaxThumb');
+ 
+  if (mobileMin && mobileMax) {
+    mobileMin.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const maxValue = parseInt(mobileMax.value);
+     
+      if (value > maxValue) {
+        e.target.value = maxValue;
+        filterState.minPrice = maxValue;
+      } else {
+        filterState.minPrice = value;
+      }
+     
+      document.getElementById('mobileMinValue').textContent = `₹${filterState.minPrice}`;
+      // Don't apply filters here, wait for Apply button
+    });
+   
+    mobileMax.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      const minValue = parseInt(mobileMin.value);
+     
+      if (value < minValue) {
+        e.target.value = minValue;
+        filterState.maxPrice = minValue;
+      } else {
+        filterState.maxPrice = value;
+      }
+     
+      document.getElementById('mobileMaxValue').textContent = `₹${filterState.maxPrice}`;
+      // Don't apply filters here, wait for Apply button
+    });
+  }
+}
+function updatePriceSliders(minPrice, maxPrice) {
+  // Ensure min and max are valid numbers
+  minPrice = Math.max(0, Math.floor(minPrice));
+  maxPrice = Math.max(minPrice + 100, Math.ceil(maxPrice));
+ 
+  // Update desktop sliders
+  const desktopMin = document.getElementById('minThumb');
+  const desktopMax = document.getElementById('maxThumb');
+  const desktopMinVal = document.getElementById('minValue');
+  const desktopMaxVal = document.getElementById('maxValue');
+ 
+  if (desktopMin && desktopMax) {
+    desktopMin.min = minPrice;
+    desktopMin.max = maxPrice;
+    desktopMin.value = filterState.minPrice;
+   
+    desktopMax.min = minPrice;
+    desktopMax.max = maxPrice;
+    desktopMax.value = filterState.maxPrice;
+   
+    if (desktopMinVal) desktopMinVal.textContent = `₹${filterState.minPrice}`;
+    if (desktopMaxVal) desktopMaxVal.textContent = `₹${filterState.maxPrice}`;
+  }
+ 
+  // Update mobile sliders
+  const mobileMin = document.getElementById('mobileMinThumb');
+  const mobileMax = document.getElementById('mobileMaxThumb');
+  const mobileMinVal = document.getElementById('mobileMinValue');
+  const mobileMaxVal = document.getElementById('mobileMaxValue');
+ 
+  if (mobileMin && mobileMax) {
+    mobileMin.min = minPrice;
+    mobileMin.max = maxPrice;
+    mobileMin.value = filterState.minPrice;
+   
+    mobileMax.min = minPrice;
+    mobileMax.max = maxPrice;
+    mobileMax.value = filterState.maxPrice;
+   
+    if (mobileMinVal) mobileMinVal.textContent = `₹${filterState.minPrice}`;
+    if (mobileMaxVal) mobileMaxVal.textContent = `₹${filterState.maxPrice}`;
+  }
+}
+// ==================== VIEW PRODUCT DETAILS ====================
+function viewProductDetails(id) {
+  const product = allProducts.find(p => p.id === id);
+  if (!product) {
+    showToast('Product not found');
+    return;
+  }
+ 
+  if (!product.inStock) {
+    showToast('This product is currently out of stock');
+    return;
+  }
+  // Store in sessionStorage for product details page
+  sessionStorage.setItem('selectedProduct', JSON.stringify(product));
+ 
+  // Navigate to product details page
+  window.location.href = `/productdetails.html?id=${product.id}&name=${encodeURIComponent(product.title)}&price=${product.price}`;
+}
+// ==================== MOBILE SHEETS ====================
+function initMobileSheets() {
+  const backdrop = document.getElementById("mobileSheetBackdrop");
+  const filterSheet = document.getElementById("filterSheet");
+  const sortSheet = document.getElementById("sortSheet");
+ 
+  if (!backdrop || !filterSheet || !sortSheet) {
+    console.warn('Mobile sheet elements not found');
+    return;
+  }
+ 
+  // Open Filter Sheet
+  document.getElementById("openFilterSheet")?.addEventListener("click", () => {
+    filterSheet.classList.remove("translate-y-full");
+    backdrop.classList.remove("hidden");
+  });
+ 
+  // Open Sort Sheet
+  document.getElementById("openSortSheet")?.addEventListener("click", () => {
+    sortSheet.classList.remove("translate-y-full");
+    backdrop.classList.remove("hidden");
+  });
+ 
+  // Close Filter Sheet
+  document.getElementById("closeFilterSheet")?.addEventListener("click", () => {
+    filterSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+ 
+  // Close Sort Sheet
+  document.getElementById("closeSortSheet")?.addEventListener("click", () => {
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+ 
+  // Close on backdrop click
+  backdrop.addEventListener("click", () => {
+    filterSheet.classList.add("translate-y-full");
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+ 
+  // Apply Mobile Filters
+  document.getElementById("applyMobileFilters")?.addEventListener("click", () => {
+    const category = document.querySelector('input[name="mobileCategory"]:checked')?.value || 'all';
+    const brand = document.querySelector('input[name="mobileBrand"]:checked')?.value || 'all';
+    const discount = parseInt(document.querySelector('input[name="mobileDiscount"]:checked')?.value || '0');
+   
+    filterState.category = category;
+    filterState.brand = brand;
+    filterState.discount = discount;
+   
+    applyFilters();
+   
+    filterSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+ 
+  // Apply Mobile Sort
+  document.getElementById("applySortBtn")?.addEventListener("click", () => {
+    const sort = document.querySelector('input[name="mobileSort"]:checked')?.value || 'default';
+    filterState.sort = sort;
+   
+    const sortSelect = document.getElementById("sortSelect");
+    if (sortSelect) sortSelect.value = sort;
+   
+    sortProducts(sort);
+    renderProducts();
+   
+    sortSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+ 
+  // Clear Mobile Filters
+  document.getElementById("clearMobileFilters")?.addEventListener("click", () => {
+    clearFilters();
+    filterSheet.classList.add("translate-y-full");
+    backdrop.classList.add("hidden");
+  });
+}
+// ==================== INITIALIZATION ====================
+async function init() {
+  console.log('Initializing Lifestyle Disorder page...');
+ 
+  // Initialize mobile sheets
+  initMobileSheets();
+ 
+  // Initialize price sliders
+  initPriceSliders();
+ 
+  // Initialize sort select
+  const sortSelect = document.getElementById("sortSelect");
+  if (sortSelect) {
+    sortSelect.value = filterState.sort;
+    sortSelect.addEventListener("change", (e) => {
+      filterState.sort = e.target.value;
+      sortProducts(filterState.sort);
+      renderProducts();
+    });
+  }
+ 
+  // Initialize category filters (your HTML already has them, just add listeners)
+  initCategoryFilters();
+ 
+  // Initialize discount filters
+  initDiscountFilters();
+ 
+  // Initialize "Apply Desktop Filters" button
+  initDesktopFilterButton();
+ 
+  // Fetch initial products
+  currentUserId = await getValidUserId();
+  await fetchProducts();
+  await syncWishlist();
+ 
+  // Update header counts
+  updateHeaderCounts();
+ 
+  // Initialize banner slider
+  initBannerSlider();
+}
+// Initialize category filters
+function initCategoryFilters() {
+  // Desktop category filters
+  document.querySelectorAll('#filterSidebar input[name="category"]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      filterState.category = e.target.value;
+      applyFilters();
+    });
+  });
+ 
+  // Mobile category filters
+  document.querySelectorAll('#filterSheet input[name="mobileCategory"]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      // Update filter state but don't apply yet
+      filterState.category = e.target.value;
+    });
+  });
+}
+// Initialize discount filters
+function initDiscountFilters() {
+  // Desktop discount filters
+  const desktopDiscountContainer = document.querySelector('#filterSidebar input[name="discount"]')?.closest('.mt-4');
+  if (desktopDiscountContainer && desktopDiscountContainer.querySelectorAll('input').length === 0) {
+    const discountOptions = [
+      { value: 0, label: 'All Products' },
+      { value: 10, label: '10% or more' },
+      { value: 20, label: '20% or more' },
+      { value: 30, label: '30% or more' }
+    ];
+   
+    let html = '';
+    discountOptions.forEach(option => {
+      html += `
+        <label class="flex items-center"><input type="radio" name="discount" value="${option.value}" ${filterState.discount === option.value ? 'checked' : ''} class="w-5 h-5 text-primary"> <span class="ml-3 text-gray-700">${option.label}</span></label>
+      `;
+    });
+    desktopDiscountContainer.innerHTML = html;
+   
+    desktopDiscountContainer.querySelectorAll('input[name="discount"]').forEach(input => {
+      input.addEventListener('change', (e) => {
+        filterState.discount = parseInt(e.target.value);
+        applyFilters();
+      });
+    });
+  }
+ 
+  // Mobile discount filters (already in HTML)
+  document.querySelectorAll('#filterSheet input[name="mobileDiscount"]').forEach(input => {
+    input.addEventListener('change', (e) => {
+      filterState.discount = parseInt(e.target.value);
+    });
+  });
+}
+// Initialize desktop filter button
+function initDesktopFilterButton() {
+  const applyDesktopBtn = document.getElementById('applyDesktopFilters');
+  if (applyDesktopBtn) {
+    applyDesktopBtn.addEventListener('click', () => {
+      // Get current filter values
+      const category = document.querySelector('#filterSidebar input[name="category"]:checked')?.value || 'all';
+      const brand = document.querySelector('#filterSidebar input[name="brand"]:checked')?.value || 'all';
+      const discount = parseInt(document.querySelector('#filterSidebar input[name="discount"]:checked')?.value || '0');
+     
+      filterState.category = category;
+      filterState.brand = brand;
+      filterState.discount = discount;
+     
+      applyFilters();
+    });
+  }
+}
+// Initialize banner slider
+function initBannerSlider() {
+  const slides = document.querySelectorAll('.banner-slide');
+  const dots = document.querySelectorAll('.banner-dot');
+ 
+  if (slides.length === 0) return;
+ 
+  let currentSlide = 0;
+ 
+  function showSlide(index) {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === index);
+    });
+   
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+   
+    currentSlide = index;
+  }
+ 
+  // Auto-rotate slides every 5 seconds
+  setInterval(() => {
+    let nextSlide = currentSlide + 1;
+    if (nextSlide >= slides.length) {
+      nextSlide = 0;
+    }
+    showSlide(nextSlide);
+  }, 5000);
+ 
+  // Add click handlers to dots
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      showSlide(index);
+    });
+  });
+}
+// ==================== ON LOAD ====================
+document.addEventListener("DOMContentLoaded", init);

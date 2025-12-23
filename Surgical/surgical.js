@@ -1,851 +1,10 @@
-const surgicalProducts = [
-  {
-    "sku": "SGAUZE001",
-    "productName": "Sterile Gauze Pad 10x10cm (Pack of 100)",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Dressings & Bandages",
-    "productPrice": 449,
-    "productOldPrice": 599,
-    "productStatus": "Available",
-    "productDescription": "Sterile non-woven gauze pads for wound dressing and surgical procedures. Highly absorbent and lint-free.",
-    "productQuantity": 50,
-    "productUnit": "Pack of 100 pads",
-    "productMRP": 650,
-    "productRating": 4.6,
-    "prescriptionRequired": false,
-    "brandName": "HLL Lifecare",
-    "mfgDate": "2024-03-15",
-    "expDate": "2027-03-15",
-    "batchNo": "BATCH-GAUZE-001",
-    "benefitsList": [
-      "Sterile and ready-to-use",
-      "Highly absorbent",
-      "Lint-free non-woven fabric",
-      "Ideal for surgical dressing"
-    ],
-    "directionsList": [
-      "Open sterile package",
-      "Apply directly to wound",
-      "Secure with adhesive tape",
-      "Change dressing daily or as needed"
-    ],
-    "ingredientsList": [
-      "Non-woven Gauze",
-      "Sterile Packaging"
-    ],
-    "productDynamicFields": {
-      "size": "10x10cm",
-      "sterility": "Sterile",
-      "material": "Non-woven Cotton",
-      "shelfLife": "36 months",
-      "countryOfOrigin": "India",
-      "suitableFor": "Hospital and clinical use",
-      "storage": "Store in cool dry place"
-    },
-    "productSizes": [
-      "Pack of 50",
-      "Pack of 100",
-      "Pack of 200"
-    ],
-    "id": 1,
-    "category": "dressings",
-    "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SGLOVES001",
-    "productName": "Latex Surgical Gloves Powder-Free (Box of 50)",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Surgical Consumables",
-    "productPrice": 649,
-    "productOldPrice": 850,
-    "productStatus": "Available",
-    "productDescription": "Powder-free latex surgical gloves for medical procedures. Provides excellent tactile sensitivity.",
-    "productQuantity": 25,
-    "productUnit": "Box of 50 pairs",
-    "productMRP": 900,
-    "productRating": 4.7,
-    "prescriptionRequired": false,
-    "brandName": "3M Healthcare",
-    "mfgDate": "2024-02-10",
-    "expDate": "2027-02-10",
-    "batchNo": "BATCH-GLOVE-002",
-    "benefitsList": [
-      "Powder-free for reduced allergy risk",
-      "Excellent tactile sensitivity",
-      "Amber colored for reduced glare",
-      "Textured fingertips for better grip"
-    ],
-    "directionsList": [
-      "Select appropriate size",
-      "Put on before procedure",
-      "Change between patients",
-      "Dispose after single use"
-    ],
-    "ingredientsList": [
-      "Natural Latex Rubber",
-      "Accelerators",
-      "Antioxidants"
-    ],
-    "productDynamicFields": {
-      "size": "Medium (7.0)",
-      "material": "Natural Latex",
-      "powder": "Powder-free",
-      "sterility": "Sterile",
-      "shelfLife": "60 months",
-      "countryOfOrigin": "India",
-      "suitableFor": "Surgical and examination use"
-    },
-    "productSizes": [
-      "Small (6.0)",
-      "Medium (7.0)",
-      "Large (8.0)",
-      "XL (9.0)"
-    ],
-    "id": 2,
-    "category": "consumables",
-    "image": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SIVCANN001",
-    "productName": "IV Cannula 20G (Pink)",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "IV & Infusion Items",
-    "productPrice": 68,
-    "productOldPrice": 85,
-    "productStatus": "Available",
-    "productDescription": "IV cannula with safety wing for secure intravenous access. Color-coded for easy identification.",
-    "productQuantity": 100,
-    "productUnit": "Single unit",
-    "productMRP": 100,
-    "productRating": 4.5,
-    "prescriptionRequired": true,
-    "brandName": "Becton Dickinson",
-    "mfgDate": "2024-01-20",
-    "expDate": "2026-01-20",
-    "batchNo": "BATCH-IVCAN-003",
-    "benefitsList": [
-      "Safety wing design",
-      "Color-coded for size identification",
-      "Radiopaque stripe for X-ray visibility",
-      "Easy insertion with sharp needle"
-    ],
-    "directionsList": [
-      "Select appropriate vein",
-      "Insert at 15-30 degree angle",
-      "Secure with adhesive tape",
-      "Flush with saline before use"
-    ],
-    "ingredientsList": [
-      "Medical Grade Plastic",
-      "Stainless Steel Needle"
-    ],
-    "productDynamicFields": {
-      "size": "20G (Pink)",
-      "length": "32mm",
-      "flowRate": "60ml/min",
-      "sterility": "Sterile",
-      "shelfLife": "36 months",
-      "countryOfOrigin": "India",
-      "suitableFor": "Intravenous therapy"
-    },
-    "productSizes": [
-      "18G (Green)",
-      "20G (Pink)",
-      "22G (Blue)",
-      "24G (Yellow)"
-    ],
-    "id": 3,
-    "category": "iv",
-    "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SFOLY001",
-    "productName": "Foley Catheter 2-Way 16Fr (Silicone)",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Catheters & Tubes",
-    "productPrice": 385,
-    "productOldPrice": 500,
-    "productStatus": "Available",
-    "productDescription": "Silicone Foley catheter with 5ml balloon for urinary drainage. Biocompatible and latex-free.",
-    "productQuantity": 30,
-    "productUnit": "Single catheter",
-    "productMRP": 550,
-    "productRating": 4.4,
-    "prescriptionRequired": true,
-    "brandName": "Smith & Nephew",
-    "mfgDate": "2024-03-01",
-    "expDate": "2027-03-01",
-    "batchNo": "BATCH-FOLY-004",
-    "benefitsList": [
-      "Silicone material reduces encrustation",
-      "5ml balloon for secure placement",
-      "Latex-free for reduced allergies",
-      "Radiopaque stripe for X-ray visibility"
-    ],
-    "directionsList": [
-      "Use sterile technique",
-      "Inflate balloon with sterile water",
-      "Connect to drainage bag",
-      "Change every 2-4 weeks"
-    ],
-    "ingredientsList": [
-      "Medical Grade Silicone",
-      "Silicone Balloon"
-    ],
-    "productDynamicFields": {
-      "size": "16 French",
-      "length": "40cm",
-      "balloon": "5ml",
-      "channels": "2-Way",
-      "sterility": "Sterile",
-      "shelfLife": "60 months",
-      "countryOfOrigin": "USA"
-    },
-    "productSizes": [
-      "12Fr",
-      "14Fr",
-      "16Fr",
-      "18Fr",
-      "20Fr"
-    ],
-    "id": 4,
-    "category": "catheters",
-    "image": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SHYDRO001",
-    "productName": "Hydrocolloid Dressing 10x10cm",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Wound Care",
-    "productPrice": 285,
-    "productOldPrice": 380,
-    "productStatus": "Available",
-    "productDescription": "Hydrocolloid dressing for moist wound healing. Creates optimal environment for healing.",
-    "productQuantity": 40,
-    "productUnit": "Box of 10 dressings",
-    "productMRP": 420,
-    "productRating": 4.6,
-    "prescriptionRequired": false,
-    "brandName": "Johnson & Johnson",
-    "mfgDate": "2024-02-15",
-    "expDate": "2026-02-15",
-    "batchNo": "BATCH-HYDRO-005",
-    "benefitsList": [
-      "Moist wound healing environment",
-      "Waterproof barrier",
-      "Absorbs exudate",
-      "Reduces pain during dressing changes"
-    ],
-    "directionsList": [
-      "Clean wound area",
-      "Apply dressing to dry skin",
-      "Leave for 3-7 days",
-      "Change when dressing lifts"
-    ],
-    "ingredientsList": [
-      "Hydrocolloid Particles",
-      "Polyurethane Foam",
-      "Adhesive Border"
-    ],
-    "productDynamicFields": {
-      "size": "10x10cm",
-      "absorbency": "Moderate",
-      "waterResistant": "Yes",
-      "wearTime": "3-7 days",
-      "sterility": "Sterile",
-      "shelfLife": "36 months",
-      "suitableFor": "Pressure ulcers, minor burns"
-    },
-    "productSizes": [
-      "5x5cm",
-      "10x10cm",
-      "15x15cm"
-    ],
-    "id": 5,
-    "category": "wound",
-    "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SKNEE001",
-    "productName": "Knee Brace with Hinges (Large)",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Orthopedic Support",
-    "productPrice": 1249,
-    "productOldPrice": 1699,
-    "productStatus": "Available",
-    "productDescription": "Hinged knee brace for post-operative support and ligament injuries. Provides stability and compression.",
-    "productQuantity": 15,
-    "productUnit": "Single brace",
-    "productMRP": 1800,
-    "productRating": 4.8,
-    "prescriptionRequired": false,
-    "brandName": "3M Healthcare",
-    "mfgDate": "2024-01-10",
-    "expDate": "2028-01-10",
-    "batchNo": "BATCH-KNEE-006",
-    "benefitsList": [
-      "Hinged for controlled movement",
-      "Adjustable straps for custom fit",
-      "Open patella design",
-      "Provides medial/lateral support"
-    ],
-    "directionsList": [
-      "Place around knee",
-      "Adjust straps for comfort",
-      "Set hinge to desired ROM",
-      "Wear during activities"
-    ],
-    "ingredientsList": [
-      "Neoprene",
-      "Metal Hinges",
-      "Velcro Straps"
-    ],
-    "productDynamicFields": {
-      "size": "Large (16-19 inches)",
-      "hingeType": "Polycentric",
-      "romAdjustment": "0-135 degrees",
-      "material": "Neoprene",
-      "shelfLife": "60 months",
-      "countryOfOrigin": "India",
-      "suitableFor": "ACL injuries, post-op rehab"
-    },
-    "productSizes": [
-      "Small",
-      "Medium",
-      "Large",
-      "XL"
-    ],
-    "id": 6,
-    "category": "orthopedic",
-    "image": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SNS001",
-    "productName": "Normal Saline 0.9% 500ml",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "IV Fluids",
-    "productPrice": 38,
-    "productOldPrice": 50,
-    "productStatus": "Available",
-    "productDescription": "Sterile normal saline solution for intravenous infusion, irrigation, and wound cleansing.",
-    "productQuantity": 200,
-    "productUnit": "500ml bottle",
-    "productMRP": 65,
-    "productRating": 4.3,
-    "prescriptionRequired": true,
-    "brandName": "HLL Lifecare",
-    "mfgDate": "2024-03-05",
-    "expDate": "2026-03-05",
-    "batchNo": "BATCH-NS-007",
-    "benefitsList": [
-      "Isotonic solution",
-      "Sterile and pyrogen-free",
-      "Compatible with most medications",
-      "For IV infusion and irrigation"
-    ],
-    "directionsList": [
-      "Check for particulate matter",
-      "Use aseptic technique",
-      "Infuse at prescribed rate",
-      "Discard unused portion"
-    ],
-    "ingredientsList": [
-      "Sodium Chloride",
-      "Water for Injection"
-    ],
-    "productDynamicFields": {
-      "concentration": "0.9%",
-      "osmolarity": "308 mOsm/L",
-      "pH": "4.5-7.0",
-      "sterility": "Sterile",
-      "shelfLife": "24 months",
-      "storage": "Store at room temperature",
-      "countryOfOrigin": "India"
-    },
-    "productSizes": [
-      "100ml",
-      "250ml",
-      "500ml",
-      "1000ml"
-    ],
-    "id": 7,
-    "category": "fluids",
-    "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SMINOR001",
-    "productName": "Minor OT Dressing Kit",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Surgical Kits",
-    "productPrice": 680,
-    "productOldPrice": 850,
-    "productStatus": "Available",
-    "productDescription": "Complete minor operation theater kit containing all essential items for minor surgical procedures.",
-    "productQuantity": 20,
-    "productUnit": "Single kit",
-    "productMRP": 950,
-    "productRating": 4.7,
-    "prescriptionRequired": false,
-    "brandName": "HLL Lifecare",
-    "mfgDate": "2024-02-20",
-    "expDate": "2027-02-20",
-    "batchNo": "BATCH-MINOR-008",
-    "benefitsList": [
-      "Complete sterile kit",
-      "Saves preparation time",
-      "Reduces cross-contamination risk",
-      "Standardized components"
-    ],
-    "directionsList": [
-      "Open outer packaging",
-      "Arrange on sterile field",
-      "Use aseptic technique",
-      "Discard after single use"
-    ],
-    "ingredientsList": [
-      "Sterile Drapes",
-      "Gauze Pads",
-      "Surgical Gloves",
-      "Antiseptic Solution",
-      "Suture Materials"
-    ],
-    "productDynamicFields": {
-      "contents": "Drape, gloves, gauze, antiseptic, suture",
-      "sterility": "Sterile",
-      "singleUse": "Yes",
-      "shelfLife": "36 months",
-      "countryOfOrigin": "India",
-      "suitableFor": "Minor surgical procedures"
-    },
-    "productSizes": [
-      "Basic Kit",
-      "Standard Kit",
-      "Premium Kit"
-    ],
-    "id": 8,
-    "category": "kits",
-    "image": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SBAND001",
-    "productName": "Adhesive Bandage Strips (100 pcs)",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Dressings & Bandages",
-    "productPrice": 179,
-    "productOldPrice": 250,
-    "productStatus": "Out of Stock",
-    "productDescription": "Assorted size adhesive bandages for minor cuts and abrasions. Water-resistant and flexible.",
-    "productQuantity": 0,
-    "productUnit": "Box of 100 strips",
-    "productMRP": 300,
-    "productRating": 4.2,
-    "prescriptionRequired": false,
-    "brandName": "Johnson & Johnson",
-    "mfgDate": "2024-01-15",
-    "expDate": "2028-01-15",
-    "batchNo": "BATCH-BAND-009",
-    "benefitsList": [
-      "Water-resistant",
-      "Flexible for joints",
-      "Non-stick pad",
-      "Hypoallergenic adhesive"
-    ],
-    "directionsList": [
-      "Clean wound area",
-      "Remove backing paper",
-      "Apply over wound",
-      "Press edges to secure"
-    ],
-    "ingredientsList": [
-      "Non-woven Pad",
-      "Acrylic Adhesive",
-      "Polyethylene Backing"
-    ],
-    "productDynamicFields": {
-      "sizes": "Assorted (S/M/L)",
-      "waterResistant": "Yes",
-      "latexFree": "Yes",
-      "shelfLife": "60 months",
-      "countryOfOrigin": "India",
-      "suitableFor": "Minor cuts and abrasions"
-    },
-    "productSizes": [
-      "Box of 20",
-      "Box of 50",
-      "Box of 100"
-    ],
-    "id": 9,
-    "category": "dressings",
-    "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SMASK001",
-    "productName": "3-Ply Face Mask with Nose Pin (50 pcs)",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Surgical Consumables",
-    "productPrice": 149,
-    "productOldPrice": 200,
-    "productStatus": "Available",
-    "productDescription": "3-ply surgical face mask with nose clip and ear loops. Provides protection against droplets.",
-    "productQuantity": 80,
-    "productUnit": "Box of 50 masks",
-    "productMRP": 250,
-    "productRating": 4.4,
-    "prescriptionRequired": false,
-    "brandName": "3M Healthcare",
-    "mfgDate": "2024-03-10",
-    "expDate": "2026-03-10",
-    "batchNo": "BATCH-MASK-010",
-    "benefitsList": [
-      "3-layer protection",
-      "Adjustable nose clip",
-      "Soft ear loops",
-      "Breathable material"
-    ],
-    "directionsList": [
-      "Place over nose and mouth",
-      "Pinch nose clip",
-      "Secure ear loops",
-      "Discard after single use"
-    ],
-    "ingredientsList": [
-      "Melt-blown Filter Layer",
-      "Non-woven Outer Layers"
-    ],
-    "productDynamicFields": {
-      "layers": "3-Ply",
-      "filtration": ">95% BFE",
-      "noseClip": "Yes",
-      "earLoops": "Elastic",
-      "shelfLife": "36 months",
-      "countryOfOrigin": "India"
-    },
-    "productSizes": [
-      "Box of 25",
-      "Box of 50",
-      "Box of 100"
-    ],
-    "id": 10,
-    "category": "consumables",
-    "image": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SINFUS001",
-    "productName": "IV Infusion Set with Airvent",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "IV & Infusion Items",
-    "productPrice": 42,
-    "productOldPrice": 55,
-    "productStatus": "Available",
-    "productDescription": "IV infusion set with airvent and roller clamp for controlled fluid administration.",
-    "productQuantity": 150,
-    "productUnit": "Single set",
-    "productMRP": 70,
-    "productRating": 4.5,
-    "prescriptionRequired": true,
-    "brandName": "Becton Dickinson",
-    "mfgDate": "2024-02-25",
-    "expDate": "2027-02-25",
-    "batchNo": "BATCH-INFUS-011",
-    "benefitsList": [
-      "Airvent prevents air embolism",
-      "Roller clamp for flow control",
-      "Luer lock connection",
-      "Clear tubing for visibility"
-    ],
-    "directionsList": [
-      "Connect to IV bag",
-      "Prime tubing",
-      "Connect to catheter",
-      "Adjust flow rate"
-    ],
-    "ingredientsList": [
-      "PVC Tubing",
-      "Polypropylene Connectors",
-      "Rubber Roller"
-    ],
-    "productDynamicFields": {
-      "length": "150cm",
-      "dropFactor": "20 drops/ml",
-      "airvent": "Yes",
-      "sterility": "Sterile",
-      "shelfLife": "60 months",
-      "countryOfOrigin": "India"
-    },
-    "productSizes": [
-      "Standard (150cm)",
-      "Long (200cm)",
-      "Micro-drip (60 drops/ml)"
-    ],
-    "id": 11,
-    "category": "iv",
-    "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SRL001",
-    "productName": "Ringer Lactate 500ml",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "IV Fluids",
-    "productPrice": 48,
-    "productOldPrice": 65,
-    "productStatus": "Available",
-    "productDescription": "Balanced electrolyte solution for intravenous fluid replacement. Similar to plasma composition.",
-    "productQuantity": 120,
-    "productUnit": "500ml bottle",
-    "productMRP": 80,
-    "productRating": 4.6,
-    "prescriptionRequired": true,
-    "brandName": "HLL Lifecare",
-    "mfgDate": "2024-03-12",
-    "expDate": "2026-03-12",
-    "batchNo": "BATCH-RL-012",
-    "benefitsList": [
-      "Balanced electrolyte solution",
-      "Similar to plasma composition",
-      "For fluid resuscitation",
-      "Maintains electrolyte balance"
-    ],
-    "directionsList": [
-      "Administer IV only",
-      "Use aseptic technique",
-      "Infuse at prescribed rate",
-      "Monitor electrolytes"
-    ],
-    "ingredientsList": [
-      "Sodium Chloride",
-      "Potassium Chloride",
-      "Calcium Chloride",
-      "Sodium Lactate",
-      "Water for Injection"
-    ],
-    "productDynamicFields": {
-      "composition": "Na+, K+, Ca++, Lactate",
-      "osmolarity": "273 mOsm/L",
-      "pH": "6.0-7.5",
-      "sterility": "Sterile",
-      "shelfLife": "24 months",
-      "storage": "Store at room temperature"
-    },
-    "productSizes": [
-      "250ml",
-      "500ml",
-      "1000ml"
-    ],
-    "id": 12,
-    "category": "fluids",
-    "image": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SSUTURE001",
-    "productName": "Suture Removal Kit",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Surgical Kits",
-    "productPrice": 380,
-    "productOldPrice": 500,
-    "productStatus": "Available",
-    "productDescription": "Complete sterile kit for suture removal. Contains all necessary instruments and dressings.",
-    "productQuantity": 25,
-    "productUnit": "Single kit",
-    "productMRP": 550,
-    "productRating": 4.7,
-    "prescriptionRequired": false,
-    "brandName": "Johnson & Johnson",
-    "mfgDate": "2024-02-28",
-    "expDate": "2027-02-28",
-    "batchNo": "BATCH-SUTURE-013",
-    "benefitsList": [
-      "Sterile ready-to-use kit",
-      "All instruments included",
-      "Reduces infection risk",
-      "Saves preparation time"
-    ],
-    "directionsList": [
-      "Open sterile field",
-      "Clean suture line",
-      "Cut and remove sutures",
-      "Apply dressing"
-    ],
-    "ingredientsList": [
-      "Suture Scissors",
-      "Forceps",
-      "Sterile Drape",
-      "Antiseptic Swabs",
-      "Dressing Materials"
-    ],
-    "productDynamicFields": {
-      "contents": "Scissors, forceps, drape, antiseptic, dressing",
-      "sterility": "Sterile",
-      "singleUse": "Yes",
-      "shelfLife": "36 months",
-      "countryOfOrigin": "India"
-    },
-    "productSizes": [
-      "Basic Kit",
-      "Deluxe Kit"
-    ],
-    "id": 13,
-    "category": "kits",
-    "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SBETADINE001",
-    "productName": "Povidone Iodine Ointment 20g",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Wound Care",
-    "productPrice": 89,
-    "productOldPrice": 120,
-    "productStatus": "Out of Stock",
-    "productDescription": "Antiseptic ointment for wound disinfection and prevention of infection. Broad-spectrum antimicrobial.",
-    "productQuantity": 0,
-    "productUnit": "20g tube",
-    "productMRP": 150,
-    "productRating": 4.5,
-    "prescriptionRequired": false,
-    "brandName": "Johnson & Johnson",
-    "mfgDate": "2024-01-30",
-    "expDate": "2026-01-30",
-    "batchNo": "BATCH-BET-014",
-    "benefitsList": [
-      "Broad-spectrum antimicrobial",
-      "Sustained release of iodine",
-      "Water-soluble base",
-      "Non-staining formula"
-    ],
-    "directionsList": [
-      "Clean wound area",
-      "Apply thin layer",
-      "Cover with dressing",
-      "Apply 1-3 times daily"
-    ],
-    "ingredientsList": [
-      "Povidone Iodine 5%",
-      "Polyethylene Glycol Base"
-    ],
-    "productDynamicFields": {
-      "strength": "5%",
-      "form": "Ointment",
-      "weight": "20g",
-      "shelfLife": "36 months",
-      "countryOfOrigin": "India",
-      "suitableFor": "Minor wounds, cuts, abrasions"
-    },
-    "productSizes": [
-      "10g",
-      "20g",
-      "50g"
-    ],
-    "id": 14,
-    "category": "wound",
-    "image": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SANKLE001",
-    "productName": "Ankle Support Neoprene",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "Orthopedic Support",
-    "productPrice": 499,
-    "productOldPrice": 650,
-    "productStatus": "Available",
-    "productDescription": "Neoprene ankle brace for sprain support and stability. Provides compression and warmth.",
-    "productQuantity": 18,
-    "productUnit": "Single support",
-    "productMRP": 750,
-    "productRating": 4.6,
-    "prescriptionRequired": false,
-    "brandName": "3M Healthcare",
-    "mfgDate": "2024-03-08",
-    "expDate": "2028-03-08",
-    "batchNo": "BATCH-ANKLE-015",
-    "benefitsList": [
-      "Neoprene provides warmth",
-      "Adjustable strap for compression",
-      "Contoured heel design",
-      "Improves proprioception"
-    ],
-    "directionsList": [
-      "Slide over foot",
-      "Position heel in opening",
-      "Adjust straps for comfort",
-      "Wear during activities"
-    ],
-    "ingredientsList": [
-      "Neoprene",
-      "Velcro Straps",
-      "Nylon Lining"
-    ],
-    "productDynamicFields": {
-      "size": "Medium",
-      "material": "Neoprene",
-      "adjustability": "Yes",
-      "leftRight": "Universal",
-      "shelfLife": "60 months",
-      "countryOfOrigin": "India",
-      "suitableFor": "Ankle sprains, instability"
-    },
-    "productSizes": [
-      "Small",
-      "Medium",
-      "Large"
-    ],
-    "id": 15,
-    "category": "orthopedic",
-    "image": "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop"
-  },
-  {
-    "sku": "SD5W001",
-    "productName": "Dextrose 5% 500ml",
-    "productCategory": "Surgical Supplies",
-    "productSubCategory": "IV Fluids",
-    "productPrice": 42,
-    "productOldPrice": 55,
-    "productStatus": "Available",
-    "productDescription": "5% dextrose solution for intravenous hydration and calorie supplementation.",
-    "productQuantity": 90,
-    "productUnit": "500ml bottle",
-    "productMRP": 70,
-    "productRating": 4.4,
-    "prescriptionRequired": true,
-    "brandName": "HLL Lifecare",
-    "mfgDate": "2024-03-20",
-    "expDate": "2026-03-20",
-    "batchNo": "BATCH-D5W-016",
-    "benefitsList": [
-      "Provides calories",
-      "Isotonic solution",
-      "Free water replacement",
-      "Compatible with medications"
-    ],
-    "directionsList": [
-      "Administer IV only",
-      "Check for crystallization",
-      "Infuse at prescribed rate",
-      "Monitor blood glucose"
-    ],
-    "ingredientsList": [
-      "Dextrose Monohydrate",
-      "Water for Injection"
-    ],
-    "productDynamicFields": {
-      "concentration": "5%",
-      "calories": "170 kcal/L",
-      "osmolarity": "252 mOsm/L",
-      "pH": "3.5-6.5",
-      "sterility": "Sterile",
-      "shelfLife": "24 months"
-    },
-    "productSizes": [
-      "250ml",
-      "500ml",
-      "1000ml"
-    ],
-    "id": 16,
-    "category": "fluids",
-    "image": "https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop"
-  }
-];
 
-let products = [...surgicalProducts];
-let filteredProducts = [...surgicalProducts];
+
+
+
+// surgical.js - Fetching data from backend API
+let products = [];
+let filteredProducts = [];
 let productGrid, sortSelect, showMoreBtn;
 
 let currentFilters = {
@@ -859,15 +18,24 @@ let currentFilters = {
 let visibleProductsCount = 8;
 let allFilteredProducts = [];
 
+// API Configuration
+const API_BASE_URL = 'http://localhost:8083/api/products';
+const SURGICAL_CATEGORY = 'Surgical Items'; // Changed from 'Surgical Supplies'
+
 // ======================================================
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, initializing surgical page...');
   productGrid = document.getElementById('productGrid');
   sortSelect = document.getElementById('sortSelect');
   showMoreBtn = document.getElementById('showMoreBtn');
 
-  sessionStorage.setItem('currentPageProducts', JSON.stringify(surgicalProducts));
+  if (!productGrid) {
+    console.error('productGrid element not found!');
+    return;
+  }
 
-  renderInitialProducts();
+  // Fetch products from backend
+  fetchProducts();
   updateResultsCount();
   initSlider();
   initSorting();
@@ -887,6 +55,328 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// =============== FETCH PRODUCTS FROM BACKEND ===============
+async function fetchProducts() {
+  console.log('Fetching products from backend...');
+  showLoading();
+  
+  try {
+    const url = `${API_BASE_URL}/get-by-category/${encodeURIComponent(SURGICAL_CATEGORY)}`;
+    console.log('API URL:', url);
+    
+    // Fetch surgical products by category from backend
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+    
+    console.log('Response status:', response.status);
+    
+    if (!response.ok) {
+      console.error('HTTP error! status:', response.status);
+      // Try alternative approach
+      await fetchAllProductsAndFilter();
+      return;
+    }
+    
+    const productData = await response.json();
+    console.log('API Response data received');
+    console.log('Number of products received:', productData ? productData.length : 0);
+    
+    if (!productData || !Array.isArray(productData) || productData.length === 0) {
+      console.warn('No products received from API endpoint, trying alternative...');
+      await fetchAllProductsAndFilter();
+      return;
+    }
+    
+    processProductData(productData);
+    
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    showErrorMessage(error);
+    hideLoading();
+  }
+}
+
+// Alternative method: Fetch all products and filter by category
+async function fetchAllProductsAndFilter() {
+  try {
+    console.log('Trying to fetch all products and filter...');
+    const response = await fetch(`${API_BASE_URL}/get-all-products?page=0&size=100`);
+    
+    if (!response.ok) {
+      throw new Error(`Failed to fetch all products: ${response.status}`);
+    }
+    
+    const pageData = await response.json();
+    console.log('All products response:', pageData);
+    
+    let allProducts = [];
+    if (pageData.content && Array.isArray(pageData.content)) {
+      allProducts = pageData.content;
+    } else if (Array.isArray(pageData)) {
+      allProducts = pageData;
+    }
+    
+    console.log('Total products fetched:', allProducts.length);
+    
+    // Filter for Surgical Items category
+    const surgicalProducts = allProducts.filter(product => {
+      const category = product.productCategory || product.category || '';
+      console.log(`Product ${product.productName || product.name}: ${category}`);
+      return category.toLowerCase().includes('surgical');
+    });
+    
+    console.log(`Found ${surgicalProducts.length} surgical products after filtering`);
+    
+    if (surgicalProducts.length === 0) {
+      showNoProductsMessage();
+      hideLoading();
+      return;
+    }
+    
+    processProductData(surgicalProducts);
+    
+  } catch (error) {
+    console.error('Error in alternative fetch:', error);
+    showNoProductsMessage();
+    hideLoading();
+  }
+}
+
+// Process product data from either endpoint
+function processProductData(productData) {
+  console.log('Processing product data...');
+  
+  // Map backend response to frontend format
+  products = productData.map((product, index) => {
+    // Debug log
+    console.log(`Processing product ${index}:`, {
+      name: product.productName,
+      category: product.productCategory,
+      subCategory: product.productSubCategory,
+      price: product.productPrice
+    });
+    
+    // Calculate product ID
+    const productId = product.productId || product.id || (index + 1000);
+    
+    // Calculate price
+    const productPrice = product.productPrice || product.price || 0;
+    const productOldPrice = product.productOldPrice || product.originalPrice || 
+                           (productPrice > 0 ? Math.round(productPrice * 1.2) : 0);
+    
+    // Calculate stock status
+    const productQuantity = product.productQuantity || product.quantity || 0;
+    const productStatus = productQuantity > 0 ? "Available" : "Out of Stock";
+    
+    // Get category mapping - use productSubCategory if available
+    const productSubCategory = product.productSubCategory || product.subCategory || '';
+    const mappedCategory = mapSubCategoryToFrontendCategory(productSubCategory);
+    
+    // Get brand name
+    const brandName = product.brandName || product.brand || 
+                     (product.productCategory && product.productCategory.includes('HLL') ? 'HLL Lifecare' : 
+                      product.productCategory && product.productCategory.includes('3M') ? '3M Healthcare' : 
+                      product.productCategory && product.productCategory.includes('Johnson') ? 'Johnson & Johnson' : 
+                      'Generic');
+    
+    // Get image URL
+    const imageUrl = getProductImageUrl(product, productId);
+    
+    return {
+      sku: product.productSku || product.sku || `SURG${String(index + 1).padStart(3, '0')}`,
+      productName: product.productName || product.name || `Surgical Product ${index + 1}`,
+      productCategory: product.productCategory || SURGICAL_CATEGORY,
+      productSubCategory: productSubCategory,
+      productPrice: productPrice,
+      productOldPrice: productOldPrice,
+      productStatus: productStatus,
+      productDescription: product.productDescription || product.description || 'Premium surgical product for medical use',
+      productQuantity: productQuantity,
+      productUnit: product.productUnit || product.unit || "Unit",
+      productMRP: product.productMRP || product.mrp || productPrice,
+      productRating: product.productRating || product.rating || 4.0,
+      prescriptionRequired: product.prescriptionRequired || false,
+      brandName: brandName,
+      mfgDate: product.mfgDate || '',
+      expDate: product.expDate || '',
+      batchNo: product.batchNo || '',
+      benefitsList: product.benefitsList || ['Medical grade', 'Sterile', 'High quality'],
+      directionsList: product.directionsList || ['Use as directed by medical professional'],
+      ingredientsList: product.ingredientsList || [],
+      productDynamicFields: product.productDynamicFields || {},
+      productSizes: product.productSizes || ['Standard'],
+      id: productId,
+      category: mappedCategory,
+      image: imageUrl
+    };
+  });
+
+  console.log(`Successfully mapped ${products.length} products`);
+
+  if (products.length === 0) {
+    showNoProductsMessage();
+    hideLoading();
+    return;
+  }
+
+  // Store in session storage for product details page
+  sessionStorage.setItem('currentPageProducts', JSON.stringify(products));
+  sessionStorage.setItem('currentPageCategory', SURGICAL_CATEGORY);
+  
+  allFilteredProducts = [...products];
+  
+  applySorting();
+  renderInitialProducts();
+  updateResultsCount();
+  hideLoading();
+  
+  console.log('Products loaded successfully!');
+  console.log('Sample product:', products[0]);
+}
+
+// Get product image URL
+function getProductImageUrl(product, productId) {
+  // Check for direct image URL
+  if (product.image) return product.image;
+  
+  // Check for image data in productMainImage
+  if (product.productMainImage) {
+    // If it's a base64 string
+    if (typeof product.productMainImage === 'string' && product.productMainImage.startsWith('data:image')) {
+      return product.productMainImage;
+    }
+    // If it's a byte array or blob, construct URL
+    if (product.productId) {
+      return `${API_BASE_URL}/${product.productId}/image`;
+    }
+  }
+  
+  // Fallback to medical-themed Unsplash images based on product type
+  const surgicalImages = [
+    'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop&auto=format', // Medical equipment
+    'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400&h=400&fit=crop&auto=format', // Surgery tools
+    'https://images.unsplash.com/photo-1516549655669-df6116822f6c?w=400&h=400&fit=crop&auto=format', // Hospital
+    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=400&fit=crop&auto=format', // Medical supplies
+    'https://images.unsplash.com/photo-1551601651-2a8555f1a136?w=400&h=400&fit=crop&auto=format' // Medical instruments
+  ];
+  
+  const randomIndex = Math.floor(Math.random() * surgicalImages.length);
+  return surgicalImages[randomIndex];
+}
+
+// Map backend sub-category to frontend category
+function mapSubCategoryToFrontendCategory(subCategory) {
+  if (!subCategory) return 'all';
+  
+  const subCategoryLower = subCategory.toLowerCase();
+  
+  if (subCategoryLower.includes('dressing') || subCategoryLower.includes('bandage')) return 'dressings';
+  if (subCategoryLower.includes('consumable') || subCategoryLower.includes('glove') || subCategoryLower.includes('mask')) return 'consumables';
+  if (subCategoryLower.includes('iv') || subCategoryLower.includes('infusion') || subCategoryLower.includes('fluid')) return 'iv';
+  if (subCategoryLower.includes('catheter') || subCategoryLower.includes('tube')) return 'catheters';
+  if (subCategoryLower.includes('wound') || subCategoryLower.includes('ointment')) return 'wound';
+  if (subCategoryLower.includes('orthopedic') || subCategoryLower.includes('support') || subCategoryLower.includes('brace')) return 'orthopedic';
+  if (subCategoryLower.includes('fluid') || subCategoryLower.includes('saline') || subCategoryLower.includes('dextrose')) return 'fluids';
+  if (subCategoryLower.includes('kit') || subCategoryLower.includes('set') || subCategoryLower.includes('pack')) return 'kits';
+  if (subCategoryLower.includes('gauze') || subCategoryLower.includes('pad') || subCategoryLower.includes('swab')) return 'dressings';
+  
+  return 'all';
+}
+
+// =============== LOADING & ERROR STATES ===============
+function showLoading() {
+  productGrid.innerHTML = `
+    <div class="col-span-full text-center py-20">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#4A70A9]"></div>
+      <p class="mt-4 text-gray-600">Loading surgical items from database...</p>
+      <p class="text-xs text-gray-400 mt-2">Category: "${SURGICAL_CATEGORY}"</p>
+    </div>
+  `;
+  showMoreBtn.classList.add('hidden');
+  
+  const countEl = document.getElementById('resultsCount');
+  if (countEl) {
+    countEl.textContent = 'Loading products...';
+  }
+}
+
+function hideLoading() {
+  // Loading will be hidden when products are rendered
+}
+
+function showNoProductsMessage() {
+  productGrid.innerHTML = `
+    <div class="col-span-full text-center py-20 text-gray-500">
+      <i class="fas fa-box-open text-4xl mb-4"></i>
+      <p class="text-xl mb-2">No surgical items found</p>
+      <p class="text-sm">Category: "${SURGICAL_CATEGORY}"</p>
+      <p class="text-sm mt-2">Please add products with this category to your database</p>
+      <div class="mt-4">
+        <button onclick="fetchProducts()" class="bg-[#4A70A9] text-white px-6 py-2 rounded-lg hover:bg-[#16476A] transition">
+          Try Again
+        </button>
+      </div>
+    </div>
+  `;
+  showMoreBtn.classList.add('hidden');
+  
+  const countEl = document.getElementById('resultsCount');
+  if (countEl) {
+    countEl.textContent = '0 products found';
+  }
+}
+
+function showErrorMessage(error) {
+  const errorDetails = error ? error.message : 'Unknown error';
+  
+  productGrid.innerHTML = `
+    <div class="col-span-full text-center py-20 text-gray-500">
+      <i class="fas fa-exclamation-triangle text-4xl mb-4 text-yellow-500"></i>
+      <p class="text-xl mb-2">Connection Error</p>
+      <p class="text-sm mb-4">${errorDetails.substring(0, 100)}</p>
+      <div class="mt-4 space-y-3">
+        <button onclick="fetchProducts()" class="bg-[#4A70A9] text-white px-6 py-2 rounded-lg hover:bg-[#16476A] transition">
+          Retry Connection
+        </button>
+        <button onclick="testBackendConnection()" class="border border-[#4A70A9] text-[#4A70A9] px-6 py-2 rounded-lg hover:bg-[#4A70A9] hover:text-white transition">
+          Test Backend
+        </button>
+      </div>
+    </div>
+  `;
+  showMoreBtn.classList.add('hidden');
+  
+  const countEl = document.getElementById('resultsCount');
+  if (countEl) {
+    countEl.textContent = 'Connection error';
+  }
+}
+
+// Test backend connection
+window.testBackendConnection = async function() {
+  console.log('Testing backend connection...');
+  try {
+    const response = await fetch(`${API_BASE_URL}/get-all-products?page=0&size=1`);
+    console.log('Test response status:', response.status);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Test response data:', data);
+      alert(`✅ Backend is responding!\nStatus: ${response.status}`);
+    } else {
+      alert(`❌ Backend error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Test connection error:', error);
+    alert(`❌ Cannot connect to backend:\n${error.message}`);
+  }
+};
+
 // =============== CARD CREATION ===============
 function createCard(p) {
   const div = document.createElement('div');
@@ -896,7 +386,9 @@ function createCard(p) {
   const stockClass = isOutOfStock ? 'out-of-stock' : 'in-stock';
   const cardClass = isOutOfStock ? 'out-of-stock-card' : '';
   
-  const discount = Math.round(((p.productOldPrice - p.productPrice) / p.productOldPrice) * 100);
+  const discount = p.productOldPrice > p.productPrice 
+    ? Math.round(((p.productOldPrice - p.productPrice) / p.productOldPrice) * 100)
+    : 0;
   
   const priceLine = p.productOldPrice > p.productPrice
     ? `₹${p.productPrice} <s class="text-gray-400 text-sm">₹${p.productOldPrice}</s> <span class="text-green-600 text-sm font-bold">${discount}% off</span>`
@@ -909,7 +401,7 @@ function createCard(p) {
   
   div.innerHTML = `
     <div class="relative">
-      <img src="${p.image}" alt="${p.productName}" class="w-full h-48 object-cover">
+      <img src="${p.image}" alt="${p.productName}" class="w-full h-48 object-cover" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=400&fit=crop&auto=format'">
       
       <!-- Stock Status Badge -->
       <div class="stock-badge ${stockClass}">${stockStatus}</div>
@@ -920,13 +412,15 @@ function createCard(p) {
       </button>
     </div>
     <div class="p-4">
-      <h3 class="font-semibold text-sm mb-1">${p.productName}</h3>
+      <h3 class="font-semibold text-sm mb-1 line-clamp-2">${p.productName}</h3>
       <p class="text-xs text-gray-500 mb-2">${p.brandName}</p>
      
       <div class="mt-2 font-bold text-lg text-green-600">${priceLine}</div>
       <div class="flex items-center mt-2">
-        
-       
+        <div class="flex text-yellow-400">
+          ${generateStarRating(p.productRating)}
+        </div>
+        <span class="ml-2 text-sm text-gray-600">(${p.productRating || '4.0'})</span>
       </div>
       <button onclick="${isOutOfStock ? 'void(0)' : `navigateToProductDetails(${p.id})`}" 
               class="mt-4 w-full ${isOutOfStock ? 'out-of-stock-btn bg-gray-400' : 'bg-[#4A70A9] hover:bg-[#16476A]'} text-white py-2 rounded-lg font-bold transition"
@@ -935,7 +429,41 @@ function createCard(p) {
       </button>
     </div>
   `;
+  
+  // Add click event for the entire card (except buttons)
+  div.addEventListener('click', (e) => {
+    if (!e.target.closest('button') && !isOutOfStock) {
+      navigateToProductDetails(p.id);
+    }
+  });
+  
   return div;
+}
+
+// Generate star rating HTML
+function generateStarRating(rating) {
+  const fullStars = Math.floor(rating || 4);
+  const hasHalfStar = (rating || 4) % 1 >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+  
+  let stars = '';
+  
+  // Full stars
+  for (let i = 0; i < fullStars; i++) {
+    stars += '<i class="fas fa-star"></i>';
+  }
+  
+  // Half star
+  if (hasHalfStar) {
+    stars += '<i class="fas fa-star-half-alt"></i>';
+  }
+  
+  // Empty stars
+  for (let i = 0; i < emptyStars; i++) {
+    stars += '<i class="far fa-star"></i>';
+  }
+  
+  return stars;
 }
 
 // =============== RENDER INITIAL PRODUCTS (8 products) ===============
@@ -943,14 +471,19 @@ function renderInitialProducts() {
   productGrid.innerHTML = '';
   
   if (allFilteredProducts.length === 0) {
-    productGrid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-500 text-xl">No products found</div>';
+    productGrid.innerHTML = '<div class="col-span-full text-center py-20 text-gray-500 text-xl">No products match your filters</div>';
     showMoreBtn.classList.add('hidden');
     return;
   }
   
   const productsToShow = allFilteredProducts.slice(0, visibleProductsCount);
   
-  productsToShow.forEach(p => productGrid.appendChild(createCard(p)));
+  console.log(`Rendering ${productsToShow.length} products`);
+  
+  productsToShow.forEach(p => {
+    const card = createCard(p);
+    productGrid.appendChild(card);
+  });
   
   if (allFilteredProducts.length > visibleProductsCount) {
     showMoreBtn.classList.remove('hidden');
@@ -982,6 +515,12 @@ function toggleWishlist(productId, buttonElement) {
   let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
   const product = products.find(p => p.id === productId);
 
+  if (!product) {
+    console.error('Product not found for wishlist:', productId);
+    showToast('Product not found', 'error');
+    return;
+  }
+
   const index = wishlist.findIndex(item => item.id === productId);
 
   if (index === -1) {
@@ -1003,7 +542,8 @@ function toggleWishlist(productId, buttonElement) {
       productQuantity: product.productQuantity,
       productRating: product.productRating || 4.0,
       productUnit: product.productUnit,
-      sku: product.sku
+      sku: product.sku,
+      prescriptionRequired: product.prescriptionRequired || false
     };
     
     wishlist.push(wishlistProduct);
@@ -1068,18 +608,18 @@ function updateTitle() {
   if (!titleEl) return;
 
   const categoryNames = {
-    'all': 'Surgical Kits & Medical Supplies',
-    'dressings': 'Dressings & Bandages',
+    'all': 'Surgical Items',
+    'dressings': 'Surgical Dressings & Bandages',
     'consumables': 'Surgical Consumables',
     'iv': 'IV & Infusion Items',
     'catheters': 'Catheters & Tubes',
     'wound': 'Wound Care Products',
     'orthopedic': 'Orthopedic Support',
-    'fluids': 'IV Fluids & Injectables',
+    'fluids': 'IV Fluids',
     'kits': 'Surgical Kits'
   };
 
-  let title = categoryNames[currentFilters.category] || 'Surgical Products';
+  let title = categoryNames[currentFilters.category] || 'Surgical Items';
 
   if (currentFilters.brand !== 'all') {
     title += ` - ${currentFilters.brand}`;
@@ -1197,53 +737,75 @@ function initFilters() {
 }
 
 // Navigate to Product Details Page with full product data
-window.navigateToProductDetails = function(id) {
-  const product = surgicalProducts.find(p => p.id === id);
-  if (!product) {
-    console.error('Product not found with id:', id);
-    return;
+window.navigateToProductDetails = async function(id) {
+  try {
+    const product = products.find(p => p.id === id);
+    if (!product) {
+      console.error('Product not found with id:', id);
+      showToast('Product not found', 'error');
+      return;
+    }
+
+    let fullProduct = product;
+    
+    // Try to fetch full product details from backend
+    try {
+      const response = await fetch(`${API_BASE_URL}/get-product/${id}`);
+      if (response.ok) {
+        const apiProduct = await response.json();
+        // Merge API data with existing product data
+        fullProduct = { ...product, ...apiProduct };
+      }
+    } catch (error) {
+      console.warn('Using cached product data:', error.message);
+    }
+
+    const currentPageName = 'Surgical Items';
+    
+    sessionStorage.setItem('selectedProduct', JSON.stringify(fullProduct));
+    sessionStorage.setItem('currentPageProducts', JSON.stringify(products));
+    sessionStorage.setItem('currentPageName', currentPageName);
+    sessionStorage.setItem('currentPageCategory', SURGICAL_CATEGORY);
+
+    const discount = fullProduct.productOldPrice > fullProduct.productPrice 
+      ? Math.round(((fullProduct.productOldPrice - fullProduct.productPrice) / fullProduct.productOldPrice) * 100)
+      : 0;
+
+    const params = new URLSearchParams({
+      id: fullProduct.id,
+      sku: fullProduct.sku,
+      name: encodeURIComponent(fullProduct.productName),
+      brand: encodeURIComponent(fullProduct.brandName),
+      price: fullProduct.productPrice,
+      originalPrice: fullProduct.productOldPrice || fullProduct.productPrice,
+      discount: discount,
+      image: encodeURIComponent(fullProduct.image),
+      description: encodeURIComponent(fullProduct.productDescription || fullProduct.productName),
+      prescription: fullProduct.prescriptionRequired || false,
+      category: fullProduct.category || 'surgical',
+      sourcePage: currentPageName,
+      quantity: fullProduct.productQuantity || 0,
+      mrp: fullProduct.productMRP || fullProduct.productPrice,
+      rating: fullProduct.productRating || 4.0,
+      unit: fullProduct.productUnit || '',
+      benefits: encodeURIComponent(JSON.stringify(fullProduct.benefitsList || [])),
+      ingredients: encodeURIComponent(JSON.stringify(fullProduct.ingredientsList || [])),
+      directions: encodeURIComponent(JSON.stringify(fullProduct.directionsList || [])),
+      dynamicFields: encodeURIComponent(JSON.stringify(fullProduct.productDynamicFields || {})),
+      mfgDate: fullProduct.mfgDate || '',
+      expDate: fullProduct.expDate || '',
+      batchNo: fullProduct.batchNo || '',
+      sizes: encodeURIComponent(JSON.stringify(fullProduct.productSizes || [])),
+      stock: fullProduct.productQuantity || 0,
+      status: fullProduct.productStatus || 'Available'
+    });
+
+    window.location.href = `../../productdetails.html?${params.toString()}`;
+    
+  } catch (error) {
+    console.error('Error navigating to product details:', error);
+    showToast('Error loading product details', 'error');
   }
-
-  const currentPageName = 'Surgical Kits';
-  
-  sessionStorage.setItem('selectedProduct', JSON.stringify(product));
-  sessionStorage.setItem('currentPageProducts', JSON.stringify(products));
-  sessionStorage.setItem('currentPageName', currentPageName);
-
-  const discount = product.productOldPrice > product.productPrice 
-    ? Math.round(((product.productOldPrice - product.productPrice) / product.productOldPrice) * 100)
-    : 0;
-
-  const params = new URLSearchParams({
-    id: product.id,
-    sku: product.sku,
-    name: encodeURIComponent(product.productName),
-    brand: encodeURIComponent(product.brandName),
-    price: product.productPrice,
-    originalPrice: product.productOldPrice || product.productPrice,
-    discount: discount,
-    image: encodeURIComponent(product.image),
-    description: encodeURIComponent(product.productDescription || product.productName),
-    prescription: product.prescriptionRequired || false,
-    category: product.category || 'surgical',
-    sourcePage: currentPageName,
-    quantity: product.productQuantity || 0,
-    mrp: product.productMRP || product.productPrice,
-    rating: product.productRating || 4.0,
-    unit: product.productUnit || '',
-    benefits: encodeURIComponent(JSON.stringify(product.benefitsList || [])),
-    ingredients: encodeURIComponent(JSON.stringify(product.ingredientsList || [])),
-    directions: encodeURIComponent(JSON.stringify(product.directionsList || [])),
-    dynamicFields: encodeURIComponent(JSON.stringify(product.productDynamicFields || {})),
-    mfgDate: product.mfgDate || '',
-    expDate: product.expDate || '',
-    batchNo: product.batchNo || '',
-    sizes: encodeURIComponent(JSON.stringify(product.productSizes || [])),
-    stock: product.productQuantity || 0,
-    status: product.productStatus || 'Available'
-  });
-
-  window.location.href = `../../productdetails.html?${params.toString()}`;
 };
 
 function initSorting() {
@@ -1384,8 +946,3 @@ window.sortProducts = function(type) {
   document.getElementById('mobileSheetBackdrop')?.click();
 };
 
-// Initial render
-allFilteredProducts = [...products];
-applySorting();
-renderInitialProducts();
-updateResultsCount();

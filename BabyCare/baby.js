@@ -1,8 +1,7 @@
-// baby.js - UPDATED VERSION WITH SKELETON LOADING
-
+// baby.js - UPDATED VERSION WITH SKELETON LOADING AND BACKEND WISHLIST SYNC
 (function() {
   'use strict';
-  
+ 
   if (window.babyFinal) return;
   window.babyFinal = true;
 
@@ -11,13 +10,15 @@
   let currentPage = 1;
   const itemsPerPage = 12;
   const API_BASE_URL = 'http://localhost:8083/api/mb/products';
+  const WISHLIST_API_BASE = "http://localhost:8083/api/wishlist";
+  const IMAGE_BASE = "http://localhost:8083";
+  const CURRENT_USER_ID = 1; // Change if you implement login
 
   const $ = id => document.getElementById(id);
 
   // Helper function to safely get price for display
   const getDisplayPrice = (priceArray) => {
     if (!priceArray || priceArray.length === 0) return 0;
-    // Return the first price for display
     return priceArray[0];
   };
 
@@ -31,6 +32,143 @@
     }
     return 0;
   };
+
+  // ==================== WISHLIST BACKEND SYNC (EXACTLY LIKE REF CODE) ====================
+  async function addToWishlistBackend(productId, productType = "MOTHER") {
+    try {
+      const response = await fetch(`${WISHLIST_API_BASE}/add-wishlist-items`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: CURRENT_USER_ID,
+          productId: productId,
+          productType: productType
+        })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        console.log("✅ Backend: Added/Updated in wishlist", data);
+        return data;
+      } else {
+        const err = await response.text();
+        console.warn("⚠️ Backend add wishlist failed:", err);
+      }
+    } catch (err) {
+      console.error("❌ Error calling add wishlist backend:", err);
+    }
+    return null;
+  }
+
+  async function removeFromWishlistBackend(productId, productType = "MOTHER") {
+    try {
+      const response = await fetch(`${WISHLIST_API_BASE}/remove-wishlist-items`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: CURRENT_USER_ID,
+          productId: productId,
+          productType: productType
+        })
+      });
+      if (response.ok) {
+        console.log("✅ Backend: Removed from wishlist");
+        return true;
+      } else {
+        console.warn("⚠️ Backend remove failed");
+      }
+    } catch (err) {
+      console.error("❌ Error calling remove wishlist backend:", err);
+    }
+    return false;
+  }
+
+  async function loadWishlistFromBackend() {
+    try {
+      const response = await fetch(`${WISHLIST_API_BASE}/get-wishlist-items?userId=${CURRENT_USER_ID}`);
+      if (response.ok) {
+        const backendItems = await response.json();
+        console.log("✅ Loaded wishlist from backend:", backendItems.length, "items");
+        
+        const wishlist = [];
+        backendItems.forEach(item => {
+          wishlist.push({
+            id: item.productId,
+            name: item.title || "Product",
+            price: item.price?.[0] || 0,
+            originalPrice: item.originalPrice?.[0] || null,
+            image: `${IMAGE_BASE}/api/mb/products/${item.productId}/image`,
+            productType: item.productType || "MOTHER"
+          });
+        });
+        
+        // Sync with localStorage for UI consistency
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        updateHeaderCounts();
+        render(); // Re-render to update heart icons
+      }
+    } catch (err) {
+      console.error("❌ Failed to load wishlist from backend:", err);
+    }
+  }
+
+  function updateHeaderCounts() {
+    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const cartTotal = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
+    const wishlistEls = document.querySelectorAll('#wishlistCount, .wishlist-count');
+    wishlistEls.forEach(el => {
+      if (el) {
+        el.textContent = wishlist.length;
+        el.classList.toggle("hidden", wishlist.length === 0);
+      }
+    });
+
+    const cartEls = document.querySelectorAll('#cartCount, .cart-count');
+    cartEls.forEach(el => {
+      if (el) {
+        el.textContent = cartTotal;
+        el.classList.toggle("hidden", cartTotal === 0);
+      }
+    });
+  }
+
+  // Global wishlist toggle function (called from heart button)
+  window.addToWishlist = async (id) => {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+
+    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const exists = wishlist.some(item => item.id === id);
+
+    if (exists) {
+      const success = await removeFromWishlistBackend(id, "MOTHER");
+      if (success) {
+        wishlist = wishlist.filter(item => item.id !== id);
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        showToast("Removed from wishlist");
+      }
+    } else {
+      const result = await addToWishlistBackend(id, "MOTHER");
+      if (result) {
+        wishlist.push({
+          id: product.id,
+          name: product.title,
+          price: product.price,
+          originalPrice: product.originalPrice || null,
+          image: product.mainImageUrl,
+          productType: "MOTHER"
+        });
+        localStorage.setItem('wishlist', JSON.stringify(wishlist));
+        showToast("Added to wishlist");
+      }
+    }
+
+    updateHeaderCounts();
+    render(); // Re-render to update all heart icons
+  };
+
+  // ==================== ORIGINAL CODE BELOW (UNCHANGED) ====================
 
   // Function to create skeleton loading cards
   const createSkeletonCards = (count) => {
@@ -57,26 +195,23 @@
       // Show skeleton loading
       $("productsGrid").innerHTML = createSkeletonCards(12);
       $("resultsCount").textContent = 'Loading products...';
-
       console.log('Fetching products from:', `${API_BASE_URL}/get-all`);
       const response = await fetch(`${API_BASE_URL}/get-all`);
-      
+     
       if (!response.ok) {
         console.error('API Response not OK:', response.status, response.statusText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+     
       const apiProducts = await response.json();
       console.log('Received products:', apiProducts.length);
-      
+     
       // Transform API response to match our frontend format
       products = apiProducts.map(p => {
-        // Get display price (use first price in array)
         const displayPrice = getDisplayPrice(p.price);
         const displayOriginalPrice = getDisplayPrice(p.originalPrice);
         const discount = calculateDiscount(p.price, p.originalPrice) || p.discount || 0;
-        
-        // Determine category for filtering
+       
         let category = 'all';
         if (p.category) {
           const cat = p.category.toLowerCase();
@@ -85,7 +220,7 @@
           else if (cat.includes('feed') || cat.includes('nutrition')) category = 'nutrition-feeding';
           else if (cat.includes('gift') || cat.includes('hamper')) category = 'gift-hampers';
         }
-        
+       
         return {
           id: p.id,
           title: p.title || 'No Title',
@@ -107,11 +242,13 @@
           specifications: p.specifications || {}
         };
       });
-
       filteredProducts = [...products];
       render();
       console.log(`Loaded ${products.length} products from backend`);
-      
+     
+      // Load wishlist from backend after products are ready
+      await loadWishlistFromBackend();
+     
     } catch (error) {
       console.error('Error loading products:', error);
       $("productsGrid").innerHTML = `
@@ -134,7 +271,6 @@
     const start = (currentPage - 1) * itemsPerPage;
     const items = filteredProducts.slice(start, start + itemsPerPage);
     const grid = $("productsGrid");
-
     if (items.length === 0) {
       grid.innerHTML = `
         <div class="col-span-full text-center py-12">
@@ -149,24 +285,18 @@
       $("pagination").innerHTML = '';
       return;
     }
-
+    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
     grid.innerHTML = items.map(p => {
-      // Generate star rating HTML
       const rating = p.rating || 0;
       const fullStars = Math.floor(rating);
       const hasHalfStar = rating % 1 >= 0.5;
       let starsHTML = '';
-      
-      for (let i = 0; i < fullStars; i++) {
-        starsHTML += '<i class="fas fa-star text-yellow-400"></i>';
-      }
-      if (hasHalfStar) {
-        starsHTML += '<i class="fas fa-star-half-alt text-yellow-400"></i>';
-      }
-      for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) {
-        starsHTML += '<i class="far fa-star text-yellow-400"></i>';
-      }
-      
+      for (let i = 0; i < fullStars; i++) starsHTML += '<i class="fas fa-star text-yellow-400"></i>';
+      if (hasHalfStar) starsHTML += '<i class="fas fa-star-half-alt text-yellow-400"></i>';
+      for (let i = fullStars + (hasHalfStar ? 1 : 0); i < 5; i++) starsHTML += '<i class="far fa-star text-yellow-400"></i>';
+
+      const isWishlisted = wishlist.some(w => w.id === p.id);
+
       return `
         <div class="product-card bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-300 cursor-pointer ${!p.inStock ? 'opacity-60 grayscale' : ''}"
              onclick="window.openProductDetails(${p.id})">
@@ -174,45 +304,44 @@
             <img src="${p.mainImageUrl}" alt="${p.title}"
                  class="w-full h-full object-contain p-5 transition-transform duration-500 hover:scale-110"
                  onerror="this.src='https://via.placeholder.com/400x400/cccccc/ffffff?text=No+Image'">
-            
-            ${p.inStock ? 
-              `<div class="absolute top-2 left-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">In Stock</div>` : 
+           
+            ${p.inStock ?
+              `<div class="absolute top-2 left-2 bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">In Stock</div>` :
               `<div class="absolute top-2 left-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">Out of Stock</div>`
             }
-            
-            ${p.discount > 0 ? 
+           
+            ${p.discount > 0 ?
               `<div class="absolute top-2 right-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">${p.discount}% OFF</div>` : ''
             }
           </div>
-          
-          <button 
+         
+          <button
             class="absolute top-3 left-64 bg-white/90 backdrop-blur hover:bg-white p-3 rounded-full shadow-lg transition-all duration-300 z-10"
-            onclick="event.stopPropagation(); window.addToWishlist(${p.id}); 
+            onclick="event.stopPropagation(); window.addToWishlist(${p.id});
                      this.classList.toggle('active-wish');
                      this.querySelector('i').classList.toggle('fas');
                      this.querySelector('i').classList.toggle('far');
                      this.querySelector('i').classList.toggle('text-red-600');">
-            <i class="far fa-heart text-xl ${JSON.parse(localStorage.getItem('wishlist')||'[]').some(w => w.id === p.id) ? 'fas text-red-600' : 'text-gray-600'}"></i>
+            <i class="far fa-heart text-xl ${isWishlisted ? 'fas text-red-600' : 'text-gray-600'}"></i>
           </button>
-          
+         
           <div class="p-3">
             <p class="text-xs text-gray-500 uppercase font-medium truncate">${p.brand || 'Brand'}</p>
             <h3 class="text-sm font-medium text-gray-800 line-clamp-2 mt-1">${p.title}</h3>
-
             <div class="mt-2 flex items-center gap-2">
               <span class="text-lg font-bold text-green-600">₹${p.price.toLocaleString()}</span>
               ${p.originalPrice > p.price ? `
                 <span class="text-sm text-gray-500 line-through">₹${p.originalPrice.toLocaleString()}</span>
               ` : ''}
             </div>
-            
+           
             <div class="mt-2 flex items-center">
               <div class="text-yellow-400 text-sm">
                 ${starsHTML}
               </div>
               <span class="text-xs text-gray-500 ml-2">(${p.reviewCount || 0})</span>
             </div>
-            
+           
             <button class="mt-4 w-full bg-[#239BA7] hover:bg-[#00809D] text-white font-bold py-3 rounded-xl transition"
                     onclick="event.stopPropagation(); window.openProductDetails(${p.id})">
               View Details
@@ -221,10 +350,9 @@
         </div>
       `;
     }).join('');
-
-    $("resultsCount").textContent = 
+    $("resultsCount").textContent =
       `Showing ${start + 1}–${Math.min(start + itemsPerPage, filteredProducts.length)} of ${filteredProducts.length} products`;
-    
+   
     renderPagination();
   };
 
@@ -232,10 +360,9 @@
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     const pag = $("pagination");
     if (totalPages <= 1) { pag.innerHTML = ''; return; }
-
     let html = '';
     if (currentPage > 1) html += `<button class="px-4 py-2 bg-white rounded-lg font-bold text-pink-600" onclick="window.changePage(${currentPage-1})">← Prev</button>`;
-    
+   
     for (let i = 1; i <= totalPages; i++) {
       if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
         html += `<button class="px-4 py-2 ${i === currentPage ? 'bg-pink-600 text-white' : 'bg-white text-pink-600'} rounded-lg font-bold" onclick="window.changePage(${i})">${i}</button>`;
@@ -244,7 +371,7 @@
       }
     }
     if (currentPage < totalPages) html += `<button class="px-4 py-2 bg-white rounded-lg font-bold text-pink-600" onclick="window.changePage(${currentPage+1})">Next →</button>`;
-    
+   
     pag.innerHTML = html;
   };
 
@@ -259,10 +386,8 @@
     const brand = document.querySelector('input[name="brand"]:checked, input[name="mobileBrand"]:checked')?.value || 'all';
     const discountEl = document.querySelector('input[name="discount"]:checked, input[name="mobileDiscount"]:checked');
     const discount = discountEl?.value === 'all' ? null : parseInt(discountEl?.value || '0');
-
     let minPrice = 0;
     let maxPrice = 10000;
-
     const desktopMin = $("minThumb");
     const desktopMax = $("maxThumb");
     if (desktopMin && desktopMax) {
@@ -274,20 +399,16 @@
       if (mobileMin) minPrice = Number(mobileMin.value);
       if (mobileMax) maxPrice = Number(mobileMax.value);
     }
-
     return { category, brand, discount, minPrice, maxPrice };
   };
 
   const applyFilters = () => {
     const { category, brand, discount, minPrice, maxPrice } = getActiveFilters();
-
     let list = [...products];
-
     if (category !== 'all') list = list.filter(p => p.category === category);
     if (brand !== 'all') list = list.filter(p => p.brand === brand);
     if (discount !== null) list = list.filter(p => (p.discount || 0) >= discount);
     list = list.filter(p => p.price >= minPrice && p.price <= maxPrice);
-
     filteredProducts = list;
     currentPage = 1;
     applySorting();
@@ -295,40 +416,30 @@
 
   const applySorting = () => {
     const sortValue = $("sortSelect")?.value || document.querySelector('input[name="mobileSort"]:checked')?.value || 'default';
-
     if (sortValue === 'price-low') filteredProducts.sort((a,b) => a.price - b.price);
     else if (sortValue === 'price-high') filteredProducts.sort((a,b) => b.price - a.price);
     else if (sortValue === 'rating') filteredProducts.sort((a,b) => (b.rating || 0) - (a.rating || 0));
     else if (sortValue === 'newest') filteredProducts.sort((a,b) => b.id - a.id);
-
     render();
   };
 
   const syncAndUpdateSliders = () => {
     let min = 0;
     let max = 10000;
-
     if ($("minThumb")) min = Number($("minThumb").value);
     else if ($("mobileMinThumb")) min = Number($("mobileMinThumb").value);
-
     if ($("maxThumb")) max = Number($("maxThumb").value);
     else if ($("mobileMaxThumb")) max = Number($("mobileMaxThumb").value);
-
     if (min > max) [min, max] = [max, min];
-
     const thumbs = ["minThumb", "mobileMinThumb", "maxThumb", "mobileMaxThumb"];
     thumbs.forEach(id => {
       const el = $(id);
-      if (el) {
-        el.value = (id.includes("min")) ? min : max;
-      }
+      if (el) el.value = (id.includes("min")) ? min : max;
     });
-
     document.querySelectorAll('.slider-fill').forEach(fill => {
       fill.style.left = (min / 10000 * 100) + '%';
       fill.style.width = ((max - min) / 10000 * 100) + '%';
     });
-
     document.querySelectorAll('#minValue, #mobileMinValue').forEach(el => el && (el.textContent = '₹' + min));
     document.querySelectorAll('#maxValue, #mobileMaxValue').forEach(el => el && (el.textContent = '₹' + max));
   };
@@ -339,13 +450,11 @@
       const desktopCat = document.querySelector(`input[name="category"][value="${mobileCat.value}"]`);
       if (desktopCat) desktopCat.checked = true;
     }
-
     const mobileBrand = document.querySelector('input[name="mobileBrand"]:checked');
     if (mobileBrand) {
       const desktopBrand = document.querySelector(`input[name="brand"][value="${mobileBrand.value}"]`);
       if (desktopBrand) desktopBrand.checked = true;
     }
-
     const mobileDisc = document.querySelector('input[name="mobileDiscount"]:checked');
     if (mobileDisc) {
       const desktopDisc = document.querySelector(`input[name="discount"][value="${mobileDisc.value}"]`);
@@ -357,10 +466,8 @@
     document.querySelectorAll('input[type="radio"]').forEach(radio => {
       if (radio.value === 'all') radio.checked = true;
     });
-
     [$("minThumb"), $("mobileMinThumb")].forEach(el => el && (el.value = 0));
     [$("maxThumb"), $("mobileMaxThumb")].forEach(el => el && (el.value = 10000));
-
     syncAndUpdateSliders();
     applyFilters();
   };
@@ -384,40 +491,33 @@
     const filterSheet = $("filterSheet");
     const sortSheet = $("sortSheet");
     const backdrop = $("mobileSheetBackdrop");
-
     const close = () => {
       filterSheet?.classList.add('translate-y-full');
       sortSheet?.classList.add('translate-y-full');
       backdrop?.classList.add('hidden');
     };
-
     $("openFilterSheet")?.addEventListener('click', () => {
       filterSheet?.classList.remove('translate-y-full');
       backdrop?.classList.remove('hidden');
     });
-
     $("openSortSheet")?.addEventListener('click', () => {
       sortSheet?.classList.remove('translate-y-full');
       backdrop?.classList.remove('hidden');
     });
-
     $("closeFilterSheet")?.addEventListener('click', close);
     $("closeSortSheet")?.addEventListener('click', close);
     backdrop?.addEventListener('click', close);
-
     $("applyMobileFilters")?.addEventListener('click', () => {
       syncMobileFiltersToDesktop();
       applyFilters();
       close();
     });
-
     $("applySortBtn")?.addEventListener('click', () => {
       const val = document.querySelector('input[name="mobileSort"]:checked')?.value || 'default';
       if ($("sortSelect")) $("sortSelect").value = val;
       applySorting();
       close();
     });
-
     $("clearMobileFilters")?.addEventListener('click', clearAllFilters);
   };
 
@@ -426,18 +526,17 @@
     try {
       console.log('Opening product details for ID:', id);
       const response = await fetch(`${API_BASE_URL}/${id}`);
-      
+     
       if (!response.ok) {
         if (response.status === 404) {
           throw new Error('Product not found');
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+     
       const product = await response.json();
       console.log('Product data received:', product);
-      
-      // Transform the product data for frontend
+     
       const transformedProduct = {
         id: product.id,
         title: product.title || 'No Title',
@@ -459,59 +558,14 @@
         features: Array.isArray(product.features) ? product.features : (product.features ? [product.features] : []),
         specifications: product.specifications || {}
       };
-
-      // Store in session storage
       sessionStorage.setItem('currentProduct', JSON.stringify(transformedProduct));
       sessionStorage.setItem('allProducts', JSON.stringify(products));
-      
-      // Navigate to details page
+     
       window.location.href = 'baby-product-details.html';
-      
+     
     } catch (error) {
       console.error('Error loading product details:', error);
       alert('Failed to load product details. Please try again.');
-    }
-  };
-
-  // Global function to add to wishlist
-  window.addToWishlist = (id) => {
-    const product = products.find(p => p.id === id);
-    if (!product) return;
-
-    let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-
-    const exists = wishlist.find(item => item.id === id);
-    if (exists) {
-      wishlist = wishlist.filter(item => item.id !== id);
-      showToast('Removed from Wishlist');
-    } else {
-      wishlist.push({
-        id: product.id,
-        name: product.title,
-        price: product.price,
-        originalPrice: product.discount 
-          ? Math.round(product.price / (1 - product.discount/100)) 
-          : product.price,
-        discount: product.discount || 0,
-        image: product.mainImageUrl,
-        title: product.title,
-        brand: product.brand,
-        rating: product.rating,
-        inStock: product.inStock
-      });
-      showToast('Added to Wishlist');
-    }
-
-    localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    updateWishlistCount();
-
-    const btn = event?.target?.closest('button');
-    if (btn) {
-      btn.classList.toggle('active-wish');
-      const icon = btn.querySelector('i');
-      icon.classList.toggle('far');
-      icon.classList.toggle('fas');
-      icon.classList.toggle('text-red-600');
     }
   };
 
@@ -519,50 +573,21 @@
   window.addToCart = (id) => {
     const product = products.find(p => p.id === id);
     if (!product) return;
-
     let cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    
+   
     const existing = cart.find(item => item.id === id);
     if (existing) {
       existing.quantity += 1;
     } else {
-      cart.push({ 
-        ...product, 
-        quantity: 1 
+      cart.push({
+        ...product,
+        quantity: 1
       });
     }
-
     localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
+    updateHeaderCounts();
     showToast(`${product.title} added to cart!`);
   };
-
-  function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    const total = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const countEl = document.querySelector('#cartCount');
-    if (countEl) {
-      countEl.textContent = total;
-      countEl.style.display = total > 0 ? 'flex' : 'none';
-    }
-  }
-
-  function updateWishlistCount() {
-    const wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
-    const total = wishlist.length;
-
-    const desktopCount = document.querySelector('#wishlistCount');
-    if (desktopCount) {
-      desktopCount.textContent = total;
-      desktopCount.style.display = total > 0 ? 'flex' : 'none';
-    }
-
-    const mobileCount = document.querySelector('#mobileWishlistCount');
-    if (mobileCount) {
-      mobileCount.textContent = total;
-      mobileCount.style.display = total > 0 ? 'flex' : 'none';
-    }
-  }
 
   function showToast(message) {
     const toast = document.createElement('div');
@@ -594,7 +619,7 @@
     syncAndUpdateSliders();
     initBannerCarousel();
     initMobileSheets();
-
+    updateHeaderCounts();
     document.addEventListener('change', (e) => {
       if (e.target.matches('input[name="category"], input[name="brand"], input[name="discount"], input[name="mobileCategory"], input[name="mobileBrand"], input[name="mobileDiscount"]')) {
         applyFilters();
@@ -604,9 +629,7 @@
         if ($("sortSelect")) $("sortSelect").value = val;
       }
     });
-
     $("sortSelect")?.addEventListener('change', applySorting);
-
     document.addEventListener('input', e => {
       if (e.target.matches('input[type="range"]')) {
         syncAndUpdateSliders();
@@ -614,7 +637,6 @@
         window._sliderTO = setTimeout(applyFilters, 200);
       }
     });
-
     $("filterForm")?.addEventListener('submit', e => {
       e.preventDefault();
       applyFilters();

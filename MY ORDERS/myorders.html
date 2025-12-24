@@ -93,16 +93,16 @@
 </head>
 <body class="bg-white">
     <div id="header-placeholder"></div>
-  <div class="max-w-4xl mx-auto px-4">
+  <div class="max-w-4xl mx-auto px-4 mt-56">
 
     <!-- Header -->
-    <div class="order-card mb-6">
+    <div class="order-card mb-6 py-2">
       <div class="flex items-center justify-between">
         <button onclick="window.history.back()" class="p-2 rounded-lg bg-neutral hover:bg-gray-100">
           <i class="fas fa-arrow-left text-primary text-lg"></i>
         </button>
         <div class="text-center flex-1">
-          <h1 class="text-2xl font-bold text-primary">My Orders</h1>
+          <h1 class="text-xl font-bold text-primary">My Orders</h1>
           
         </div>
         <div class="w-10"></div>
@@ -121,7 +121,7 @@
   </div>
 
   <!-- View Modal -->
-  <div id="viewModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 hidden">
+  <div id="viewModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 mt-8 hidden">
     <div class="bg-white rounded-xl max-w-md w-full max-h-[90vh] flex flex-col order-card modal-card">
       <div class="flex justify-between items-center p-5 border-b border-gray-200">
         <h2 class="text-lg font-bold text-primary">Order Details</h2>
@@ -178,7 +178,7 @@
             .then(html => {
                 document.getElementById('header-placeholder').innerHTML = html;
                 const script = document.createElement('script');
-                script.src = '../Header/header.js';
+                script.src = '../../Header/header.js';
                 script.onload = () => console.log('Header JS loaded');
                 document.body.appendChild(script);
             })
@@ -200,354 +200,472 @@
         // ... rest of your code
     });
 </script>
+
+
 <script>
-  'use strict';
-  let orders = [];
-  let currentOrderId = null;
-  let activeTab = 'upcoming';
-  const statusMap = {
-    'placed': { display: 'Placed', class: 'bg-sky-100 text-sky-800 border-sky-300' },
-    'cancelled': { display: 'Cancelled', class: 'bg-red-100 text-red-800 border-red-300' },
-    'delivered': { display: 'Delivered', class: 'bg-green-100 text-green-800 border-green-300' },
-    'processing': { display: 'Processing', class: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
-  };
+  // Dynamically set current year
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
 
-  // CHANGE THIS TO YOUR ACTUAL LOGGED-IN USER ID
-  // You can get this from auth token, session, or pass it from backend
-  const CURRENT_USER_ID = 1; // Replace with real user ID (e.g., from localStorage or backend)
+  <script>
+'use strict';
 
-  const API_BASE_URL = 'http://localhost:8083/api/orders';
+let orders = [];
+let currentOrderId = null;
+let activeTab = 'upcoming';
 
-  function parseDate(dateStr) {
-    if (!dateStr) return new Date();
+const API_BASE_URL = 'http://localhost:8083/api/orders';  // ← change if needed
+
+const statusMap = {
+  'placed':     { display: 'Placed',    class: 'bg-sky-100 text-sky-800 border-sky-300' },
+  'cancelled':  { display: 'Cancelled', class: 'bg-red-100 text-red-800 border-red-300' },
+  'processing': { display: 'Processing', class: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
+  'delivered':  { display: 'Delivered', class: 'bg-green-100 text-green-800 border-green-300' }
+};
+
+function getCurrentUserId() {
+  const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+  if (!userId) {
+    console.warn("No userId found in storage → user probably not logged in");
+    return null;
+  }
+  return parseInt(userId, 10);
+}
+
+function parseDate(dateStr) {
+  // Backend sends e.g. "12/24/2025 03:45 PM"
+  // We'll try to parse flexibly
+  try {
     return new Date(dateStr);
+  } catch (e) {
+    console.warn("Invalid date format:", dateStr);
+    return new Date();
+  }
+}
+
+function isWithinCancellationWindow(dateStr) {
+  const orderTime = parseDate(dateStr);
+  const now = new Date();
+  const diffHours = (now - orderTime) / (1000 * 60 * 60);
+  return diffHours < 24 && diffHours > -6;
+}
+
+function getWarning(dateStr) {
+  const orderTime = parseDate(dateStr);
+  const now = new Date();
+  const elapsedMs = now - orderTime;
+  const windowMs = 24 * 3600000;
+  if (elapsedMs >= windowMs) return "Cancellation expired.";
+  const remainingMs = windowMs - elapsedMs;
+  const h = Math.floor(remainingMs / 3600000);
+  const m = Math.floor((remainingMs % 3600000) / 60000);
+  return `Cancel within ${h}h ${m}m`;
+}
+
+function showModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.remove('hidden');
+  setTimeout(() => modal.querySelector('.modal-card').classList.add('show'), 10);
+}
+
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  const card = modal.querySelector('.modal-card');
+  card.classList.remove('show');
+  setTimeout(() => modal.classList.add('hidden'), 300);
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('text-primary', 'border-primary');
+    btn.classList.add('text-dark', 'border-transparent');
+  });
+  const activeBtn = document.getElementById(`tab-${tab}`);
+  if (activeBtn) {
+    activeBtn.classList.add('text-primary', 'border-primary');
+    activeBtn.classList.remove('text-dark', 'border-transparent');
+  }
+  renderOrders();
+}
+
+async function fetchOrders() {
+  const userId = getCurrentUserId();
+  if (!userId) {
+    // Show login required message (you can customize)
+    const container = document.getElementById('ordersList');
+    container.innerHTML = `
+      <div class="text-center py-20 order-card">
+        <i class="fas fa-user-lock text-7xl text-primary mb-6"></i>
+        <h2 class="text-3xl font-bold text-primary mb-4">Please log in</h2>
+        <p class="text-gray-600 mb-6">You need to be logged in to view orders.</p>
+        <a href="../login.html" class="btn btn-primary">Login</a>
+      </div>`;
+    return;
   }
 
-  function isWithinCancellationWindow(dateStr) {
-    const orderTime = parseDate(dateStr);
-    const now = new Date();
-    const diffHours = (now - orderTime) / (1000 * 60 * 60);
-    return diffHours < 24 && diffHours >= 0;
-  }
+  const loading = document.getElementById('loadingOverlay');
+  const container = document.getElementById('ordersList');
+  loading?.classList.remove('hidden');
+  container.innerHTML = '';
 
-  function getWarning(dateStr) {
-    const orderTime = parseDate(dateStr);
-    const now = new Date();
-    const elapsedMs = now - orderTime;
-    const windowMs = 24 * 3600000;
-    if (elapsedMs >= windowMs || elapsedMs < 0) return "Cancellation expired.";
-    const remainingMs = windowMs - elapsedMs;
-    const h = Math.floor(remainingMs / 3600000);
-    const m = Math.floor((remainingMs % 3600000) / 60000);
-    return `Cancel within ${h}h ${m}m`;
-  }
+  try {
+    const resp = await fetch(`${API_BASE_URL}/get-order-by-userId/${userId}?page=0&size=50&sortBy=orderId&sortDir=desc`);
 
-  function showModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) {
-      modal.classList.remove('hidden');
-      setTimeout(() => modal.querySelector('.modal-card')?.classList.add('show'), 10);
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}`);
     }
-  }
 
-  function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (modal) {
-      const card = modal.querySelector('.modal-card');
-      if (card) card.classList.remove('show');
-      setTimeout(() => modal.classList.add('hidden'), 300);
-    }
-  }
+    const pageData = await resp.json();
+    const rawOrders = pageData.content || [];
 
-  function switchTab(tab) {
-    activeTab = tab;
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.classList.remove('text-primary', 'border-primary');
-      btn.classList.add('text-dark', 'border-transparent');
-    });
-    const activeBtn = document.getElementById(`tab-${tab}`);
-    if (activeBtn) {
-      activeBtn.classList.add('text-primary', 'border-primary');
-      activeBtn.classList.remove('text-dark', 'border-transparent');
-    }
+   orders = rawOrders.map(o => {
+  const items = (o.orderItems || []).map(item => {
+    const productId = item.productId || null;
+    return {
+      name:   item.itemName   || 'Unknown Item',
+      qty:    item.quantity   || 1,
+      weight: item.selectedSize || item.size || '',
+      price:  (item.itemPrice || item.unitPrice || 0).toFixed(2),
+      image:  productId 
+                ? `http://localhost:8083/api/products/${productId}/image`
+                : 'https://via.placeholder.com/120?text=No+Image',
+      productId: productId // optional: store for later use
+    };
+  });
+
+  const statusKey = (o.orderStatus || 'PLACED').toLowerCase();
+  const status = statusMap[statusKey] || { display: statusKey.charAt(0).toUpperCase() + statusKey.slice(1), class: 'bg-gray-100 text-gray-800' };
+
+  const placedOn = o.orderDate || new Date().toISOString();
+  const canCancel = statusKey === 'placed' && isWithinCancellationWindow(placedOn);
+
+  const orderDateObj = parseDate(placedOn);
+  const now = new Date();
+  const diffMinutes = Math.floor((now - orderDateObj) / (1000 * 60));
+
+  const deliveryMinutes = 25;
+  const remainingMinutes = Math.max(0, deliveryMinutes - diffMinutes);
+  const deliveryText = remainingMinutes > 0 ? `Delivery within ${remainingMinutes} mins` : 'Delivered';
+
+  const firstName = o.shippingFirstName || '';
+  const lastName  = o.shippingLastName  || '';
+  const fullNameRaw = [firstName, lastName].filter(Boolean).join(' ');
+  const fullName = fullNameRaw || 'Not provided';
+
+  return {
+    id:             o.orderId,
+    date:           orderDateObj.toLocaleDateString('en-US', {
+                      month: 'short', day: 'numeric', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit'
+                    }),
+    status:         status.display,
+    statusClass:    status.class,
+    canCancel,
+    items,
+    total:          (o.totalAmount || 0).toFixed(2),
+    warning:        getWarning(placedOn),
+    placedOn,
+    paymentMethod:  o.paymentMethod || 'Unknown',
+    address: {
+      fullName:   fullName,
+      mobile:     o.shippingPhone    || o.customerPhone || 'Not provided',
+      flat:       o.shippingAddress  || 'Not provided',
+      area:       o.shippingAddress2 || '',
+      city:       o.shippingCity     || '',
+      state:      o.shippingState    || '',
+      pincode:    o.shippingPincode  || ''
+    },
+    deliveryText,
+    orderAge:       diffMinutes,
+    itemCount:      items.length
+  };
+}).sort((a, b) => b.id - a.id);
+
+    updateTabCounts();
     renderOrders();
+
+  } catch (err) {
+    console.error("Orders fetch failed:", err);
+    container.innerHTML = `
+      <div class="text-center py-20 order-card">
+        <i class="fas fa-exclamation-triangle text-7xl text-red-500 mb-6"></i>
+        <h2 class="text-3xl font-bold text-primary mb-4">Failed to load orders</h2>
+        <p class="text-gray-600 mb-6">${err.message}</p>
+        <button onclick="fetchOrders()" class="btn btn-primary">Retry</button>
+      </div>`;
+  } finally {
+    loading?.classList.add('hidden');
   }
+}
 
-  async function fetchOrders() {
-    const loading = document.getElementById('loadingOverlay');
-    const container = document.getElementById('ordersList');
-    if (loading) loading.classList.remove('hidden');
-    if (container) container.innerHTML = '';
+function updateTabCounts() {
+  const upcoming = orders.filter(o => o.status.toLowerCase() !== 'cancelled').length;
+  const cancelled = orders.filter(o => o.status.toLowerCase() === 'cancelled').length;
 
-    try {
-      const response = await fetch(`${API_BASE_URL}/get-order-by-user-id/user/${CURRENT_USER_ID}?page=0&size=50&sortBy=orderId&sortDir=desc`);
+  document.getElementById('tab-upcoming').innerHTML   = `Upcoming Orders (${upcoming})`;
+  document.getElementById('tab-cancelled').innerHTML = `Cancelled Orders (${cancelled})`;
+}
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: Failed to fetch orders`);
-      }
+// ────────────────────────────────────────────────────────────────
+// The rest remains almost identical — only confirmCancel changes
+// ────────────────────────────────────────────────────────────────
 
-      const result = await response.json();
+function renderOrders() {
+  // ────────────── your original renderOrders code ──────────────
+  // (keeping exactly the same – preview 2 items, +more, etc.)
+  const container = document.getElementById('ordersList');
+  container.innerHTML = '';
 
-      if (!result.success || !Array.isArray(result.data)) {
-        throw new Error(result.message || 'No orders found or invalid response');
-      }
-
-      const rawOrders = result.data;
-
-      orders = rawOrders.map(o => {
-        // Safely extract fields with fallbacks
-        const orderId = o.orderId || o.id || 'Unknown';
-        const placedOn = o.placedOn || o.orderDate || new Date().toISOString();
-        const totalAmount = o.totalAmount || o.total || 0;
-        const statusKey = (o.status || 'placed').toLowerCase();
-        const status = statusMap[statusKey] || { display: statusKey.charAt(0).toUpperCase() + statusKey.slice(1), class: 'bg-gray-100 text-gray-800' };
-        const canCancel = statusKey === 'placed' && isWithinCancellationWindow(placedOn);
-
-        const items = (o.items || []).map(item => ({
-          name: item.name || item.productName || 'Unknown Item',
-          qty: item.quantity || item.qty || 1,
-          weight: item.weight || item.size || '',
-          price: Number(item.price || item.unitPrice || 0).toFixed(2),
-          image: item.imageUrl || item.img || 'https://placehold.co/120x120?text=No+Image',
-    }));
-
-        return {
-          id: orderId,
-          date: parseDate(placedOn).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          status: status.display,
-          statusClass: status.class,
-          canCancel,
-          items,
-          total: Number(totalAmount).toFixed(2), // Safe conversion
-          warning: getWarning(placedOn),
-          placedOn
-        };
-      }).sort((a, b) => b.id - a.id);
-
-      updateTabCounts();
-      renderOrders();
-
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      if (container) {
-        container.innerHTML = `
-          <div class="text-center py-20 order-card">
-            <i class="fas fa-exclamation-triangle text-7xl text-red-500 mb-6"></i>
-            <h2 class="text-3xl font-bold text-primary mb-4">Failed to load orders</h2>
-            <p class="text-gray-600 mb-6">${error.message}</p>
-            <button onclick="fetchOrders()" class="btn btn-primary">Retry</button>
-          </div>`;
-      }
-    } finally {
-      if (loading) loading.classList.add('hidden');
-    }
-  }
-
-  function updateTabCounts() {
-    const upcoming = orders.filter(o => o.status.toLowerCase() !== 'cancelled').length;
-    const cancelled = orders.filter(o => o.status.toLowerCase() === 'cancelled').length;
-    
-    const upcomingTab = document.getElementById('tab-upcoming');
-    const cancelledTab = document.getElementById('tab-cancelled');
-    
-    if (upcomingTab) upcomingTab.innerHTML = `Upcoming Orders (${upcoming})`;
-    if (cancelledTab) cancelledTab.innerHTML = `Cancelled Orders (${cancelled})`;
-  }
-
-  function renderOrders() {
-    const container = document.getElementById('ordersList');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    const filteredOrders = activeTab === 'upcoming'
+  const filteredOrders = activeTab === 'upcoming'
       ? orders.filter(o => o.status.toLowerCase() !== 'cancelled')
       : orders.filter(o => o.status.toLowerCase() === 'cancelled');
 
-    if (!filteredOrders.length) {
+  if (!filteredOrders.length) {
       const emptyMsg = activeTab === 'upcoming' ? 'No active orders' : 'No cancelled orders';
       container.innerHTML = `<div class="text-center py-20 order-card">
         <i class="fas fa-shopping-bag text-7xl text-primary mb-6"></i>
         <h2 class="text-3xl font-bold text-primary mb-4">${emptyMsg}</h2>
-        <a href="/shop" class="btn btn-primary">Shop Now</a>
+        <a href="../home.html" class="btn btn-primary">Shop Now</a>
       </div>`;
       return;
-    }
+  }
 
-    filteredOrders.forEach(order => {
+  filteredOrders.forEach(order => {
       const isCancelled = order.status.toLowerCase() === 'cancelled';
-     const cancelBtn = !isCancelled && order.canCancel
-  ? `<button class="btn btn-danger cancel-btn" data-id="${order.id}">Cancel Order</button>`
-  : `<button class="btn btn-outline opacity-50 cursor-not-allowed" disabled>Cancel Order</button>`;
+      const cancelBtn = !isCancelled && order.canCancel
+          ? `<button class="btn btn-danger cancel-btn" data-id="${order.id}">Cancel Order</button>`
+          : `<button class="btn btn-outline opacity-50 cursor-not-allowed" disabled>Cancel Order</button>`;
 
       const viewBtn = `<button class="btn btn-primary view-btn" data-id="${order.id}">Order Details</button>`;
 
       let itemsHtml = '';
-      order.items.forEach((item, idx) => {
-        itemsHtml += `
-          <div class="flex gap-3 items-center ${idx > 0 ? 'mt-3' : ''}">
-            <img src="${item.image}" alt="${item.name}" class="w-12 h-12 rounded-lg object-cover shadow-sm">
-            <div class="flex-1">
-              <p class="font-medium text-primary text-sm">${item.name}</p>
-              <p class="text-xs text-dark">Qty: ${item.qty} × ${item.weight}</p>
-            </div>
-            <p class="text-sm font-medium text-primary">EGP ${item.price}</p>
-          </div>
-        `;
+      const previewItems = order.items.slice(0, 2);
+      previewItems.forEach((item, idx) => {
+          itemsHtml += `
+              <div class="flex gap-3 items-center ${idx > 0 ? 'mt-3' : ''}">
+                  <img src="${item.image}" alt="${item.name}" class="w-12 h-12 rounded-lg object-cover shadow-sm">
+                  <div class="flex-1">
+                      <p class="font-medium text-primary text-sm">${item.name}</p>
+                      <p class="text-xs text-dark">Qty: ${item.qty} ${item.weight ? '× ' + item.weight : ''}</p>
+                  </div>
+                  <p class="text-sm font-medium text-primary">₹${item.price}</p>
+              </div>
+          `;
       });
+
+      const moreItemsCount = order.items.length - 2;
+      const moreItemsHtml = moreItemsCount > 0 
+          ? `<div class="text-center mt-2">
+                <p class="text-xs text-gray-500">+ ${moreItemsCount} more item${moreItemsCount > 1 ? 's' : ''}</p>
+             </div>`
+          : '';
 
       container.innerHTML += `
-        <div class="order-card">
-          <div class="flex justify-between items-center mb-3">
-            <div>
-              <h3 class="text-lg font-bold text-primary">Order #${order.id}</h3>
-              <p class="text-sm text-dark">EGP ${order.total}</p>
-            </div>
-            <div class="flex gap-2">
-              ${viewBtn}
-              ${isCancelled ? '' : cancelBtn}
-            </div>
+          <div class="order-card">
+              <div class="flex justify-between items-center mb-3">
+                  <div>
+                      <h3 class="text-lg font-bold text-primary">Order #${order.id}</h3>
+                      <p class="text-sm text-dark">₹${order.total}</p>
+                  </div>
+                  <div class="flex gap-2">
+                      ${viewBtn}
+                      ${isCancelled ? '' : cancelBtn}
+                  </div>
+              </div>
+
+              <div class="mb-4">
+                  <span class="status-badge ${order.statusClass}">${order.status}</span>
+              </div>
+
+              <div class="mb-4">
+                  ${itemsHtml}
+                  ${moreItemsHtml}
+              </div>
+
+              <div class="mb-3">
+                  <p class="text-sm text-dark">Payment: <span class="font-medium">${order.paymentMethod}</span></p>
+              </div>
+
+              ${isCancelled ? `<p class="text-sm font-medium text-red-600 mb-3">This order was cancelled.</p>` : ''}
+
+              <div class="text-xs text-gray-600">
+                  <p>${order.itemCount} Items • ${order.paymentMethod} • Ordered ${order.orderAge} mins ago • ${order.deliveryText}</p>
+              </div>
           </div>
-          <div class="mb-4">
-            ${itemsHtml}
-          </div>
-          ${isCancelled ? `<p class="text-sm font-medium text-red-600 mb-3">This order was cancelled.</p>` : ''}
-          <div class="text-xs text-gray-600">
-            <p>Ordered on ${order.date} • ${order.warning || 'Delivery in progress'}</p>
-          </div>
-        </div>
       `;
-    });
+  });
 
-    attachButtons();
-  }
+  attachButtons();
+}
 
-  function attachButtons() {
-    document.querySelectorAll('.cancel-btn').forEach(btn => {
-      btn.onclick = () => handleCancel(btn.dataset.id);
-    });
-    document.querySelectorAll('.view-btn').forEach(btn => {
-      btn.onclick = () => handleView(btn.dataset.id);
-    });
-  }
+function attachButtons() {
+  document.querySelectorAll('.cancel-btn').forEach(btn => {
+    btn.onclick = () => handleCancel(btn.dataset.id);
+  });
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.onclick = () => handleView(btn.dataset.id);
+  });
+}
 
-  function handleCancel(id) {
-    const order = orders.find(o => o.id == id);
-    if (!order?.canCancel) {
-      toast('Cancellation window has expired', 'error');
-      return;
-    }
-    currentOrderId = id;
-    const warningEl = document.getElementById('cancelWarningText');
-    if (warningEl) {
-      warningEl.innerHTML = `<p class="mb-2">Are you sure you want to cancel Order #${id}?</p>`;
-    }
-    showModal('cancelModal');
-  }
+function handleCancel(id) {
+  const order = orders.find(o => o.id == id);
+  if (!order?.canCancel) return toast('Cancellation not allowed', 'error');
+  currentOrderId = id;
+  document.getElementById('cancelWarningText').innerHTML = `<p class="mb-2">Are you sure you want to cancel?</p>`;
+  showModal('cancelModal');
+}
 
-  async function confirmCancel() {
-    if (!currentOrderId) return;
 
-    closeModal('cancelModal');
-    const loading = document.getElementById('loadingOverlay');
-    if (loading) loading.classList.remove('hidden');
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/cancel-order/${currentOrderId}/cancel`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || 'Failed to cancel order');
+async function loadProductImages() {
+  const imageElements = document.querySelectorAll('.order-card img');
+  for (const img of imageElements) {
+    const productId = img.dataset.productId; // you'll add this in render
+    if (productId) {
+      try {
+        const response = await fetch(`${API_BASE_URL.replace('/orders', '/products')}/${productId}/image`);
+        if (response.ok) {
+          img.src = response.url; // or blob if needed
+        }
+      } catch (e) {
+        console.warn("Image load failed for product", productId);
       }
-
-      const order = orders.find(o => o.id == currentOrderId);
-      if (order) {
-        order.status = 'Cancelled';
-        order.statusClass = statusMap.cancelled.class;
-        order.canCancel = false;
-      }
-
-      updateTabCounts();
-      renderOrders();
-      toast('Order cancelled successfully!', 'success');
-
-    } catch (error) {
-      console.error('Cancel error:', error);
-      toast('Failed to cancel order: ' + error.message, 'error');
-    } finally {
-      if (loading) loading.classList.add('hidden');
-      currentOrderId = null;
     }
-  }
-
-  function handleView(id) {
-    const order = orders.find(o => o.id == id);
-    if (!order) return;
-
-    let itemsHtml = '';
-    order.items.forEach(item => {
-      itemsHtml += `
-        <div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0">
-          <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-lg object-cover shadow-sm">
-          <div class="flex-1">
-            <p class="font-medium text-primary">${item.name}</p>
-            <p class="text-xs text-dark">Qty: ${item.qty} × ${item.weight}</p>
-          </div>
-          <p class="text-sm font-medium text-primary">EGP ${item.price}</p>
-        </div>
-      `;
-    });
-
-    const viewContent = document.getElementById('viewContent');
-    if (viewContent) {
-      viewContent.innerHTML = `
-        <div class="space-y-4">
-          ${itemsHtml}
-        </div>
-        <div class="mt-4 space-y-2 text-sm pt-3 border-t border-gray-200">
-          <div class="flex justify-between font-bold text-base">
-            <span class="text-primary">Total</span>
-            <span class="text-primary">EGP ${order.total}</span>
-          </div>
-        </div>
-        <div class="mt-5 pt-4 border-t border-gray-200 space-y-2 text-sm">
-          <div class="flex justify-between"><span class="text-dark">Status</span><span class="${order.status.toLowerCase() === 'cancelled' ? 'text-red-600' : 'text-green-600'} font-medium">${order.status}</span></div>
-          <div class="flex justify-between"><span class="text-dark">Placed</span><span>${order.date}</span></div>
-        </div>
-      `;
-    }
-    showModal('viewModal');
-  }
-
- function toast(message, type = 'info') {
-  if (typeof Toastify === 'function') {
-    let background;
-    if (type === 'success') background = '#10b981';
-    else if (type === 'error') background = '#EF4444';
-    else background = '#3B82F6';
-
-    Toastify({
-      text: message,
-      duration: 3000,
-      gravity: "top",
-      position: "right",
-      style: {
-        background: background,
-      },
-    }).showToast();
-  } else {
-    alert(message); // Fallback
   }
 }
 
-  // Auto-load on page load
-  document.addEventListener('DOMContentLoaded', () => {
-    fetchOrders();
+
+async function confirmCancel() {
+  if (!currentOrderId) return;
+  closeModal('cancelModal');
+
+  const loading = document.getElementById('loadingOverlay');
+  loading?.classList.remove('hidden');
+
+  try {
+    const resp = await fetch(`${API_BASE_URL}/cancel-order/${currentOrderId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (!resp.ok) {
+      let msg = await resp.text().catch(() => resp.statusText);
+      throw new Error(msg || `HTTP ${resp.status}`);
+    }
+
+    const result = await resp.json();
+
+    // Backend returns orderStatus = "CANCELLED"
+    if (result.orderStatus?.toUpperCase() !== 'CANCELLED') {
+      throw new Error("Server did not confirm cancellation");
+    }
+
+    // Update local model
+    const idx = orders.findIndex(o => o.id == currentOrderId);
+    if (idx !== -1) {
+      orders[idx].status = 'Cancelled';
+      orders[idx].statusClass = statusMap.cancelled.class;
+      orders[idx].canCancel = false;
+    }
+
+    updateTabCounts();
+    renderOrders();
+    toast('Order cancelled successfully!', 'success');
+
+  } catch (err) {
+    console.error("Cancel failed:", err);
+    toast('Failed to cancel order: ' + err.message, 'error');
+  } finally {
+    loading?.classList.add('hidden');
+  }
+}
+
+// handleView remains the same
+function handleView(id) {
+  const order = orders.find(o => o.id == id);
+  if (!order) return;
+
+  const items = order.items;
+  let itemsHtml = '';
+  items.forEach(item => {
+      itemsHtml += `
+          <div class="flex gap-4 items-start pb-3 border-b border-gray-100 last:border-0">
+              <img src="${item.image}" alt="${item.name}" class="w-16 h-16 rounded-lg object-cover shadow-sm">
+              <div class="flex-1">
+                  <p class="font-medium text-primary">${item.name}</p>
+                  <p class="text-xs text-dark">Qty: ${item.qty} ${item.weight ? '× ' + item.weight : ''}</p>
+              </div>
+              <p class="text-sm font-medium text-primary">₹${item.price}</p>
+          </div>
+      `;
   });
+
+ let addressHtml = '';
+if (order.address) {
+  const addr = order.address;
+  // Only show section if there's meaningful data
+  const hasContent = 
+    addr.fullName !== 'Not provided' ||
+    addr.mobile !== 'Not provided' ||
+    addr.flat !== 'Not provided' ||
+    addr.city || addr.state || addr.pincode;
+
+  if (hasContent) {
+    addressHtml = `
+      <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+        <p class="font-medium text-primary text-sm mb-2">Delivery Address:</p>
+        ${addr.fullName !== 'Not provided' ? `<p class="text-sm text-dark">${addr.fullName}</p>` : ''}
+        ${addr.mobile !== 'Not provided' ? `<p class="text-sm text-dark">${addr.mobile}</p>` : ''}
+        <p class="text-sm text-dark">
+          ${[addr.flat, addr.area].filter(Boolean).join(', ') || 'Address line not provided'}
+        </p>
+        <p class="text-sm text-dark">
+          ${[addr.city, addr.state].filter(Boolean).join(', ') || ''}
+          ${addr.pincode ? ` - ${addr.pincode}` : ''}
+        </p>
+      </div>
+    `;
+  }
+}
+
+  document.getElementById('viewContent').innerHTML = `
+      <div class="space-y-4">
+          ${itemsHtml}
+      </div>
+      <div class="mt-4 space-y-2 text-sm pt-3 border-t border-gray-200">
+          <div class="flex justify-between font-bold text-base">
+              <span class="text-primary">Total</span>
+              <span class="text-primary">₹${order.total}</span>
+          </div>
+          <div class="flex justify-between">
+              <span class="text-dark">Payment Method</span>
+              <span class="font-medium text-primary">${order.paymentMethod}</span>
+          </div>
+      </div>
+      <div class="mt-5 pt-4 border-t border-gray-200 space-y-2 text-sm">
+          <div class="flex justify-between"><span class="text-dark">Status</span><span class="${order.status.toLowerCase() === 'cancelled' ? 'text-red-600' : 'text-green-600'} font-medium">${order.status}</span></div>
+          <div class="flex justify-between"><span class="text-dark">Order ID</span><span class="font-mono">#${order.id}</span></div>
+          <div class="flex justify-between"><span class="text-dark">Placed On</span><span>${order.date}</span></div>
+          <div class="flex justify-between"><span class="text-dark">Items</span><span>${order.itemCount} items</span></div>
+      </div>
+      ${addressHtml}
+  `;
+  showModal('viewModal');
+}
+
+function toast(message, type = 'info') {
+  Toastify({
+    text: message,
+    duration: 3000,
+    gravity: "top",
+    position: "right",
+    backgroundColor: type === 'success' ? "#10b981" : type === 'error' ? "#EF4444" : "#3B82F6",
+  }).showToast();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchOrders();
+});
 </script>
 </body>
 </html>

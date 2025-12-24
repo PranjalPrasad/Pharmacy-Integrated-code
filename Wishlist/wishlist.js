@@ -3,6 +3,7 @@ const API_BASE_URL = 'http://localhost:8083/api/wishlist';
 const CART_API_URL = 'http://localhost:8083/api/cart';
 const PRODUCT_API_URL = 'http://localhost:8083/api/products';
 const MBP_PRODUCT_API = 'http://localhost:8083/api/mb/products';
+
 // ==================== UTILITY FUNCTIONS ====================
 function getUserId() {
     const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
@@ -12,6 +13,7 @@ function getUserId() {
     }
     return parseInt(userId);
 }
+
 function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
     if (!toast) return;
@@ -20,15 +22,18 @@ function showToast(message, type = 'success') {
     toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg text-white font-medium shadow-xl z-50 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'} show`;
     setTimeout(() => toast.classList.remove('show'), 3000);
 }
+
 function getProductImageUrl(productId, productType) {
     return productType === 'MOTHER' || productType === 'BABY'
         ? `${MBP_PRODUCT_API}/${productId}/image`
         : `${PRODUCT_API_URL}/${productId}/image`;
 }
+
 function calculateDiscount(originalPrice, currentPrice) {
     if (!originalPrice || originalPrice <= currentPrice) return 0;
     return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
 }
+
 // ==================== WISHLIST FUNCTIONS ====================
 async function fetchWishlistFromBackend() {
     const userId = getUserId();
@@ -43,18 +48,23 @@ async function fetchWishlistFromBackend() {
         const data = await response.json();
         return data.map(item => {
             const productType = item.productType || 'MEDICINE';
-            // Determine type based on productType: MOTHER/BABY = MBP, MEDICINE = PRODUCT
             const itemType = (productType === 'MOTHER' || productType === 'BABY') ? 'MBP' : 'PRODUCT';
            
+            // FIX: Handle price/originalPrice as arrays from backend
+            const currentPrice = Array.isArray(item.price) ? (item.price[0] || 0) : (item.price || 0);
+            const origPrice = Array.isArray(item.originalPrice) 
+                ? (item.originalPrice[0] || currentPrice) 
+                : (item.originalPrice || currentPrice);
+
             return {
                 id: item.productId,
                 name: item.title || 'Unknown Product',
-                price: item.price || 0,
-                originalPrice: item.originalPrice || item.price || 0,
+                price: currentPrice,
+                originalPrice: origPrice,
                 image: getProductImageUrl(item.productId, productType),
                 productType: productType,
                 sizes: item.sizes || [],
-                type: itemType // PRODUCT or MBP based on productType
+                type: itemType
             };
         });
     } catch (error) {
@@ -63,6 +73,7 @@ async function fetchWishlistFromBackend() {
         return [];
     }
 }
+
 async function removeFromWishlist(productId, productType = 'MEDICINE') {
     const userId = getUserId();
     if (!userId) {
@@ -93,6 +104,7 @@ async function removeFromWishlist(productId, productType = 'MEDICINE') {
         showToast('Network error', 'error');
     }
 }
+
 async function clearWishlist() {
     const userId = getUserId();
     if (!userId) {
@@ -120,6 +132,7 @@ async function clearWishlist() {
         showToast('Network error', 'error');
     }
 }
+
 // ==================== CART FUNCTIONS - BACKEND ONLY ====================
 async function addToCartBackend(productId, productType, type, quantity = 1, selectedSize = '') {
     const userId = getUserId();
@@ -130,12 +143,11 @@ async function addToCartBackend(productId, productType, type, quantity = 1, sele
     try {
         const requestBody = {
             userId: userId,
-            type: type, // 'PRODUCT' or 'MBP'
+            type: type,
             quantity: quantity,
-            productType: productType.toUpperCase(), // 'MEDICINE', 'MOTHER', 'BABY'
+            productType: productType.toUpperCase(),
             selectedSize: selectedSize
         };
-        // Add productId or mbpId based on type
         if (type === 'PRODUCT') {
             requestBody.productId = productId;
         } else if (type === 'MBP') {
@@ -150,7 +162,6 @@ async function addToCartBackend(productId, productType, type, quantity = 1, sele
         const result = await response.json();
         if (response.ok) {
             showToast('Added to cart successfully', 'success');
-            // Update cart count if function exists
             if (typeof updateCartCount === 'function') {
                 await updateCartCount();
             }
@@ -166,13 +177,13 @@ async function addToCartBackend(productId, productType, type, quantity = 1, sele
         return false;
     }
 }
+
 async function moveToCart(productId, productType = 'MEDICINE') {
     const userId = getUserId();
     if (!userId) {
         showToast('Please login', 'error');
         return;
     }
-    // Fetch current wishlist to get item details
     const wishlist = await fetchWishlistFromBackend();
     const item = wishlist.find(i => i.id === productId && i.productType === productType);
    
@@ -180,9 +191,7 @@ async function moveToCart(productId, productType = 'MEDICINE') {
         showToast('Item not found in wishlist', 'error');
         return;
     }
-    // Determine correct type: if productType is MOTHER or BABY, use MBP, otherwise PRODUCT
     const itemType = (item.productType === 'MOTHER' || item.productType === 'BABY') ? 'MBP' : 'PRODUCT';
-    // Check if item has sizes and show size selector if needed
     if (item.sizes && item.sizes.length > 0) {
         const selectedSize = await showSizeSelector(item.sizes, item.name);
         if (!selectedSize) {
@@ -190,7 +199,6 @@ async function moveToCart(productId, productType = 'MEDICINE') {
             return;
         }
        
-        // Add to cart with selected size
         const success = await addToCartBackend(
             item.id,
             item.productType,
@@ -199,12 +207,10 @@ async function moveToCart(productId, productType = 'MEDICINE') {
             selectedSize
         );
         if (success) {
-            // Remove from wishlist after successful cart addition
             await removeFromWishlist(productId, item.productType);
             showToast('Item moved to cart!', 'success');
         }
     } else {
-        // Add to cart without size
         const success = await addToCartBackend(
             item.id,
             item.productType,
@@ -213,16 +219,15 @@ async function moveToCart(productId, productType = 'MEDICINE') {
             ''
         );
         if (success) {
-            // Remove from wishlist after successful cart addition
             await removeFromWishlist(productId, item.productType);
             showToast('Item moved to cart!', 'success');
         }
     }
 }
+
 // ==================== SIZE SELECTOR MODAL ====================
 function showSizeSelector(sizes, productName) {
     return new Promise((resolve) => {
-        // Create modal HTML
         const modalHTML = `
             <div id="size-selector-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -245,14 +250,13 @@ function showSizeSelector(sizes, productName) {
                 </div>
             </div>
         `;
-        // Insert modal into document
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         const modal = document.getElementById('size-selector-modal');
         const confirmBtn = document.getElementById('confirm-size-btn');
         const cancelBtn = document.getElementById('cancel-size-btn');
         const sizeOptions = modal.querySelectorAll('.size-option');
         let selectedSize = null;
-        // Handle size selection
+
         sizeOptions.forEach(btn => {
             btn.addEventListener('click', () => {
                 sizeOptions.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-50'));
@@ -261,17 +265,17 @@ function showSizeSelector(sizes, productName) {
                 confirmBtn.disabled = false;
             });
         });
-        // Handle confirm
+
         confirmBtn.addEventListener('click', () => {
             modal.remove();
             resolve(selectedSize);
         });
-        // Handle cancel
+
         cancelBtn.addEventListener('click', () => {
             modal.remove();
             resolve(null);
         });
-        // Handle click outside
+
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
@@ -280,6 +284,7 @@ function showSizeSelector(sizes, productName) {
         });
     });
 }
+
 // ==================== UPDATE COUNTS ====================
 async function updateWishlistCount() {
     const wishlist = await fetchWishlistFromBackend();
@@ -292,6 +297,7 @@ async function updateWishlistCount() {
         }
     });
 }
+
 async function updateCartCount() {
     const userId = getUserId();
     if (!userId) return;
@@ -312,9 +318,14 @@ async function updateCartCount() {
         console.error('Error updating cart count:', error);
     }
 }
+
 // ==================== RENDER FUNCTIONS ====================
 function createWishlistCard(item) {
-    const discount = calculateDiscount(item.originalPrice, item.price);
+    // FIX: Ensure price and originalPrice are numbers before using toFixed
+    const currentPrice = Number(item.price) || 0;
+    const originalPrice = Number(item.originalPrice) || currentPrice;
+    const discount = calculateDiscount(originalPrice, currentPrice);
+
     return `
         <div class="bg-white rounded-xl shadow-lg overflow-hidden relative group hover:shadow-2xl transition-shadow duration-300">
             <div class="relative">
@@ -336,9 +347,9 @@ function createWishlistCard(item) {
             <div class="p-4">
                 <h3 class="font-semibold text-sm line-clamp-2 h-10 mb-2">${item.name}</h3>
                 <div class="flex items-center gap-2 mb-3">
-                    <span class="text-lg font-bold text-green-600">₹${item.price.toFixed(2)}</span>
-                    ${item.originalPrice > item.price ? `
-                        <span class="text-sm text-gray-500 line-through">₹${item.originalPrice.toFixed(2)}</span>
+                    <span class="text-lg font-bold text-green-600">₹${currentPrice.toFixed(2)}</span>
+                    ${originalPrice > currentPrice ? `
+                        <span class="text-sm text-gray-500 line-through">₹${originalPrice.toFixed(2)}</span>
                     ` : ''}
                 </div>
                 ${item.sizes && item.sizes.length > 0 ? `
@@ -355,6 +366,7 @@ function createWishlistCard(item) {
         </div>
     `;
 }
+
 function toggleClearButton(show) {
     const btn = document.getElementById('clear-wishlist-btn');
     if (btn) {
@@ -365,60 +377,59 @@ function toggleClearButton(show) {
         }
     }
 }
+
 async function renderWishlist() {
     const loading = document.getElementById('loading-state');
     const empty = document.getElementById('empty-state');
     const container = document.getElementById('wishlist-items');
-    // Show loading state
     if (loading) loading.classList.remove('hidden');
     if (empty) empty.classList.add('hidden');
     if (container) container.classList.add('hidden');
     toggleClearButton(false);
-    // Check if user is logged in
+
     if (!getUserId()) {
         if (loading) loading.classList.add('hidden');
         if (empty) empty.classList.remove('hidden');
         return;
     }
-    // Fetch wishlist items
+
     const items = await fetchWishlistFromBackend();
-   
-    // Hide loading state
     if (loading) loading.classList.add('hidden');
-    // Handle empty wishlist
+
     if (items.length === 0) {
         if (empty) empty.classList.remove('hidden');
         toggleClearButton(false);
         return;
     }
-    // Render wishlist items
+
     if (container) {
         container.classList.remove('hidden');
         container.innerHTML = items.map(createWishlistCard).join('');
     }
     toggleClearButton(true);
 }
+
 // ==================== GLOBAL FUNCTIONS ====================
 window.removeFromWishlist = removeFromWishlist;
 window.moveToCart = moveToCart;
 window.clearWishlist = clearWishlist;
 window.updateWishlistCount = updateWishlistCount;
 window.updateCartCount = updateCartCount;
+
 // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Wishlist page loaded - Backend integration active');
    
-    // Small delay to ensure DOM is fully ready
     setTimeout(() => {
         renderWishlist();
         updateWishlistCount();
         updateCartCount();
     }, 100);
 });
+
 // ==================== AUTO-REFRESH ON VISIBILITY CHANGE ====================
 document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
-        // Refresh wishlist when user returns to tab
         renderWishlist();
         updateWishlistCount();
         updateCartCount();

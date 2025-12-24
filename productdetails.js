@@ -2,10 +2,12 @@
 const API_BASE_URL = 'http://localhost:8083/api/products';
 const CART_API_BASE = 'http://localhost:8083/api/cart';
 const WISHLIST_API_BASE = 'http://localhost:8083/api/wishlist';
+
 // Global variables
 let cart = JSON.parse(localStorage.getItem('cart') || '[]');
 let currentProduct = null;
 let currentUserId = 1; // Will be updated dynamically
+
 // ------------------- Utility Functions -------------------
 function removeSkeleton() {
     document.querySelectorAll('.skeleton').forEach(el => {
@@ -15,6 +17,7 @@ function removeSkeleton() {
         el.style.animation = '';
     });
 }
+
 function showToast(message) {
     document.querySelectorAll('.toast-notification').forEach(toast => toast.remove());
     const toast = document.createElement('div');
@@ -26,6 +29,7 @@ function showToast(message) {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
 function updateCartCount() {
     const total = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     ['desktop-cart-count', 'mobile-cart-count'].forEach(id => {
@@ -36,6 +40,7 @@ function updateCartCount() {
         }
     });
 }
+
 function updateRightCartPanel() {
     const items = cart.reduce((sum, i) => sum + (i.quantity || 1), 0);
     const countEl = document.getElementById('cart-items-number');
@@ -49,6 +54,7 @@ function updateRightCartPanel() {
             : `<span id="cart-items-number">${items}</span> Item<span id="cart-items-text">${items === 1 ? '' : 's'}</span> in Cart`;
     }
 }
+
 // Local cart sync helper (used for UI consistency and offline fallback)
 function updateLocalCart(product, qty = 1) {
     const cartItem = {
@@ -73,6 +79,7 @@ function updateLocalCart(product, qty = 1) {
     updateCartCount();
     updateRightCartPanel();
 }
+
 // ------------------- Backend Cart Functions -------------------
 async function getValidUserId() {
     const testIds = [1, 100, 1000, 1001, 10000];
@@ -89,6 +96,7 @@ async function getValidUserId() {
     console.warn("No valid user ID found. Using default 1.");
     return 1;
 }
+
 async function addToCartBackend(product, qty = 1) {
     try {
         const payload = {
@@ -129,6 +137,7 @@ async function addToCartBackend(product, qty = 1) {
         return false;
     }
 }
+
 async function syncCartFromBackend() {
     try {
         const response = await fetch(`${CART_API_BASE}/get-cart-items?userId=${currentUserId}`);
@@ -154,6 +163,7 @@ async function syncCartFromBackend() {
         console.error("Failed to sync cart from backend:", err);
     }
 }
+
 // ------------------- Backend Wishlist Functions -------------------
 async function addToWishlistBackend(product) {
     try {
@@ -172,6 +182,7 @@ async function addToWishlistBackend(product) {
         return false;
     }
 }
+
 async function removeFromWishlistBackend(product) {
     try {
         const response = await fetch(`${WISHLIST_API_BASE}/remove-wishlist-items`, {
@@ -188,6 +199,7 @@ async function removeFromWishlistBackend(product) {
         return false;
     }
 }
+
 async function isInWishlistBackend(productId) {
     try {
         const response = await fetch(`${WISHLIST_API_BASE}/get-wishlist-items?userId=${currentUserId}`);
@@ -199,6 +211,7 @@ async function isInWishlistBackend(productId) {
         return false;
     }
 }
+
 function updateLocalWishlistSync(product, isAdded) {
     let wishlist = JSON.parse(localStorage.getItem('wishlist') || '[]');
     if (isAdded) {
@@ -218,6 +231,7 @@ function updateLocalWishlistSync(product, isAdded) {
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
     window.dispatchEvent(new CustomEvent('wishlistUpdated'));
 }
+
 async function toggleWishlist(product) {
     const wishlistBtn = document.getElementById('wishlist-btn');
     if (!wishlistBtn) return;
@@ -241,6 +255,7 @@ async function toggleWishlist(product) {
         }
     }
 }
+
 function updateWishlistButton() {
     const wishlistBtn = document.getElementById('wishlist-btn');
     if (!wishlistBtn || !currentProduct) return;
@@ -260,6 +275,7 @@ function updateWishlistButton() {
         });
     }
 }
+
 // ------------------- Updated Add to Cart -------------------
 async function addToCart(product, qty = 1) {
     const success = await addToCartBackend(product, qty);
@@ -271,17 +287,35 @@ async function addToCart(product, qty = 1) {
     // Always update local cart for UI consistency
     updateLocalCart(product, qty);
 }
+
 // ------------------- API Calls -------------------
 async function fetchProductById(productId) {
     try {
-        const response = await fetch(`${API_BASE_URL}/get-product/${productId}`);
-        if (!response.ok) throw new Error('Product not found');
-        return await response.json();
+        // Try most common endpoint variations - pick the one that matches your controller
+        const possibleUrls = [
+            `${API_BASE_URL}/${productId}`,                    // Option 1: @GetMapping("/{id}")
+            `${API_BASE_URL}/get-by-id/${productId}`,          // Option 2
+            `${API_BASE_URL}/get-product/${productId}`,        // your original
+            `${API_BASE_URL}/product/${productId}`             // Option 3
+        ];
+
+        for (const url of possibleUrls) {
+            console.log(`Trying product endpoint: ${url}`);
+            const response = await fetch(url);
+            if (response.ok) {
+                console.log(`Success from: ${url}`);
+                return await response.json();
+            }
+            console.warn(`Failed ${url} → ${response.status}`);
+        }
+
+        throw new Error('Product not found - tried multiple endpoints');
     } catch (err) {
-        console.error(err);
+        console.error("Product fetch error:", err);
         return null;
     }
 }
+
 async function fetchRelatedProducts(category, currentId) {
     try {
         const response = await fetch(`${API_BASE_URL}/get-by-category/${encodeURIComponent(category)}`);
@@ -296,8 +330,8 @@ async function fetchRelatedProducts(category, currentId) {
         return [];
     }
 }
+
 // ------------------- Rendering Functions -------------------
-// (All rendering functions remain exactly the same as original)
 async function renderThumbnails(productId, mainImageUrl) {
     const container = document.getElementById('thumbnail-container');
     if (!container) return;
@@ -331,6 +365,7 @@ async function renderThumbnails(productId, mainImageUrl) {
         container.children[0].classList.add('border-pharmeasy-green');
     }
 }
+
 function formatDate(dateStr) {
     if (!dateStr) return 'Not specified';
     try {
@@ -340,6 +375,7 @@ function formatDate(dateStr) {
         return dateStr;
     }
 }
+
 function renderProductDetailsTab() {
     const tableBody = document.getElementById('specifications-table-body');
     if (!tableBody || !currentProduct) return;
@@ -378,6 +414,7 @@ function renderProductDetailsTab() {
         }
     });
 }
+
 function renderBenefitsTab() {
     const content = document.getElementById('benefits-content');
     if (!content || !currentProduct) return;
@@ -399,6 +436,7 @@ function renderBenefitsTab() {
             </div>
         </div>`;
 }
+
 function renderIngredientsTab() {
     const content = document.getElementById('ingredients-content');
     if (!content || !currentProduct) return;
@@ -420,6 +458,7 @@ function renderIngredientsTab() {
             </div>
         </div>`;
 }
+
 function renderDirectionsTab() {
     const content = document.getElementById('directions-content');
     if (!content || !currentProduct) return;
@@ -471,12 +510,14 @@ function renderDirectionsTab() {
     html += `</div>`;
     content.innerHTML = html;
 }
+
 function renderAllTabs() {
     renderProductDetailsTab();
     renderBenefitsTab();
     renderIngredientsTab();
     renderDirectionsTab();
 }
+
 function renderRelatedProducts(products) {
     const container = document.getElementById('related-products-container');
     if (!container) return;
@@ -508,22 +549,29 @@ function renderRelatedProducts(products) {
         container.appendChild(card);
     });
 }
+
 // ------------------- Main Load Function -------------------
 async function loadProduct() {
     // Get valid user ID first
     currentUserId = await getValidUserId();
     await syncCartFromBackend();
+
     const params = new URLSearchParams(window.location.search);
     const productId = params.get('id');
     if (!productId) {
         showNotFound();
         return;
     }
+
+    console.log(`Loading product with ID: ${productId}`);
+
     const product = await fetchProductById(productId);
     if (!product) {
+        console.warn(`Product ${productId} not found or API error`);
         showNotFound();
         return;
     }
+
     currentProduct = {
         ...product,
         id: product.productId,
@@ -534,11 +582,14 @@ async function loadProduct() {
         unit: product.productUnit,
         category: product.productCategory
     };
+
     document.getElementById('product-name').textContent = currentProduct.name;
     document.getElementById('selling-price').textContent = '₹' + currentProduct.price.toFixed(0);
+
     const mrpPriceEl = document.getElementById('mrp-price');
     const discountBadge = document.getElementById('discount-badge');
     const lineThrough = document.querySelector('.line-through');
+
     if (product.productMRP && product.productMRP > currentProduct.price) {
         const mrp = product.productMRP;
         mrpPriceEl.textContent = '₹' + mrp.toFixed(0);
@@ -550,19 +601,24 @@ async function loadProduct() {
         discountBadge.classList.add('hidden');
         if (lineThrough) lineThrough.classList.add('hidden');
     }
+
     const productUnitEl = document.getElementById('product-unit');
     if (productUnitEl && currentProduct.unit) {
         productUnitEl.textContent = currentProduct.unit;
     }
+
     const mainImg = document.getElementById('main-product-image');
     if (mainImg) {
         mainImg.src = currentProduct.image;
     }
+
     await renderThumbnails(product.productId, currentProduct.image);
+
     const quantityInput = document.getElementById('quantity-input');
     const available = currentProduct.productQuantity || 0;
     const addToCartBtn = document.getElementById('add-to-cart-btn');
     const buyNowBtn = document.getElementById('buy-now-btn');
+
     if (available > 0) {
         quantityInput.max = Math.min(available, 10);
         quantityInput.value = 1;
@@ -584,13 +640,17 @@ async function loadProduct() {
         buyNowBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Out of Stock';
         buyNowBtn.className = 'px-6 bg-gray-400 cursor-not-allowed text-white font-bold py-3 rounded-lg text-md shadow-lg transition';
     }
+
     renderAllTabs();
     updateWishlistButton();
+
     const related = await fetchRelatedProducts(currentProduct.category, currentProduct.id);
     renderRelatedProducts(related);
+
     initCartButtons();
     removeSkeleton();
 }
+
 function showNotFound() {
     document.getElementById('product-name').textContent = 'Product Not Found';
     document.getElementById('main-product-image').src = 'https://via.placeholder.com/600?text=Product+Not+Found';
@@ -598,6 +658,7 @@ function showNotFound() {
     document.getElementById('discount-badge').classList.add('hidden');
     removeSkeleton();
 }
+
 // ------------------- Init Functions -------------------
 function initTabs() {
     const tabButtons = document.querySelectorAll('.tab-button');
@@ -612,6 +673,7 @@ function initTabs() {
         });
     });
 }
+
 function initQuantitySelector() {
     const decreaseBtn = document.getElementById('decrease-qty');
     const increaseBtn = document.getElementById('increase-qty');
@@ -635,6 +697,7 @@ function initQuantitySelector() {
         quantityInput.value = val;
     };
 }
+
 function initCartButtons() {
     const addBtn = document.getElementById('add-to-cart-btn');
     const buyBtn = document.getElementById('buy-now-btn');
@@ -652,6 +715,7 @@ function initCartButtons() {
         };
     }
 }
+
 // ------------------- Page Init -------------------
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
